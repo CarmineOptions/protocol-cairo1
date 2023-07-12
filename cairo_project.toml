@@ -1,0 +1,2 @@
+[crate_roots]
+carmine_protocol = "src"
