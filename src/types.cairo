@@ -2,8 +2,8 @@
 use starknet::ContractAddress;
 
 type BlockNumber = felt252;
-type OptionSide = felt252;
-type OptionType = felt252;
+type OptionSide = felt252; // TODO: Make this an enum
+type OptionType = felt252; // TODO: Make this an enum
 type Maturity = felt252;
 type LPTAddress = ContractAddress;
 type Int = felt252;
