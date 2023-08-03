@@ -1,14 +1,23 @@
-use core::traits::TryInto;
 
 mod State {
     use starknet::ContractAddress;
     use traits::Into;
-    use starknet::contract_address::contract_address_to_felt252;
+    use starknet::contract_address::{
+        contract_address_to_felt252,
+        contract_address_try_from_felt252
+    };
+    use core::option::OptionTrait;
+    use core::traits::TryInto;
 
     use cubit::types::fixed::{Fixed, FixedTrait};
 
     use carmine_protocol::amm_core::helpers::{
-        legacyMath_to_cubit
+        legacyMath_to_cubit,
+        cubit_to_legacyMath,
+        assert_nn_not_zero_cubit,
+        assert_option_side_exists,
+        assert_option_type_exists,
+        assert_address_not_zero,
     };
     
     use carmine_protocol::amm_core::constants::{
@@ -19,15 +28,25 @@ mod State {
         OPTION_PUT
     };
     use carmine_protocol::amm_core::amm::AMM::{
-        option_token_address,
         pool_volatility_separate,
-        available_options,
+        option_volatility,
         pool_volatility_adjustment_speed,
+        new_pool_volatility_adjustment_speed,
+        option_position_,
+        new_option_position_,
+        option_token_address,
+        new_option_token_address,
+        available_options,
+        new_available_options,
+        new_available_options_usable_index,
+        max_lpool_balance,
+        lptoken_addr_for_given_pooled_token,
+        trading_halted,
+        available_lptoken_adresses,
         max_option_size_percent_of_voladjspd,
         underlying_token_address,
         pool_definition_from_lptoken_address,
         lpool_balance_,
-        option_position_,
         pool_locked_capital_
     };
 
@@ -39,34 +58,92 @@ mod State {
         OptionType,
         Maturity,
         Math64x61_,
+        LegacyVolatility,
+        LegacyStrike,
+        LegacyOption,
+
         Volatility,
         Strike,
         Option_,
+        
+        LegacyOption_to_Option,
+        Option_to_LegacyOption,
+
         Int,
         Pool
     };
+
+    fn set_option_token_address(
+        lptoken_address: LPTAddress, 
+        option_side: OptionSide, 
+        maturity: Maturity, 
+        strike_price: Strike,
+        opt_address: ContractAddress
+    ) {
+        let mut state = AMM::unsafe_new_contract_state();
+
+        assert_option_side_exists(option_side, 'SOTA - opt side 0');
+        assert(contract_address_to_felt252(lptoken_address) != 0, 'SOTE - lpt addr 0');
+        assert(maturity.into() > 0_u256, 'SOTA - maturity <= 0');
+        assert_nn_not_zero_cubit(strike_price,  'sota - maturity <= 0');
+        assert(contract_address_to_felt252(opt_address) != 0, 'SOTE - opt addr 0');
+
+        // Set old storage var to zero in case this function get called before the getter
+        option_token_address::InternalContractStateTrait::write(
+            ref state.option_token_address,
+            (lptoken_address, option_side, maturity, cubit_to_legacyMath(strike_price)),
+            contract_address_try_from_felt252(0).unwrap()
+        );
+
+        new_option_token_address::InternalContractStateTrait::write(
+            ref state.new_option_token_address,
+            (lptoken_address, option_side, maturity, strike_price),
+            opt_address
+        );
+        
+    }
 
     fn get_option_token_address(
         lptoken_address: LPTAddress, 
         option_side: OptionSide, 
         maturity: Maturity, 
-        strike_price: Math64x61_
+        strike_price: Strike
     ) -> ContractAddress {
+        let mut state = AMM::unsafe_new_contract_state();
 
-        let state = AMM::unsafe_new_contract_state();
-
+        // First read the old value
         let option_token_addr = option_token_address::InternalContractStateTrait::read(
             @state.option_token_address,
+            (lptoken_address, option_side, maturity, cubit_to_legacyMath(strike_price))
+        );
+        
+        if contract_address_to_felt252(option_token_addr) != 0 {
+            // Write it to new storage var
+            // set_option_token_address();
+
+            // Set old storage var to zero
+            option_token_address::InternalContractStateTrait::write(
+                ref state.option_token_address,
+                (lptoken_address, option_side, maturity, cubit_to_legacyMath(strike_price)),
+                contract_address_try_from_felt252(0).unwrap()
+            );
+
+            return option_token_addr;
+        }
+
+        // Read from new storage var
+        let res = new_option_token_address::InternalContractStateTrait::read(
+            @state.new_option_token_address,
             (lptoken_address, option_side, maturity, strike_price)
         );
 
-        return option_token_addr;
+        return res;
     }
 
     // TODO: Maybe setters/getters could return true/false instead of failing?
     // so that we can raise the error in function that actually calls the setters/getters
 
-    fn set_pool_volatility_separate(
+    fn set_option_volatility(
         lptoken_address: LPTAddress,
         maturity: Maturity,
         strike_price: Strike,
@@ -74,93 +151,225 @@ mod State {
     ) {
         let mut state = AMM::unsafe_new_contract_state();
 
-        let vol_u: u256 = volatility.into();
-        let vol_upper: u256 = (VOLATILITY_UPPER_BOUND - 1).into();
-        let vol_lower: u256 = VOLATILITY_LOWER_BOUND.into();
-        
-        assert(SEPARATE_VOLATILITIES_FOR_DIFFERENT_STRIKES == 1, 'Unable to use separate vols');
-        assert(vol_u < vol_upper, 'Volatility exceeds upper bound');
-        assert(vol_u > vol_lower, 'Volatility below lower bound');
+        // let volatility = cubit_to_legacyMath(volatility);
+        // let strike_price = cubit_to_legacyMath(strike_price);
 
+        // let vol_u: u256 = volatility.into();
+        // let vol_upper: u256 = (VOLATILITY_UPPER_BOUND - 1).into();
+        // let vol_lower: u256 = VOLATILITY_LOWER_BOUND.into();
+
+        // TODO: Use checks below       
+        // assert(SEPARATE_VOLATILITIES_FOR_DIFFERENT_STRIKES == 1, 'Unable to use separate vols');
+        // assert(vol_u < vol_upper, 'Volatility exceeds upper bound');
+        // assert(vol_u > vol_lower, 'Volatility below lower bound');
+
+        // Set old storage var to zero in case this function get called before the getter
         pool_volatility_separate::InternalContractStateTrait::write(
             ref state.pool_volatility_separate,
+            (lptoken_address, maturity, cubit_to_legacyMath(strike_price)),
+            0
+        );
+
+        option_volatility::InternalContractStateTrait::write(
+            ref state.option_volatility,
             (lptoken_address, maturity, strike_price), 
             volatility
         );
+    }   
+
+    fn get_option_volatility(
+        lptoken_address: LPTAddress,
+        maturity: Maturity,
+        strike_price: Strike,
+    ) -> Volatility {
+        let mut state = AMM::unsafe_new_contract_state();
+
+        // First let's try to read from the old storage var
+        let res = pool_volatility_separate::InternalContractStateTrait::read(
+            @state.pool_volatility_separate,
+            (lptoken_address, maturity, cubit_to_legacyMath(strike_price))
+        );
+
+        if res != 0{
+            // First assert it's not negative
+            assert(res.into() > 0_u256, 'Old opt vol adj spd negative');
+
+            // If it's not zero then move the old value to new storage var and set the old one to zero
+
+            let res_cubit = legacyMath_to_cubit(res);
+
+            // Write old value to new storage var
+            set_option_volatility(
+                lptoken_address,
+                maturity,
+                strike_price,
+                res_cubit
+            );
+
+            // Set old value to zero
+            pool_volatility_separate::InternalContractStateTrait::write(
+                ref state.pool_volatility_separate,
+                (lptoken_address, maturity, cubit_to_legacyMath(strike_price)),
+                0
+            );
+
+            return res_cubit;
+        }
+
+        // If value in old storage var was zero then we can try to read from new storage var
+        let res = option_volatility::InternalContractStateTrait::read(
+            @state.option_volatility,
+            (lptoken_address, maturity, strike_price)
+        );
+
+        assert_nn_not_zero_cubit(res, 'Opt vol <= 0');
+
+        return res;
     }
 
+    // TODO: finish function below
+    fn get_available_options(lptoken_address: LPTAddress, idx: felt252) -> Option_ {
+        let state = AMM::unsafe_new_contract_state();
+        
+        // In case this function is called before append_to_available_options
+        let usable_index = new_available_options_usable_index::InternalContractStateTrait::read(
+            @state.new_available_options_usable_index
+        );  
+        if usable_index == 0 {
+            migrate_old_options(lptoken_address, 0);
+        }
 
+        new_available_options::InternalContractStateTrait::read(
+            @state.new_available_options,
+            (lptoken_address, idx)
+        );
+    }
 
     fn append_to_available_options(
         option: Option_,
-        lptoken_address: ContractAddress
+        lptoken_address: LPTAddress
     ) {
 
-        let usable_index = get_available_options_usable_index(lptoken_address);
         let mut state = AMM::unsafe_new_contract_state();
 
-        available_options::InternalContractStateTrait::write(
-            ref state.available_options,
+        // Read storage var containg the usable index
+        let usable_index = new_available_options_usable_index::InternalContractStateTrait::read(
+            @state.new_available_options_usable_index
+        );
+
+        // In this case we need to migrate the old options to the new storage var
+        // since this storage var was introduced and is used only in c1 version
+        if usable_index == 0 {
+            let usable_index = migrate_old_options(lptoken_address, 0);
+        }
+
+        new_available_options::InternalContractStateTrait::write(
+            ref state.new_available_options,
             (lptoken_address, usable_index), 
             option
         );
+
+        // Increase the usable index in available options
+        new_available_options_usable_index::InternalContractStateTrait::write(
+            ref state.new_available_options_usable_index,
+            usable_index + 1
+        );
     }
 
-    fn get_available_options_usable_index(lptoken_address: LPTAddress) -> felt252 {
-        _get_available_option_usable_index(lptoken_address, 0)
-    }
+    // Migrates old options and returns first empty index
+    fn migrate_old_options(lptoken_address: ContractAddress, idx: felt252) -> felt252 {
+        let mut state = AMM::unsafe_new_contract_state(); // Todo: maybe pass this as an arg? Is it expensive to create it?
 
-    fn _get_available_option_usable_index(lptoken_address: LPTAddress, idx: felt252) -> felt252 {
-        let state = AMM::unsafe_new_contract_state();
-        let option = available_options::InternalContractStateTrait::read(
-            @state.available_options,
+        // Get old option at index
+        let old_option = available_options::InternalContractStateTrait::read(
+            @state.available_options, 
             (lptoken_address, idx)
         );
 
-        // Because of how the defined options are stored we have to verify that we have not run
-        // at the end of the stored values. The end is with "empty" Option.
-        let opt_sum = option.maturity + option.strike_price;
-
-        if opt_sum == 0 {
-            idx
-        } else {
-            _get_available_option_usable_index(lptoken_address, idx + 1)
+        // This means we've reached the end of list, so return current index
+        let option_sum = old_option.maturity + old_option.strike_price;
+        if option_sum == 0 {
+            return idx;
         }
+
+        // Convert old option to new one and write at current index
+        let new_option = LegacyOption_to_Option(old_option);
+        new_available_options::InternalContractStateTrait::write(
+            ref state.new_available_options, 
+            (lptoken_address, idx),
+            new_option
+        );
+
+        // TODO: Should we alse set old option at current index to zero to "delete" it? 
+
+        // Continue to the next index
+        migrate_old_options(lptoken_address, idx)
+    }   
+
+    fn set_pool_volatility_adjustment_speed(lptoken_address: LPTAddress, new_speed: Fixed) {
+        assert_nn_not_zero_cubit(new_speed, 'Pool vol adjspd cant <= 0');
+
+        let mut state = AMM::unsafe_new_contract_state();
+
+        // Set old storage var to zero in case this function gets called before the getter
+        pool_volatility_adjustment_speed::InternalContractStateTrait::write(
+            ref state.pool_volatility_adjustment_speed,
+            lptoken_address,
+            0
+        );
+
+        new_pool_volatility_adjustment_speed::InternalContractStateTrait::write(
+            ref state.new_pool_volatility_adjustment_speed,
+            lptoken_address,
+            new_speed
+        );
     }
 
-
     fn get_pool_volatility_adjustment_speed(lptoken_address: LPTAddress) -> Fixed {
-        let state = AMM::unsafe_new_contract_state();
+        let mut state = AMM::unsafe_new_contract_state();
+
+        // First let's try to read the old storage var
         let res = pool_volatility_adjustment_speed::InternalContractStateTrait::read(
             @state.pool_volatility_adjustment_speed,
             lptoken_address
         );
-        assert(res != 0, 'Pool vol adj spd is 0');
-        assert(res.into() > 0_u256, 'Pool vol adj spd negative');
 
-        legacyMath_to_cubit(res)
+        if res != 0 {
+            // First assert that it's not negative
+            assert(res.into() > 0_u256, 'Old pool vol adj spd negative');
+            
+            // if it's not zero then move the old value to new storage var and set the old one to zero
+            let res_cubit = legacyMath_to_cubit(res);
+
+            // Write old value to new storage var
+            set_pool_volatility_adjustment_speed(lptoken_address, res_cubit);
+
+            // Set old value to zero
+            pool_volatility_adjustment_speed::InternalContractStateTrait::write(
+                ref state.pool_volatility_adjustment_speed,
+                lptoken_address,
+                0
+            );
+
+            return res_cubit;
+        }
+
+        // If value in old storage var was zero then we can try to read from new storage var
+        let res = new_pool_volatility_adjustment_speed::InternalContractStateTrait::read(
+            @state.new_pool_volatility_adjustment_speed,
+            lptoken_address
+        );
+       
+        assert_nn_not_zero_cubit(res, 'New pool vol adj spd is <= 0');
+
+        return res;
     }
 
     fn get_max_option_size_percent_of_voladjspd() -> Int {
-        let state = AMM::unsafe_new_contract_state();
         max_option_size_percent_of_voladjspd::InternalContractStateTrait::read(
-            @state.max_option_size_percent_of_voladjspd
+            @AMM::unsafe_new_contract_state().max_option_size_percent_of_voladjspd
         )
     }
-
-    // @notice Returns the token that's underlying the given liquidity pool.
-    fn get_underlying_token_address(lptoken_address: LPTAddress) -> ContractAddress {
-        let state = AMM::unsafe_new_contract_state();
-        let underlying_token_address_ = underlying_token_address::InternalContractStateTrait::read(
-            @state.underlying_token_address,
-            lptoken_address
-        );
-
-        assert(contract_address_to_felt252(underlying_token_address_) != 0, 'Underlying addr is zero');
-
-        return underlying_token_address_;
-    }
-
 
     fn get_pool_definition_from_lptoken_address(lptoken_address: LPTAddress) -> Pool {
         let state = AMM::unsafe_new_contract_state();
@@ -171,7 +380,7 @@ mod State {
 
         assert(contract_address_to_felt252(pool.quote_token_address) != 0, 'Quote addr doesnt exist');
         assert(contract_address_to_felt252(pool.base_token_address) != 0, 'Quote addr doesnt exist');
-        assert((pool.option_type - OPTION_CALL) * (pool.option_type - OPTION_PUT) == 0, 'Unknown option type');
+        assert_option_type_exists(pool.option_type, 'Unknown option type');
 
         return pool;
     }
@@ -199,31 +408,72 @@ mod State {
         lptoken_address: LPTAddress,
         option_side: OptionSide,
         maturity: Maturity,
-        strike_price: Math64x61_
+        strike_price: Strike
     ) -> Int {
-        let state = AMM::unsafe_new_contract_state();
-        option_position_::InternalContractStateTrait::read(
+        let mut state = AMM::unsafe_new_contract_state();
+
+        // First let's try to read from the old storage var
+        let res  = option_position_::InternalContractStateTrait::read(
             @state.option_position_,
+            (lptoken_address, option_side, maturity, cubit_to_legacyMath(strike_price))
+        );
+
+        if res != 0 {
+            // First assert it's not negative
+            assert(res > 0_u256, 'Old opt pos negative');
+
+            // If it's not zero then move the old value to new storage var and set the old one to zero
+
+            // Write old value to new storage var
+            set_option_position(
+                lptoken_address,
+                option_side,
+                maturity,
+                strike_price,
+                0
+            );
+
+            // Set old value to zero
+            option_position_::InternalContractStateTrait::write(
+                ref state.option_position_,
+                (lptoken_address, option_side, maturity, cubit_to_legacyMath(strike_price)),
+                0
+            );
+
+            return res;
+        }
+
+        // Otherwise just read and return from new storage var
+        new_option_position_::InternalContractStateTrait::read(
+            @state.new_option_position_,
             (lptoken_address, option_side, maturity, strike_price)
-        )       
+        )
     }
 
     fn set_option_position(
         lptoken_address: LPTAddress,
         option_side: OptionSide,
         maturity: Int,
-        strike_price: Math64x61_,
+        strike_price: Strike,
         position: Int
-    ) {
-        assert(strike_price.into() > 0_u256, 'Strike zero/neg in set_opt_pos');
+    ) { 
+        let mut state = AMM::unsafe_new_contract_state();
+
+        assert_nn_not_zero_cubit(strike_price, 'Strike zero/neg in set_opt_pos');
         assert(position.into() > 0_u256, 'Pos zero/neg in set_opt_pos');
 
-        let mut state = AMM::unsafe_new_contract_state();
+        // Also it's important to set corresponding option position in old storage var to zero se that if this function is called before get_option_position then the value in new storage var won't be overwritten by the old one
         option_position_::InternalContractStateTrait::write(
             ref state.option_position_,
+            (lptoken_address, option_side, maturity, cubit_to_legacyMath(strike_price)),
+            position
+        );
+
+        new_option_position_::InternalContractStateTrait::write(
+            ref state.new_option_position_,
             (lptoken_address, option_side, maturity, strike_price),
             position
-        )       
+        )
     }
 
     fn get_pool_locked_capital(lptoken_address: LPTAddress) -> u256 {
@@ -256,6 +506,137 @@ mod State {
             lptoken_address,
             balance
         )
+    }
+
+    fn get_max_lpool_balance(pooled_token_address: ContractAddress) -> u256 {
+        max_lpool_balance::InternalContractStateTrait::read(
+            @AMM::unsafe_new_contract_state().max_lpool_balance,
+            pooled_token_address
+        )
+    }
+
+    fn set_max_lpool_balance(pooled_token_address: ContractAddress, max_bal: u256) {
+
+        let mut state = AMM::unsafe_new_contract_state();
+        // TODO: Assert admin only!!!!!!!!!!!
+
+        // TODO: Can uint be even negative lol
+        assert(max_bal >= 0, 'Max lpool bal < 0');
+
+        max_lpool_balance::InternalContractStateTrait::write(
+            ref state.max_lpool_balance,
+            pooled_token_address,
+            max_bal
+        );
+    }
+
+    // TODO: Rename, there is no option here
+    fn get_lptoken_address_for_given_option(
+        quote_token_address: ContractAddress,
+        base_token_address: ContractAddress,
+        option_type: OptionType
+    ) -> LPTAddress {
+        
+        let lpt_address = lptoken_addr_for_given_pooled_token::InternalContractStateTrait::read(
+            @AMM::unsafe_new_contract_state().lptoken_addr_for_given_pooled_token,
+            (quote_token_address, base_token_address, option_type)
+        );
+
+        assert_address_not_zero(lpt_address,'GLAFGO - pool non existent');
+
+        lpt_address
+    }
+
+    fn set_lptoken_address_for_given_option(
+        quote_token_address: ContractAddress,
+        base_token_address: ContractAddress,
+        option_type: OptionType,
+        lpt_address: LPTAddress
+    ) {
+
+        assert_address_not_zero(quote_token_address, 'SLAFGO - Quote addr zero');
+        assert_address_not_zero(base_token_address, 'SLAFGO - Base addr zero');
+        assert_address_not_zero(lpt_address, 'SLAFGO - LPT addr zero');
+        assert_option_type_exists(option_type, 'SLAFGO - Unknown opt type');
+
+        let mut state = AMM::unsafe_new_contract_state();
+
+        lptoken_addr_for_given_pooled_token::InternalContractStateTrait::write(
+            ref state.lptoken_addr_for_given_pooled_token,
+            (quote_token_address, base_token_address, option_type),
+            lpt_address
+        );
+    }
+
+    fn get_trading_halt() -> felt252 {
+        trading_halted::InternalContractStateTrait::read(
+            @AMM::unsafe_new_contract_state().trading_halted
+        )
+    }
+    
+    fn set_trading_halt(new_status: felt252) {
+        // TODO: implement check below
+        // let caller_addr = get_caller_address();
+        // let can_halt = can_halt_trading(caller_addr);
+        // assert(can_halt, 'Noperrino')
+
+        assert_option_type_exists(new_status, 'This is unacceptableeeeeeeeeeee');
+        let mut state = AMM::unsafe_new_contract_state();
+
+        trading_halted::InternalContractStateTrait::write(
+            ref state.trading_halted,
+            new_status
+        )
+    }
+
+        // @notice Returns the token that's underlying the given liquidity pool.
+    fn get_underlying_token_address(lptoken_address: LPTAddress) -> ContractAddress {
+        let state = AMM::unsafe_new_contract_state();
+        let underlying_token_address_ = underlying_token_address::InternalContractStateTrait::read(
+            @state.underlying_token_address,
+            lptoken_address
+        );
+        assert_address_not_zero(underlying_token_address_, 'Underlying addr is zero');
+        return underlying_token_address_;
+    }
+
+    fn set_underlying_token_address(lptoken_address: LPTAddress, underlying_addr: ContractAddress) {
+
+        assert_address_not_zero(underlying_addr, 'Underlying addr is zero');
+        assert_address_not_zero(lptoken_address, 'LPT addr is zero');
+
+        let mut state = AMM::unsafe_new_contract_state();
+
+        underlying_token_address::InternalContractStateTrait::write(
+                ref state.underlying_token_address,
+                lptoken_address,
+                underlying_addr
+        );
+    }
+
+    fn get_available_lptoken_addresses(idx: felt252) -> LPTAddress {
+        available_lptoken_adresses::InternalContractStateTrait::read(
+            @AMM::unsafe_new_contract_state().available_lptoken_adresses,
+            idx
+        )
+    }
+
+    fn append_to_available_lptoken_addresses(lptoken_addr: LPTAddress) {
+        let usable_idx = get_available_lptoken_addresses_usable_index(0);
+        let mut state = AMM::unsafe_new_contract_state();
+        available_lptoken_adresses::InternalContractStateTrait::write(
+            ref state.available_lptoken_adresses,
+            usable_idx,
+            lptoken_addr
+        )
+    }
+
+    fn get_available_lptoken_addresses_usable_index(idx: felt252) -> felt252 {
+        let addr = get_available_lptoken_addresses(idx);
+        if contract_address_to_felt252(addr) == 0 { // TODO: Does this check work?
+            return idx;
+        }
+        get_available_lptoken_addresses_usable_index(idx + 1)
     }
 
 }
