@@ -1,28 +1,18 @@
-
 mod Pragma {
-
     use starknet::get_block_timestamp;
 
-    use carmine_protocol::traits::{
-        IPragmaOracleDispatcher,
-        IPragmaOracleDispatcherTrait
-    };
+    use carmine_protocol::traits::{IPragmaOracleDispatcher, IPragmaOracleDispatcherTrait};
 
-    use carmine_protocol::amm_core::oracles::oracle_helpers::{
-        convert_from_int_to_Fixed
-    };
+    use carmine_protocol::amm_core::oracles::oracle_helpers::{convert_from_int_to_Fixed};
 
     use starknet::ContractAddress;
     use traits::{TryInto, Into};
     use option::OptionTrait;
 
     use cubit::types::fixed::{Fixed, FixedTrait};
-    
 
-    use carmine_protocol::amm_core::constants::{
-        TOKEN_USDC_ADDRESS,
-        TOKEN_ETH_ADDRESS,
-    };
+
+    use carmine_protocol::amm_core::constants::{TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, };
 
     const PRAGMA_ORACLE_ADDRESS: felt252 =
         0x0346c57f094d641ad94e43468628d8e9c574dcb2803ec372576ccc60a40be2c4;
@@ -55,7 +45,9 @@ mod Pragma {
 
 
     fn _get_stablecoin_key(quote_token_addr: ContractAddress) -> Option<felt252> {
-        if quote_token_addr == TOKEN_USDC_ADDRESS.try_into().expect('Pragma/GSK - Failed to convert') {
+        if quote_token_addr == TOKEN_USDC_ADDRESS
+            .try_into()
+            .expect('Pragma/GSK - Failed to convert') {
             Option::Some(PRAGMA_USDC_USD_KEY)
         } else {
             Option::None(())
@@ -63,11 +55,14 @@ mod Pragma {
     }
 
     fn _get_ticker_key(
-        quote_token_addr: ContractAddress, 
-        base_token_addr: ContractAddress
+        quote_token_addr: ContractAddress, base_token_addr: ContractAddress
     ) -> Option<felt252> {
-        if base_token_addr == TOKEN_ETH_ADDRESS.try_into().expect('Pragma/GTK - Failed to convert') {
-            if quote_token_addr == TOKEN_USDC_ADDRESS.try_into().expect('Pragma/GTK - Failed to convert') {
+        if base_token_addr == TOKEN_ETH_ADDRESS
+            .try_into()
+            .expect('Pragma/GTK - Failed to convert') {
+            if quote_token_addr == TOKEN_USDC_ADDRESS
+                .try_into()
+                .expect('Pragma/GTK - Failed to convert') {
                 Option::Some(PRAGMA_ETH_USD_KEY)
             } else {
                 Option::None(())
@@ -78,25 +73,27 @@ mod Pragma {
     }
 
 
-    fn _get_pragma_median_price(
-        key: felt252
-    ) -> Fixed {
-        let (value, decimals, last_updated_timestamp, num_sources_aggregated) =  IPragmaOracleDispatcher {
+    fn _get_pragma_median_price(key: felt252) -> Fixed {
+        let (value, decimals, last_updated_timestamp, num_sources_aggregated) =
+            IPragmaOracleDispatcher {
             contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
         }.get_spot_median(key);
 
         let curr_time = get_block_timestamp();
-        let time_diff = curr_time - last_updated_timestamp.try_into().expect('Pragma/_GPMP - LUT too large');
+        let time_diff = curr_time
+            - last_updated_timestamp.try_into().expect('Pragma/_GPMP - LUT too large');
 
         assert(time_diff < 3600, 'Pragma/_GPMP - Price too old');
-        assert(value.try_into().expect('Pragma/GPMP - Price too high') > 0_u128 ,'Pragma/-GPMP - Price <= 0');
-       
+        assert(
+            value.try_into().expect('Pragma/GPMP - Price too high') > 0_u128,
+            'Pragma/-GPMP - Price <= 0'
+        );
+
         convert_from_int_to_Fixed(value, decimals)
     }
 
     fn get_pragma_median_price(
-        quote_token_addr: ContractAddress,
-        base_token_addr: ContractAddress, 
+        quote_token_addr: ContractAddress, base_token_addr: ContractAddress, 
     ) -> Fixed {
         let key = _get_ticker_key(quote_token_addr, base_token_addr)
             .expect('Pragma/GPMP - Cant get spot key');
@@ -104,29 +101,27 @@ mod Pragma {
         account_for_stablecoin_divergence(res, quote_token_addr, 0)
     }
 
-    fn _get_pragma_terminal_price(
-        key: felt252, 
-        maturity: felt252
-    ) -> Fixed {
-        
+    fn _get_pragma_terminal_price(key: felt252, maturity: felt252) -> Fixed {
         let (last_checkpoint, _) = IPragmaOracleDispatcher {
-            contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/GTMP - Unable to convert')
+            contract_address: PRAGMA_ORACLE_ADDRESS
+                .try_into()
+                .expect('Pragma/GTMP - Unable to convert')
         }.get_last_spot_checkpoint_before(key, maturity);
-        
 
         let time_diff = maturity - last_checkpoint.timestamp;
 
         assert(time_diff.try_into().unwrap() < 7200_u128, 'Pragma/GPTP - Price too old');
-        assert(last_checkpoint.value.try_into().expect('Pragma/GTMP - Price too high') > 0_u128 ,'Pragma/GPMP - Price <= 0');
+        assert(
+            last_checkpoint.value.try_into().expect('Pragma/GTMP - Price too high') > 0_u128,
+            'Pragma/GPMP - Price <= 0'
+        );
 
         //  Pragma checkpoints should always have 8 decimals
         convert_from_int_to_Fixed(last_checkpoint.value, 8)
     }
 
     fn get_pragma_terminal_price(
-        quote_token_addr: ContractAddress,
-        base_token_addr: ContractAddress,
-        maturity: felt252
+        quote_token_addr: ContractAddress, base_token_addr: ContractAddress, maturity: felt252
     ) -> Fixed {
         let key = _get_ticker_key(quote_token_addr, base_token_addr)
             .expect('Pragma/GPMP - Cant get spot key');
@@ -134,20 +129,19 @@ mod Pragma {
         account_for_stablecoin_divergence(res, quote_token_addr, maturity)
     }
 
-    fn account_for_stablecoin_divergence(price: Fixed, quote_token_addr: ContractAddress, maturity: felt252) -> Fixed {
-
+    fn account_for_stablecoin_divergence(
+        price: Fixed, quote_token_addr: ContractAddress, maturity: felt252
+    ) -> Fixed {
         let key = _get_stablecoin_key(quote_token_addr);
 
         match key {
             Option::Some(key) => {
-                if  maturity == 0 {
-                    let stablecoin_price = _get_pragma_median_price(key);
-                    return price / stablecoin_price;
+                let stable_coin_price = if maturity == 0 {
+                    _get_pragma_median_price(key)
                 } else {
-                    let stablecoin_price = _get_pragma_terminal_price(key, maturity);
-                    return price / stablecoin_price; 
-                }
-                    // Idk it just cant find stablecoin_price after above ifelse lol
+                    _get_pragma_terminal_price(key, maturity)
+                };
+                return price / stable_coin_price;
             },
             // If key is zero, it means that quote_token isn't stablecoin(or at least one we use)
             Option::None(_) => {
