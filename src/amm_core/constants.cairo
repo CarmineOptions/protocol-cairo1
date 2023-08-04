@@ -3,6 +3,7 @@ use starknet::ContractAddress;
 use starknet::contract_address::contract_address_to_felt252;
 use traits::Into;
 
+use carmine_protocol::amm_core::helpers::{assert_option_side_exists, };
 
 use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
 
@@ -14,6 +15,17 @@ const OPTION_PUT: felt252 = 1;
 
 const TRADE_SIDE_LONG: felt252 = 0;
 const TRADE_SIDE_SHORT: felt252 = 1;
+
+fn get_opposite_side(side: felt252) -> felt252 {
+    assert_option_side_exists(side, 'GES - invalid option side');
+
+    if side == TRADE_SIDE_LONG {
+        TRADE_SIDE_SHORT
+    } else {
+        TRADE_SIDE_LONG
+    }
+}
+
 
 const SEPARATE_VOLATILITIES_FOR_DIFFERENT_STRIKES: felt252 = 1;
 const VOLATILITY_LOWER_BOUND: felt252 = 1;
