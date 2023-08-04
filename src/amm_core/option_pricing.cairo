@@ -6,9 +6,9 @@ use cubit::math::comp::max;
 
 use array::{ArrayTrait, SpanTrait};
 
-const CONST_A: u128 = 4168964160658358665;  // 0.226 * 2**64
+const CONST_A: u128 = 4168964160658358665; // 0.226 * 2**64
 const CONST_B: u128 = 11805916207174113034; // 0.64  * 2**64
-const CONST_C: u128 = 6087425544324152033;  // 0.33  * 2**64
+const CONST_C: u128 = 6087425544324152033; // 0.33  * 2**64
 const INV_ROOT_OF_TWO_PI: u128 = 7359186143223876056; // (1 / sqrt(pi * 2)) * 2**64
 
 // @notice Calculates 1/exp(x) for big x
@@ -16,7 +16,6 @@ const INV_ROOT_OF_TWO_PI: u128 = 7359186143223876056; // (1 / sqrt(pi * 2)) * 2*
 // @param x: number in Cubit form
 // @return Returns 1/exp(x) in Cubit form
 fn inv_exp_big_x(x: Fixed) -> Fixed {
-
     let ten = FixedTrait::new_unscaled(10_u128, false);
     let one = FixedTrait::new_unscaled(1_u128, false);
 
@@ -44,7 +43,6 @@ fn inv_exp_big_x(x: Fixed) -> Fixed {
 // @param x: number in Math64x61 form
 // @return Returns std normal cdf value in Math64x61 form
 fn std_normal_cdf(x: Fixed) -> Fixed {
-
     let ONE = FixedTrait::from_unscaled_felt(1);
     let TWO = FixedTrait::from_unscaled_felt(2);
     let THREE = FixedTrait::from_unscaled_felt(3);
@@ -58,7 +56,7 @@ fn std_normal_cdf(x: Fixed) -> Fixed {
 
     let x_squared = x * x;
     let x_sq_half = x_squared / TWO;
-    let numerator = inv_exp_big_x(x_sq_half);   
+    let numerator = inv_exp_big_x(x_sq_half);
 
     let denominator_b = x * FixedTrait::new(CONST_B, false);
     let denominator_a = denominator_b * FixedTrait::new(CONST_A, false);
@@ -68,7 +66,7 @@ fn std_normal_cdf(x: Fixed) -> Fixed {
 
     let res_a = numerator / denominator;
     let res_b = res_a * FixedTrait::new(INV_ROOT_OF_TWO_PI, false);
-    
+
     return (ONE - res_b);
 }
 
@@ -82,19 +80,17 @@ fn std_normal_cdf(x: Fixed) -> Fixed {
 //      of the Black-Scholes model.
 // @return Returns values that are needed for further computation.
 fn _get_d1_d2_numerator(
-    is_frac: bool, 
-    ln_price_to_strike: Fixed, 
-    risk_plus_sigma_squared_half_time: Fixed
+    is_frac: bool, ln_price_to_strike: Fixed, risk_plus_sigma_squared_half_time: Fixed
 ) -> (Fixed, bool) {
-
     if (is_frac == true) {
         // ln_price_to_strike < 0 (not stored as negative), but above the "let (div) = Math6..." had to be used
         // to not overflow
         // risk_plus_sigma_squared_half_time > 0
 
-        if ln_price_to_strike <= (risk_plus_sigma_squared_half_time - FixedTrait::new(1_u128, false)) {
+        if ln_price_to_strike <= (risk_plus_sigma_squared_half_time
+            - FixedTrait::new(1_u128, false)) {
             let numerator = risk_plus_sigma_squared_half_time - ln_price_to_strike;
-            let is_pos_d_1 = true; 
+            let is_pos_d_1 = true;
 
             return (numerator, is_pos_d_1);
         } else {
@@ -106,10 +102,9 @@ fn _get_d1_d2_numerator(
     } else {
         // both ln_price_to_strike, risk_plus_sigma_squared_half_time are positive
         let numerator = ln_price_to_strike + risk_plus_sigma_squared_half_time;
-        let is_pos_d_1 = true; 
+        let is_pos_d_1 = true;
         return (numerator, is_pos_d_1);
     }
-
 }
 
 // @notice Helper function
@@ -120,7 +115,6 @@ fn _get_d1_d2_numerator(
 // @param denominator: "intermeidary" value needed inside of the Black-Scholes
 // @return Returns values that are needed for further computation.
 fn _get_d1_d2_d_2(is_pos_d1: bool, d_1: Fixed, denominator: Fixed) -> (Fixed, bool) {
-
     if (is_pos_d1 == false) {
         let d_2 = d_1 + denominator;
         let is_pos_d2 = false;
@@ -131,11 +125,9 @@ fn _get_d1_d2_d_2(is_pos_d1: bool, d_1: Fixed, denominator: Fixed) -> (Fixed, bo
         if is_pos_d_2 == true {
             let d_2 = d_1 - denominator;
             return (d_2, is_pos_d_2);
-
         } else {
             let d_2 = denominator - d_1;
             return (d_2, is_pos_d_2);
-            
         }
     }
 }
@@ -148,10 +140,10 @@ fn _get_d1_d2_d_2(is_pos_d1: bool, d_1: Fixed, denominator: Fixed) -> (Fixed, bo
 // @param risk_free_rate_annualized: risk free rate that is annualized
 // @return Returns D1 and D2 needed in the Black Scholes model and their sign
 fn d1_d2(
-    sigma: Fixed, 
-    time_till_maturity_annualized: Fixed, 
-    strike_price: Fixed, 
-    underlying_price: Fixed, 
+    sigma: Fixed,
+    time_till_maturity_annualized: Fixed,
+    strike_price: Fixed,
+    underlying_price: Fixed,
     risk_free_rate_annualized: Fixed
 ) -> (Fixed, bool, Fixed, bool) {
     let ONE = FixedTrait::new_unscaled(1, false);
@@ -164,7 +156,8 @@ fn d1_d2(
 
     let price_to_strike = underlying_price / strike_price;
 
-    let risk_plus_sigma_squared_half_time = risk_plus_sigma_squared_half * time_till_maturity_annualized;
+    let risk_plus_sigma_squared_half_time = risk_plus_sigma_squared_half
+        * time_till_maturity_annualized;
     let denominator = sigma * sqrt_time_till_maturity_annualized;
 
     let is_frac = price_to_strike <= (ONE - FixedTrait::new(1_u128, false));
@@ -172,33 +165,23 @@ fn d1_d2(
         let div = ONE / price_to_strike;
         let ln_price_to_strike = div.ln();
         let (numerator, is_pos_d1) = _get_d1_d2_numerator(
-            is_frac, 
-            ln_price_to_strike, 
-            risk_plus_sigma_squared_half_time
+            is_frac, ln_price_to_strike, risk_plus_sigma_squared_half_time
         );
         let d_1 = numerator / denominator;
 
         let (d_2, is_pos_d_2) = _get_d1_d2_d_2(is_pos_d1, d_1, denominator);
 
-        return (
-            d_1, is_pos_d1,
-            d_2, is_pos_d_2
-        );
+        return (d_1, is_pos_d1, d_2, is_pos_d_2);
     } else {
         let ln_price_to_strike = price_to_strike.ln();
         let (numerator, is_pos_d1) = _get_d1_d2_numerator(
-            is_frac, 
-            ln_price_to_strike, 
-            risk_plus_sigma_squared_half_time
+            is_frac, ln_price_to_strike, risk_plus_sigma_squared_half_time
         );
         let d_1 = numerator / denominator;
 
         let (d_2, is_pos_d_2) = _get_d1_d2_d_2(is_pos_d1, d_1, denominator);
 
-        return (
-            d_1, is_pos_d1,
-            d_2, is_pos_d_2
-        );
+        return (d_1, is_pos_d1, d_2, is_pos_d_2);
     }
 }
 
@@ -235,7 +218,6 @@ fn black_scholes(
     risk_free_rate_annualized: Fixed,
     is_for_trade: bool // We want it to work for anything but trading
 ) -> (Fixed, Fixed, bool) {
-
     let ONE = FixedTrait::new_unscaled(1, false);
     let EIGHT = FixedTrait::new_unscaled(8, false);
 
@@ -245,10 +227,10 @@ fn black_scholes(
     let strike_e_neg_risk_time_till_maturity = strike_price * e_neg_risk_time_till_maturity;
 
     let (d_1, is_pos_d_1, d_2, is_pos_d_2) = d1_d2(
-        sigma, 
+        sigma,
         time_till_maturity_annualized,
-        strike_price, 
-        underlying_price, 
+        strike_price,
+        underlying_price,
         risk_free_rate_annualized,
     );
 
@@ -266,18 +248,16 @@ fn black_scholes(
     let normal_d_2 = adjusted_std_normal_cdf(d_2, is_pos_d_2);
 
     let normal_d_1_underlying_price = normal_d_1 * strike_price;
-    let normal_d_2_strike_e_neg_risk_time_till_maturity = normal_d_2 * strike_e_neg_risk_time_till_maturity;
+    let normal_d_2_strike_e_neg_risk_time_till_maturity = normal_d_2
+        * strike_e_neg_risk_time_till_maturity;
 
-    let call_option_value = normal_d_1_underlying_price - normal_d_2_strike_e_neg_risk_time_till_maturity;
+    let call_option_value = normal_d_1_underlying_price
+        - normal_d_2_strike_e_neg_risk_time_till_maturity;
 
     let neg_underlying_price_call_value = call_option_value - underlying_price;
     let put_option_value = strike_e_neg_risk_time_till_maturity + neg_underlying_price_call_value;
 
-    return (
-        call_option_value, 
-        put_option_value,
-        true
-    );
+    return (call_option_value, put_option_value, true);
 }
 
 // @notice Calculates premia for ds in BS that are outside of usability of our standard normal CDF approximation
@@ -286,7 +266,6 @@ fn black_scholes(
 // @param underlying_price: Current price of the underlying
 // @returns Call and Put premia, plus variable indicating whether it was calculated by BS or not
 fn _premia_extreme_d(strike_price: Fixed, underlying_price: Fixed) -> (Fixed, Fixed, bool) {
-
     let price_diff_call = underlying_price - strike_price;
     let price_diff_put = strike_price - underlying_price;
 
@@ -298,9 +277,5 @@ fn _premia_extreme_d(strike_price: Fixed, underlying_price: Fixed) -> (Fixed, Fi
     let _put_premia = max(FixedTrait::new_unscaled(0, false), price_diff_put);
     let put_option_value = _put_premia + cent;
 
-    return (
-        call_option_value,
-        put_option_value,
-        false
-    );
+    return (call_option_value, put_option_value, false);
 }

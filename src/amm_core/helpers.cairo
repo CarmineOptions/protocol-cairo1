@@ -3,22 +3,41 @@ use traits::Into;
 use traits::TryInto;
 use option::OptionTrait;
 
+use starknet::contract_address::{contract_address_to_felt252, contract_address_try_from_felt252};
 use core::cmp::{max, min};
 
 use cubit::types::fixed::{Fixed, FixedTrait, MAX_u128, FixedInto};
 
 use carmine_protocol::amm_core::constants::{
-    OPTION_CALL, 
-    OPTION_PUT
+    OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT,
 };
 
-use carmine_protocol::types::{
-    Math64x61_, 
-    OptionSide, 
-    OptionType
-};
+use carmine_protocol::types::{Math64x61_, OptionSide, OptionType};
 use carmine_protocol::amm_core::constants::get_decimal;
 
+// TODO: make this functions generic
+
+fn assert_nn_cubit(num: Fixed, msg: felt252) {
+    let zero = FixedTrait::from_felt(0);
+    assert(num >= zero, msg);
+}
+
+fn assert_nn_not_zero_cubit(num: Fixed, msg: felt252) {
+    let zero = FixedTrait::from_felt(0);
+    assert(num > zero, msg);
+}
+
+fn assert_option_side_exists(option_side: felt252, msg: felt252) {
+    assert((option_side - TRADE_SIDE_LONG) * (option_side - TRADE_SIDE_SHORT) == 0, msg);
+}
+
+fn assert_option_type_exists(option_type: felt252, msg: felt252) {
+    assert((option_type - OPTION_CALL) * (option_type - OPTION_PUT) == 0, msg);
+}
+
+fn assert_address_not_zero(addr: ContractAddress, msg: felt252) {
+    assert(contract_address_to_felt252(addr) != 0, msg);
+}
 
 
 // #[panic_with('unable to convert to cubit', legacyMath_to_cubit)]
@@ -26,7 +45,7 @@ fn legacyMath_to_cubit(num: Math64x61_) -> Fixed {
     // 2**61 is 8 times smaller than 2**64
     // so we can just multiply old legacy math number by 8 to get cubit 
     FixedTrait::from_felt(num * 8)
-    // TODO: Check for overflow/make it panic
+// TODO: Check for overflow/make it panic
 }
 
 fn cubit_to_legacyMath(num: Fixed) -> Math64x61_ {
@@ -69,9 +88,8 @@ fn toU256_balance(x: Fixed, currency_address: ContractAddress) -> u256 {
     // We can split the 10*18 to (2**18 * 5**18)
     // (1.2 * 2**61) * 2**18 * 5**18 / 2**61
 
-    let decimals = get_decimal(currency_address);
+    let decimals = get_decimal(currency_address).expect('toU256 - Unable to get decimals');
     let five_to_dec = FixedTrait::from_unscaled_felt(felt_power(5, decimals));
-
 
     let x_5 = x * five_to_dec;
 
@@ -86,13 +104,14 @@ fn toU256_balance(x: Fixed, currency_address: ContractAddress) -> u256 {
     assert_nn_fixed(FixedTrait::from_felt(_64_minus_dec), '64 - dec negative toUint256_bal');
 
     let decreased_part = felt_power(2, _64_minus_dec);
-    let decreased_part_u128: u128 = decreased_part.try_into().expect('dec_part felt252 -> u128 failed');
+    let decreased_part_u128: u128 = decreased_part
+        .try_into()
+        .expect('dec_part felt252 -> u128 failed');
 
     let x_5_u128: u128 = x_5.try_into().expect('x_5 felt252 -> u128 failed');
 
     let (q, r) = integer::u128_safe_divmod(
-        x_5_u128, 
-        decreased_part_u128.try_into().expect('Division by 0 in toUint256_bal')
+        x_5_u128, decreased_part_u128.try_into().expect('Division by 0 in toUint256_bal')
     );
 
     return q.into();
@@ -116,8 +135,8 @@ fn fromU256_balance(x: u256, currency_address: ContractAddress) -> Fixed {
     // (1.2 * 10**18) * 2**61 / 10**18
     // We can split the 10*18 to (2**18 * 5**18)
     // (1.2 * 10**18) * 2**61 / (5**18 * 2**18)
-       
-    let decimal = get_decimal(currency_address);
+
+    let decimal = get_decimal(currency_address).expect('fromU256 - cant to get decimals');
     let five_to_dec = felt_power(5, decimal);
 
     let sixty_four_plus_dec = 64 + decimal;
@@ -148,10 +167,10 @@ fn fromU256_balance(x: u256, currency_address: ContractAddress) -> Fixed {
 fn split_option_locked_capital(
     option_type: OptionType,
     option_side: OptionSide,
-    option_size: Fixed, 
-    strike_price: Fixed, 
-    terminal_price: Fixed, 
-) -> (Fixed, Fixed)  {
+    option_size: Fixed,
+    strike_price: Fixed,
+    terminal_price: Fixed,
+) -> (Fixed, Fixed) {
     assert((option_type - OPTION_CALL) * (option_type - OPTION_PUT) == 0, '');
 
     if option_type == OPTION_CALL {
@@ -174,7 +193,7 @@ fn split_option_locked_capital(
         let to_be_paid_seller = option_size * seller_relative_profit;
 
         return (to_be_paid_buyer, to_be_paid_seller);
-    }    
+    }
 
     // For Put option
     // User receives option_size * max(0, (strike_price - terminal_price)) in quote token for long
@@ -184,10 +203,9 @@ fn split_option_locked_capital(
     let price_diff = strike_price - terminal_price;
     let buyer_relative_profit = max(FixedTrait::from_felt(0), price_diff);
     let seller_relative_profit = min(strike_price, terminal_price);
-    
+
     let to_be_paid_buyer = option_size * buyer_relative_profit;
     let to_be_paid_seller = option_size * seller_relative_profit;
 
     return (to_be_paid_buyer, to_be_paid_seller);
-
 }
