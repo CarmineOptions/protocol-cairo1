@@ -1,4 +1,5 @@
 mod Trading {
+    use starknet::get_block_timestamp;
     use starknet::ContractAddress;
     use traits::{TryInto, Into};
     use carmine_protocol::types::{Math64x61_, OptionType, OptionSide, LPTAddress, Int};
@@ -6,18 +7,23 @@ mod Trading {
     use carmine_protocol::amm_core::fees::get_fees;
     use option::OptionTrait;
     use carmine_protocol::amm_core::state::State::{
-        get_option_volatility, get_pool_volatility_adjustment_speed, set_option_volatility,
+        get_option_volatility, 
+        get_pool_volatility_adjustment_speed, 
+        set_option_volatility,
+        get_trading_halt,
+        is_option_available,
     };
 
     use carmine_protocol::amm_core::options::{mint_option_token, burn_option_token, };
 
     use carmine_protocol::amm_core::constants::{
-        RISK_FREE_RATE, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side,
+        RISK_FREE_RATE, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side, STOP_TRADING_BEFORE_MATURITY_SECONDS,
     };
     use cubit::types::fixed::{Fixed, FixedTrait};
     use carmine_protocol::amm_core::option_pricing_helpers::{
         convert_amount_to_option_currency_from_base_uint256, get_new_volatility,
         get_time_till_maturity, select_and_adjust_premia, add_premia_fees,
+        assert_option_type_exists, assert_option_side_exists
     };
     use carmine_protocol::amm_core::helpers::{fromU256_balance, };
 
@@ -231,4 +237,60 @@ mod Trading {
         // TODO: ReentrancyGuard.end()
         return premia;
     }
+
+    fn validate_trade_input(
+        option_type : OptionType,
+        strike_price : Fixed,
+        maturity : Int,
+        option_side : OptionSide,
+        option_size : Int,
+        quote_token_address: ContractAddress,
+        base_token_address: ContractAddress,
+        lptoken_address: ContractAddress,
+        open_position: bool,
+        limit_total_premia: Fixed,
+        tx_deadline: Int,
+    ) {
+
+        let maturity: u64 = maturity.try_into().expect('VTI - cant convert maturity');
+        let tx_deadline: u64 = tx_deadline.try_into().expect('VTI - cant convert tx_deadline');
+        
+        let halt_status = get_trading_halt();
+        assert(halt_status == 0, 'Trading halted');
+
+        assert(option_size.try_into().expect('VTI - opt size too large') > 0_u128, 'VTI - opt size <= 0');
+        assert_option_type_exists(option_type, 'VTI - invalid option type');
+        assert_option_side_exists(option_side, 'VTI - invalid option side');
+        
+        let is_opt_available = is_option_available(
+            lptoken_address,
+            option_side,
+            strike_price,
+            maturity.into()
+        );
+        assert(is_opt_available, 'VTI - opt unavailable');
+
+        let current_block_time = get_block_timestamp();
+
+        // Check that maturity hasn't matured in case of open_position=TRUE
+        // If open_position=FALSE it means the user wants to close or settle the option
+        if open_position {
+            assert(current_block_time > maturity, 'VTI - opt already expired');
+            assert(
+                current_block_time < (maturity - STOP_TRADING_BEFORE_MATURITY_SECONDS),
+                'VTI - Trading is no mo'
+            );
+        } else {
+            let is_not_ripe = current_block_time <= maturity;
+            let cannot_be_closed = (maturity - STOP_TRADING_BEFORE_MATURITY_SECONDS) <= current_block_time;
+            
+            let cannot_be_closed_or_settled = is_not_ripe && cannot_be_closed;
+
+            assert(!cannot_be_closed_or_settled, 'VTI - No Closing/settling yet')
+        }
+
+        assert(limit_total_premia >= FixedTrait::from_felt(1), 'VTI - limit total premia <= 0');
+        assert(tx_deadline >= 1, 'VTI - limit total premia <= 0');
+    }
+
 }

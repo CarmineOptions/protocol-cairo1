@@ -26,6 +26,7 @@ fn get_opposite_side(side: felt252) -> felt252 {
     }
 }
 
+const STOP_TRADING_BEFORE_MATURITY_SECONDS: u64 = 7200;
 
 const SEPARATE_VOLATILITIES_FOR_DIFFERENT_STRIKES: felt252 = 1;
 const VOLATILITY_LOWER_BOUND: felt252 = 1;

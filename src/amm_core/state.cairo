@@ -542,4 +542,26 @@ mod State {
         }
         get_available_lptoken_addresses_usable_index(idx + 1)
     }
+
+    fn is_option_available(
+        lptoken_address: ContractAddress, 
+        option_side: OptionSide, 
+        strike_price: Fixed, 
+        maturity: Int
+    ) -> bool { 
+        let option_addr = get_option_token_address(
+            lptoken_address,
+            option_side,
+            maturity,
+            strike_price
+        );
+
+        if contract_address_to_felt252(option_addr) == 0{
+            false
+        } else {
+            true
+        }
+    }
 }
+
+
