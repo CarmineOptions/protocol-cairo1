@@ -290,7 +290,7 @@ mod Trading {
         }
 
         assert(limit_total_premia >= FixedTrait::from_felt(1), 'VTI - limit total premia <= 0');
-        assert(tx_deadline >= 1, 'VTI - limit total premia <= 0');
+        assert(tx_deadline >= 1, 'VTI - tx deadline <= 0');
     }
 
 }
