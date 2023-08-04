@@ -1,3 +1,4 @@
+use starknet::get_block_timestamp;
 use starknet::ContractAddress;
 use traits::Into;
 use traits::TryInto;
@@ -65,6 +66,11 @@ fn felt_power(num: felt252, pow: felt252) -> felt252 {
 // cairo1 repo has similar functions in tests/test_utils.cairo or sth
 fn assert_nn_fixed(num: Fixed, errmsg: felt252) {
     assert(num >= FixedTrait::from_felt(0), errmsg)
+}
+
+fn check_deadline(deadline: felt252) {
+    let current_block_time = get_block_timestamp();
+    assert(current_block_time <= deadline.try_into().expect('Deadline number too high'), 'TX is too old');
 }
 
 // @notice Converts the value into Uint256 balance

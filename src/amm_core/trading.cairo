@@ -3,7 +3,7 @@ mod Trading {
     use starknet::ContractAddress;
     use traits::{TryInto, Into};
     use carmine_protocol::types::{Math64x61_, OptionType, OptionSide, LPTAddress, Int};
-    use carmine_protocol::amm_core::helpers::{toU256_balance, legacyMath_to_cubit, };
+    use carmine_protocol::amm_core::helpers::{toU256_balance, legacyMath_to_cubit, check_deadline};
     use carmine_protocol::amm_core::fees::get_fees;
     use option::OptionTrait;
     use carmine_protocol::amm_core::state::State::{
@@ -12,9 +12,14 @@ mod Trading {
         set_option_volatility,
         get_trading_halt,
         is_option_available,
+        get_lptoken_address_for_given_option,
     };
 
-    use carmine_protocol::amm_core::options::{mint_option_token, burn_option_token, };
+    use carmine_protocol::amm_core::options::{
+        mint_option_token, 
+        burn_option_token, 
+        expire_option_token
+    };
 
     use carmine_protocol::amm_core::constants::{
         RISK_FREE_RATE, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side, STOP_TRADING_BEFORE_MATURITY_SECONDS,
@@ -293,4 +298,145 @@ mod Trading {
         assert(tx_deadline >= 1, 'VTI - tx deadline <= 0');
     }
 
+    fn trade_open(
+        option_type : OptionType,
+        strike_price : Fixed,
+        maturity : Int,
+        option_side : OptionSide,
+        option_size : Int,  // in base token currency
+        quote_token_address: ContractAddress,  // part of underlying_asset definition
+        base_token_address: ContractAddress,  // part of underlying_asset definition
+        limit_total_premia: Fixed,  // The limit price that user wants
+        tx_deadline: Int,  // Timestamp deadline for the transaction to happen
+    ) -> Fixed {
+
+        let lptoken_address = get_lptoken_address_for_given_option(
+            quote_token_address,
+            base_token_address,
+            option_type
+        );
+        validate_trade_input(
+           option_type,
+           strike_price,
+           maturity,
+           option_side,
+           option_size,
+           quote_token_address,
+           base_token_address,
+           lptoken_address,
+           true,
+           limit_total_premia,
+           tx_deadline,
+        );
+
+        // Validate deadline
+        check_deadline(tx_deadline);
+        
+        do_trade(
+            option_type,
+            strike_price,
+            maturity,
+            option_side,
+            option_size,
+            quote_token_address,
+            base_token_address,
+            lptoken_address,
+            limit_total_premia,
+        )
+    }
+    
+    fn trade_close(
+        option_type : OptionType,
+        strike_price : Fixed,
+        maturity : Int,
+        option_side : OptionSide,
+        option_size : Int,  // in base token currency
+        quote_token_address: ContractAddress,  // part of underlying_asset definition
+        base_token_address: ContractAddress,  // part of underlying_asset definition
+        limit_total_premia: Fixed,  // The limit price that user wants
+        tx_deadline: Int,  // Timestamp deadline for the transaction to happen
+    ) -> Fixed {
+        let lptoken_address = get_lptoken_address_for_given_option(
+            quote_token_address,
+            base_token_address,
+            option_type
+        );
+
+        validate_trade_input(
+            option_type,
+            strike_price,
+            maturity,
+            option_side,
+            option_size,
+            quote_token_address,
+            base_token_address,
+            lptoken_address,
+            false,
+            limit_total_premia,
+            tx_deadline,
+        );
+
+        // Validate deadline
+        check_deadline(tx_deadline);
+
+        close_position(
+            option_type,
+            strike_price,
+            maturity,
+            option_side,
+            option_size,
+            quote_token_address,
+            base_token_address,
+            lptoken_address,
+            limit_total_premia,
+        )
+    }
+
+
+    fn trade_settle(
+        option_type : OptionType,
+        strike_price : Fixed,
+        maturity : Int,
+        option_side : OptionSide,
+        option_size : Int,
+        quote_token_address: ContractAddress,  // Identifies underlying_asset
+        base_token_address: ContractAddress,  // Identifies underlying_asset
+    ) {
+
+        let lptoken_address = get_lptoken_address_for_given_option(
+            quote_token_address,
+            base_token_address,
+            option_type
+        );
+
+        validate_trade_input(
+            option_type,
+            strike_price,
+            maturity,
+            option_side,
+            option_size,
+            quote_token_address,
+            base_token_address,
+            lptoken_address,
+            false,
+            FixedTrait::from_felt(1), // effectively switching off this check
+            1677588647000,  // effectively switching off this check
+        );
+
+        // Position can be expired/settled only if the maturity has passed.
+        let current_block_time = get_block_timestamp();
+        assert(maturity.try_into().unwrap() <= current_block_time, 'Settle - option not expired');
+
+        let terminal_price = get_terminal_price(quote_token_address, base_token_address, maturity);
+
+        expire_option_token(
+            lptoken_address,
+            option_type,
+            option_side,
+            strike_price,
+            terminal_price,
+            option_size,
+            maturity,
+        );
+    }
 }
