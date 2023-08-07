@@ -49,14 +49,11 @@ struct Option_ {
 
 // trait Option_Trait {
 //     fn sum(self: Option_) -> felt252;
-//     fn lptoken_addr(self: Option_) -> ContractAddress;
 // }
 
 // impl Option_Impl of Option_Trait {
 //     fn sum(self: Option_) -> felt252 {
 //         self.maturity + self.strike_price.mag.into()
-//     }
-//     fn lptoken_addr(self: Option_) -> ContractAddress {
 //     }
 // }
 

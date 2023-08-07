@@ -1,11 +1,10 @@
 mod State {
     use starknet::ContractAddress;
-    use traits::Into;
+    use traits::{Into, TryInto};
     use starknet::contract_address::{
         contract_address_to_felt252, contract_address_try_from_felt252
     };
     use core::option::OptionTrait;
-    use core::traits::TryInto;
 
     use cubit::types::fixed::{Fixed, FixedTrait};
 
@@ -187,7 +186,7 @@ mod State {
             @state.new_available_options_usable_index
         );
         if usable_index == 0 {
-            migrate_old_options(lptoken_address, 0);
+            let idx = migrate_old_options(lptoken_address, 0);
         }
 
         new_available_options::InternalContractStateTrait::read(
@@ -544,24 +543,72 @@ mod State {
     }
 
     fn is_option_available(
-        lptoken_address: ContractAddress, 
-        option_side: OptionSide, 
-        strike_price: Fixed, 
+        lptoken_address: ContractAddress,
+        option_side: OptionSide,
+        strike_price: Fixed,
         maturity: Int
-    ) -> bool { 
+    ) -> bool {
         let option_addr = get_option_token_address(
-            lptoken_address,
-            option_side,
-            maturity,
-            strike_price
+            lptoken_address, option_side, maturity, strike_price
         );
 
-        if contract_address_to_felt252(option_addr) == 0{
+        if contract_address_to_felt252(option_addr) == 0 {
             false
         } else {
             true
         }
     }
-}
 
+    fn fail_if_existing_pool_definition_from_lptoken_address(lpt_addr: LPTAddress) {
+        let state = AMM::unsafe_new_contract_state();
+        let pool = pool_definition_from_lptoken_address::InternalContractStateTrait::read(
+            @state.pool_definition_from_lptoken_address, lpt_addr
+        );
+
+        assert(
+            contract_address_to_felt252(pool.quote_token_address) == 0, 'Given lpt registered - 0'
+        );
+        assert(
+            contract_address_to_felt252(pool.base_token_address) == 0, 'Given lpt registered - 1'
+        );
+    }
+
+    fn set_pool_definition_from_lptoken_address(lptoken_address: LPTAddress, pool: Pool) {
+        fail_if_existing_pool_definition_from_lptoken_address(lptoken_address);
+
+        let mut state = AMM::unsafe_new_contract_state();
+        let pool = pool_definition_from_lptoken_address::InternalContractStateTrait::write(
+            ref state.pool_definition_from_lptoken_address, lptoken_address, pool
+        );
+    }
+
+    fn get_option_info(
+        lptoken_address: ContractAddress,
+        option_side: OptionSide,
+        strike_price: Fixed,
+        maturity: Int,
+    ) -> Option_ {
+        let mut i: felt252 = 0;
+
+        let match_opt: Option_ = loop {
+            let option_ = get_available_options(lptoken_address, i);
+            let option_sum = option_.maturity + option_.strike_price.mag.into();
+            assert(option_sum != 0, 'Specified option unavailable');
+
+            i += 1;
+            if !(option_.option_side == option_side) {
+                continue;
+            }
+            if !(option_.strike_price == strike_price) {
+                continue;
+            }
+            if !(option_.maturity == maturity) {
+                continue;
+            }
+            break option_;
+        };
+
+        match_opt
+    }
+}
 

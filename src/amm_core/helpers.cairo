@@ -10,11 +10,24 @@ use core::cmp::{max, min};
 use cubit::types::fixed::{Fixed, FixedTrait, MAX_u128, FixedInto};
 
 use carmine_protocol::amm_core::constants::{
-    OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT,
+    OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side
 };
 
-use carmine_protocol::types::{Math64x61_, OptionSide, OptionType};
-use carmine_protocol::amm_core::constants::get_decimal;
+use carmine_protocol::types::{Math64x61_, OptionSide, OptionType, Option_, Int};
+use carmine_protocol::amm_core::constants::{
+    get_decimal, STOP_TRADING_BEFORE_MATURITY_SECONDS, RISK_FREE_RATE
+};
+
+use carmine_protocol::amm_core::oracles::agg::OracleAgg::{get_terminal_price, get_current_price};
+
+use carmine_protocol::amm_core::option_pricing_helpers::{
+    get_new_volatility, get_time_till_maturity, select_and_adjust_premia, add_premia_fees,
+};
+
+
+use carmine_protocol::amm_core::option_pricing::{black_scholes};
+
+use carmine_protocol::amm_core::fees::get_fees;
 
 // TODO: make this functions generic
 
@@ -70,7 +83,10 @@ fn assert_nn_fixed(num: Fixed, errmsg: felt252) {
 
 fn check_deadline(deadline: felt252) {
     let current_block_time = get_block_timestamp();
-    assert(current_block_time <= deadline.try_into().expect('Deadline number too high'), 'TX is too old');
+    assert(
+        current_block_time <= deadline.try_into().expect('Deadline number too high'),
+        'TX is too old'
+    );
 }
 
 // @notice Converts the value into Uint256 balance
@@ -94,33 +110,34 @@ fn toU256_balance(x: Fixed, currency_address: ContractAddress) -> u256 {
     // We can split the 10*18 to (2**18 * 5**18)
     // (1.2 * 2**61) * 2**18 * 5**18 / 2**61
 
-    let decimals = get_decimal(currency_address).expect('toU256 - Unable to get decimals');
-    let five_to_dec = FixedTrait::from_unscaled_felt(felt_power(5, decimals));
+    // let decimals = get_decimal(currency_address).expect('toU256 - Unable to get decimals');
+    // let five_to_dec = FixedTrait::from_unscaled_felt(felt_power(5, decimals));
 
-    let x_5 = x * five_to_dec;
+    // let x_5 = x * five_to_dec;
 
-    assert_nn_fixed(x_5, 'x negative in toUint256_bal');
-    // TODO: Check below is late, it would've failed already
-    assert(x_5 <= FixedTrait::new(MAX_u128 - 1, false), 'x out of bound in toUint256_bal');
+    // assert_nn_fixed(x_5, 'x negative in toUint256_bal');
+    // // TODO: Check below is late, it would've failed already
+    // assert(x_5 <= FixedTrait::new(MAX_u128 - 1, false), 'x out of bound in toUint256_bal');
 
-    // we can rearange a little again
-    // (1.2 * 2**61 * 5**18) / (2**61 / 2**18)
-    // (1.2 * 2**61 * 5**18) / 2**(61 - 18)
-    let _64_minus_dec = 64 - decimals;
-    assert_nn_fixed(FixedTrait::from_felt(_64_minus_dec), '64 - dec negative toUint256_bal');
+    // // we can rearange a little again
+    // // (1.2 * 2**61 * 5**18) / (2**61 / 2**18)
+    // // (1.2 * 2**61 * 5**18) / 2**(61 - 18)
+    // let _64_minus_dec = 64 - decimals;
+    // assert_nn_fixed(FixedTrait::from_felt(_64_minus_dec), '64 - dec negative toUint256_bal');
 
-    let decreased_part = felt_power(2, _64_minus_dec);
-    let decreased_part_u128: u128 = decreased_part
-        .try_into()
-        .expect('dec_part felt252 -> u128 failed');
+    // let decreased_part = felt_power(2, _64_minus_dec);
+    // let decreased_part_u128: u128 = decreased_part
+    //     .try_into()
+    //     .expect('dec_part felt252 -> u128 failed');
 
-    let x_5_u128: u128 = x_5.try_into().expect('x_5 felt252 -> u128 failed');
+    // let x_5_u128: u128 = x_5.try_into().expect('x_5 felt252 -> u128 failed');
 
-    let (q, r) = integer::u128_safe_divmod(
-        x_5_u128, decreased_part_u128.try_into().expect('Division by 0 in toUint256_bal')
-    );
+    // let (q, r) = integer::u128_safe_divmod(
+    //     x_5_u128, decreased_part_u128.try_into().expect('Division by 0 in toUint256_bal')
+    // );
 
-    return q.into();
+    // return q.into();
+    return u256{low: 1, high: 1};
 }
 
 // @notice Converts the value from Uint256 balance to Math64_61
@@ -142,11 +159,11 @@ fn fromU256_balance(x: u256, currency_address: ContractAddress) -> Fixed {
     // We can split the 10*18 to (2**18 * 5**18)
     // (1.2 * 10**18) * 2**61 / (5**18 * 2**18)
 
-    let decimal = get_decimal(currency_address).expect('fromU256 - cant to get decimals');
-    let five_to_dec = felt_power(5, decimal);
+    // let decimal = get_decimal(currency_address).expect('fromU256 - cant to get decimals');
+    // let five_to_dec = felt_power(5, decimal);
 
-    let sixty_four_plus_dec = 64 + decimal;
-    let increased_INT_PART = felt_power(2, sixty_four_plus_dec);
+    // let sixty_four_plus_dec = 64 + decimal;
+    // let increased_INT_PART = felt_power(2, sixty_four_plus_dec);
     // assert_le(x_low, increased_INT_PART);
     // assert_le(-increased_INT_PART, x_low);
 
@@ -157,8 +174,8 @@ fn fromU256_balance(x: u256, currency_address: ContractAddress) -> Fixed {
     // (1.2 * 10**18) / 5**18 * (2**61 / 2**18)
     // (1.2 * 10**18) / 5**18 * 2**(61-18)
     // x / five_to_dec * 2**(sixty_one_minus_dec)
-    let sixty_four_minus_dec = 64 - decimal;
-    let decreased_FRACT_PART = felt_power(2, sixty_four_minus_dec);
+    // let sixty_four_minus_dec = 64 - decimal;
+    // let decreased_FRACT_PART = felt_power(2, sixty_four_minus_dec);
     // x / five_to_dec * decreased_FRACT_PART
     // x * decreased_FRACT_PART / five_to_dec
     // let x_ = x * FixedTrait::from_felt(decreased_FRACT_PART);
@@ -214,4 +231,159 @@ fn split_option_locked_capital(
     let to_be_paid_seller = option_size * seller_relative_profit;
 
     return (to_be_paid_buyer, to_be_paid_seller);
+}
+
+fn _get_premia_before_fees(
+    option: Option_,
+    position_size: Int,
+    option_type: OptionType,
+    current_volatility: Fixed,
+    pool_volatility_adjustment_speed: Fixed,
+    is_for_trade: bool
+) -> Fixed {
+    // For clarity
+    let option_size = position_size;
+    let option_size_cubit = fromU256_balance(
+        u256 { low: position_size.try_into().expect('GPBF - Position size too big'), high: 0 },
+        option.base_token_address
+    );
+
+    // 1) Get current underlying price
+    let underlying_price = get_current_price(option.quote_token_address, option.base_token_address);
+
+    // 2) Get trade vol
+    let (_, trade_volatility) = get_new_volatility(
+        current_volatility,
+        option_size_cubit,
+        option_type,
+        option.option_side,
+        option.strike_price,
+        pool_volatility_adjustment_speed
+    );
+
+    // 3) Get TTM
+    let time_till_maturity = get_time_till_maturity(option.maturity);
+
+    // 4) Get Risk free rate
+    let risk_free_rate_annualized = FixedTrait::from_felt(RISK_FREE_RATE);
+
+    // 5) Get premia
+    let hundred = FixedTrait::from_unscaled_felt(100);
+    let sigma = trade_volatility / hundred;
+
+    let (call_premia, put_premia, is_usable) = black_scholes(
+        sigma,
+        time_till_maturity,
+        option.strike_price,
+        underlying_price,
+        risk_free_rate_annualized,
+        is_for_trade
+    );
+    let zero = FixedTrait::from_felt(0);
+
+    assert(call_premia >= zero, 'GPBF - call_premia < 0');
+    assert(put_premia >= zero, 'GPBF - put_premia < 0');
+
+    let premia = select_and_adjust_premia(call_premia, put_premia, option_type, underlying_price);
+
+    let total_premia_before_fees = premia * option_size_cubit;
+
+    assert(premia >= zero, 'GPBF - premia < 0');
+    assert(total_premia_before_fees >= zero, 'GPBF - premia_before_fees < 0');
+
+    total_premia_before_fees
+}
+
+fn _get_value_of_position(
+    option: Option_,
+    position_size: Int,
+    option_type: OptionType,
+    current_volatility: Fixed,
+    pool_volatility_adjustment_speed: Fixed,
+) -> Fixed {
+    let zero = FixedTrait::from_felt(0);
+
+    let current_block_time = get_block_timestamp();
+    let is_ripe = option.maturity.try_into().unwrap() <= current_block_time;
+
+    let position_size_cubit = fromU256_balance(
+        u256 { low: position_size.try_into().expect('GVoP - Position size too big'), high: 0 },
+        option.base_token_address
+    );
+
+    if is_ripe {
+        let terminal_price = get_terminal_price(
+            option.quote_token_address, option.base_token_address, option.maturity
+        );
+
+        let position_size_cubit = fromU256_balance(
+            u256 { low: position_size.try_into().expect('GVoP - Position size too big'), high: 0 },
+            option.base_token_address
+        );
+        let (long_value, short_value) = split_option_locked_capital(
+            option.option_type,
+            option.option_side,
+            position_size_cubit,
+            option.strike_price,
+            terminal_price
+        );
+
+        if option.option_side == TRADE_SIDE_LONG {
+            return long_value;
+        } else {
+            return short_value;
+        }
+    }
+
+    // Fail if the value of option that matures in 2 hours or less (can't price the option)
+    let stop_trading_by = option.maturity - STOP_TRADING_BEFORE_MATURITY_SECONDS.into();
+    assert(current_block_time <= stop_trading_by.try_into().unwrap(), 'GVoP - Wait till maturity');
+
+    let total_premia_before_fees = _get_premia_before_fees(
+        option,
+        position_size,
+        option_type,
+        current_volatility,
+        pool_volatility_adjustment_speed,
+        false
+    );
+
+    // Get fees and total premia
+    let total_fees = get_fees(total_premia_before_fees);
+    assert(total_fees >= zero, 'GVoP - total fees < 0');
+
+    let opposite_side = get_opposite_side(option.option_side);
+
+    let premia_with_fees = add_premia_fees(opposite_side, total_premia_before_fees, total_fees);
+
+    assert(premia_with_fees >= zero, 'GVoP - premia w fees < 0');
+
+    if option.option_side == TRADE_SIDE_LONG {
+        return premia_with_fees;
+    }
+
+    if option.option_type == OPTION_CALL {
+        let locked_and_premia_with_fees = position_size_cubit - premia_with_fees;
+        assert(locked_and_premia_with_fees >= zero, 'GVoP - locked_prem_fee < 0');
+
+        return locked_and_premia_with_fees;
+    } else {
+        let locked_capital = position_size_cubit * option.strike_price;
+        let locked_and_premia_with_fees = locked_capital - premia_with_fees;
+        assert(locked_and_premia_with_fees >= zero, 'GVoP - locked_prem_fee < 0');
+
+        return locked_and_premia_with_fees;
+    }
+}
+
+fn get_underlying_from_option_data(
+    option_type: OptionType,
+    base_token_address: ContractAddress,
+    quote_token_address: ContractAddress,
+) -> ContractAddress {
+    if option_type == OPTION_CALL {
+        base_token_address
+    } else {
+        quote_token_address
+    }
 }
