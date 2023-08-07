@@ -6,7 +6,7 @@ mod State {
     };
     use core::option::OptionTrait;
 
-    use cubit::types::fixed::{Fixed, FixedTrait};
+    use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
     use carmine_protocol::amm_core::helpers::{
         legacyMath_to_cubit, cubit_to_legacyMath, assert_nn_not_zero_cubit,

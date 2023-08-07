@@ -19,7 +19,7 @@ mod Trading {
         RISK_FREE_RATE, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side,
         STOP_TRADING_BEFORE_MATURITY_SECONDS,
     };
-    use cubit::types::fixed::{Fixed, FixedTrait};
+    use cubit::f128::types::fixed::{Fixed, FixedTrait};
     use carmine_protocol::amm_core::option_pricing_helpers::{
         convert_amount_to_option_currency_from_base_uint256, get_new_volatility,
         get_time_till_maturity, select_and_adjust_premia, add_premia_fees,

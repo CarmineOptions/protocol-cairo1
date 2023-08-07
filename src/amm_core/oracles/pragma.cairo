@@ -9,7 +9,7 @@ mod Pragma {
     use traits::{TryInto, Into};
     use option::OptionTrait;
 
-    use cubit::types::fixed::{Fixed, FixedTrait};
+    use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
 
     use carmine_protocol::amm_core::constants::{TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, };
@@ -89,7 +89,7 @@ mod Pragma {
             'Pragma/-GPMP - Price <= 0'
         );
 
-        convert_from_int_to_Fixed(value, decimals)
+        convert_from_int_to_Fixed(value.try_into().unwrap(), decimals.try_into().unwrap())
     }
 
     fn get_pragma_median_price(
@@ -117,7 +117,7 @@ mod Pragma {
         );
 
         //  Pragma checkpoints should always have 8 decimals
-        convert_from_int_to_Fixed(last_checkpoint.value, 8)
+        convert_from_int_to_Fixed(last_checkpoint.value.try_into().unwrap(), 8)
     }
 
     fn get_pragma_terminal_price(

@@ -1,6 +1,6 @@
-use cubit::types::fixed::{Fixed, FixedTrait};
+use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
-fn convert_from_int_to_Fixed(value: felt252, decimals: felt252) -> Fixed {
+fn convert_from_int_to_Fixed(value: u128, decimals: u8) -> Fixed {
     // TODO: This function
 
     return FixedTrait::from_felt(1);

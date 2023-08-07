@@ -1,6 +1,6 @@
 use carmine_protocol::amm_core::helpers::{legacyMath_to_cubit, cubit_to_legacyMath};
 
-use cubit::types::fixed::{Fixed, FixedTrait};
+use cubit::f128::types::fixed::{Fixed, FixedTrait};
 use starknet::ContractAddress;
 use core::traits::{TryInto, Into};
 use core::option::OptionTrait;
@@ -20,7 +20,7 @@ type Volatility = Fixed;
 type Strike = Fixed;
 
 
-#[derive(Copy, Drop, Serde, storage_access::StorageAccess)]
+#[derive(Copy, Drop, Serde, Store)]
 struct LegacyOption {
     option_side: OptionSide,
     maturity: Maturity,
@@ -37,7 +37,7 @@ struct LegacyOptionWithPremia {
 
 // TODO: Rename Option_ (note the trailing underscore) to sth more sensible
 // TODO: Add lptoken addr to option (will be added in migrate function)
-#[derive(Copy, Drop, Serde, storage_access::StorageAccess)]
+#[derive(Copy, Drop, Serde, Store)]
 struct Option_ {
     option_side: OptionSide,
     maturity: Maturity,
@@ -80,7 +80,7 @@ fn LegacyOption_to_Option(opt: LegacyOption) -> Option_ {
 }
 
 
-#[derive(Copy, Drop, Serde, storage_access::StorageAccess)]
+#[derive(Copy, Drop, Serde, Store)]
 struct Pool {
     quote_token_address: ContractAddress,
     base_token_address: ContractAddress,

@@ -1,6 +1,6 @@
 mod OracleAgg {
     use starknet::ContractAddress;
-    use cubit::types::fixed::{Fixed};
+    use cubit::f128::types::fixed::{Fixed};
 
     use carmine_protocol::amm_core::oracles::pragma::Pragma::{
         get_pragma_median_price, get_pragma_terminal_price

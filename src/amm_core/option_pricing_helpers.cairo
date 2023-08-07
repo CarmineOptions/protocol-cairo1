@@ -3,7 +3,7 @@ use traits::{Into, TryInto};
 use option::OptionTrait;
 use starknet::get_block_timestamp;
 
-use cubit::types::fixed::{Fixed, FixedTrait};
+use cubit::f128::types::fixed::{Fixed, FixedTrait};
 use carmine_protocol::amm_core::helpers::{
     get_decimal, felt_power, assert_option_type_exists, assert_option_side_exists,
 };
@@ -44,7 +44,7 @@ fn convert_amount_to_option_currency_from_base_uint256(
 
         let adj_amount = amount * strike_price;
 
-        let (quot, rem) = integer::u256_safe_divmod(
+        let (quot, rem) = integer::U256DivRem::div_rem(
             adj_amount, dec.try_into().expect('Div by zero in CATOCFBU')
         );
         assert(quot >= 0, 'CATOCFBU: Opt size too low');

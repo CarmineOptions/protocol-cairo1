@@ -2,7 +2,7 @@
 mod AMM {
     use starknet::ContractAddress;
 
-    use cubit::types::fixed::{Fixed, FixedTrait};
+    use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
     use carmine_protocol::types::{
         Math64x61_, LegacyVolatility, LegacyStrike, Volatility, Strike, LPTAddress, OptionSide,

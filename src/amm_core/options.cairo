@@ -8,7 +8,7 @@ use starknet::info::get_contract_address;
 use traits::Into;
 use option::OptionTrait;
 
-use cubit::types::fixed::{Fixed, FixedTrait};
+use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
 
 use carmine_protocol::types::{

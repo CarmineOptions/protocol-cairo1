@@ -1,4 +1,3 @@
-use core::option::OptionTrait;
 mod LiquidityPool {
     use starknet::ContractAddress;
     use starknet::get_caller_address;
@@ -8,9 +7,10 @@ mod LiquidityPool {
     use starknet::contract_address::{
         contract_address_to_felt252, contract_address_try_from_felt252
     };
-    use core::traits::{Into, TryInto};
-    use core::option::OptionTrait;
-    use cubit::types::fixed::{Fixed, FixedTrait};
+    use traits::{Into, TryInto};
+    use option::OptionTrait;
+    use cubit::f128::types::fixed::{Fixed, FixedTrait};
+    use integer::U256DivRem;
 
     use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
 
@@ -118,14 +118,14 @@ mod LiquidityPool {
         }
 
         let lpt_supply = IERC20Dispatcher { contract_address: lptoken_address }.totalSupply();
-        let (q, r) = integer::u256_safe_divmod(
+        let (q, r) = U256DivRem::div_rem(
             lpt_supply, value_of_pool.try_into().expect('Div by zero in GLfU')
         );
         let to_mint = q * underlying_amt;
 
         let to_div = r * underlying_amt;
 
-        let (to_mint_additional_q, _) = integer::u256_safe_divmod(
+        let (to_mint_additional_q, _) = U256DivRem::div_rem(
             to_div, value_of_pool.try_into().expect('Div by zero in GLfU')
         );
 
@@ -142,13 +142,13 @@ mod LiquidityPool {
 
         let total_underlying_amt = free_capital + value_of_position;
 
-        let (aq, ar) = integer::u256_safe_divmod(
+        let (aq, ar) = U256DivRem::div_rem(
             total_underlying_amt, lpt_supply.try_into().expect('Div by zero in GUfL')
         );
         let b = aq * lpt_amt;
         let tmp = ar * lpt_amt;
 
-        let (to_burn_addition_q, _) = integer::u256_safe_divmod(
+        let (to_burn_addition_q, _) = U256DivRem::div_rem(
             tmp, lpt_supply.try_into().expect('Div by zero in GUfL')
         );
 

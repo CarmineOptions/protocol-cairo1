@@ -1,8 +1,8 @@
 // Module that calculates Black-Scholes with Choudhury's approximation to std normal CDF
 // https://www.hrpub.org/download/20140305/MS7-13401470.pdf.
 
-use cubit::types::fixed::{Fixed, FixedTrait};
-use cubit::math::comp::max;
+use cubit::f128::types::fixed::{Fixed, FixedTrait};
+use cubit::f128::math::comp::max;
 
 use array::{ArrayTrait, SpanTrait};
 

@@ -7,7 +7,7 @@ use option::OptionTrait;
 use starknet::contract_address::{contract_address_to_felt252, contract_address_try_from_felt252};
 use core::cmp::{max, min};
 
-use cubit::types::fixed::{Fixed, FixedTrait, MAX_u128, FixedInto};
+use cubit::f128::types::fixed::{Fixed, FixedTrait, MAX_u128, FixedInto};
 
 use carmine_protocol::amm_core::constants::{
     OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side
@@ -137,7 +137,7 @@ fn toU256_balance(x: Fixed, currency_address: ContractAddress) -> u256 {
     // );
 
     // return q.into();
-    return u256{low: 1, high: 1};
+    return u256 { low: 1, high: 1 };
 }
 
 // @notice Converts the value from Uint256 balance to Math64_61

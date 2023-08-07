@@ -2,13 +2,9 @@
 name = "carmine_protocol"
 version = "0.1.0"
 description = "Code for Carmine Option AMM"
-# cairo-version = "2.0.0-rc"
-# homepage = "https://github.com/auditless/cairo-template"
+cairo-version = "2.1.0"
+homepage = "https://github.com/CarmineOptions/protocol-cairo1"
 
-# [scripts]
-# test = "cairo-test ."
-# test = "protostar test"
-# Add your own custom commands and run them with `scarb run <command>`
 
 [dependencies]
-cubit = { path = "../cubit" }
+cubit = { git = "https://github.com/tensojka/cubit.git", branch = "chore/2.1.0" }
