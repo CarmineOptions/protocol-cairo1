@@ -4,7 +4,7 @@ mod AMM {
 
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
-    use carmine_protocol::types::{
+    use carmine_protocol::types::basic::{
         Math64x61_, LegacyVolatility, LegacyStrike, Volatility, Strike, LPTAddress, OptionSide,
         Maturity, LegacyOption, Pool
     };

@@ -8,7 +8,7 @@ use carmine_protocol::amm_core::helpers::{
     get_decimal, felt_power, assert_option_type_exists, assert_option_side_exists,
 };
 use carmine_protocol::amm_core::constants::{TRADE_SIDE_LONG, TRADE_SIDE_SHORT};
-use carmine_protocol::types::{OptionType, OptionSide};
+use carmine_protocol::types::basic::{OptionType, OptionSide};
 
 use carmine_protocol::amm_core::constants::{OPTION_CALL, OPTION_PUT};
 

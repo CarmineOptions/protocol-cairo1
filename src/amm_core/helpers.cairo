@@ -13,7 +13,7 @@ use carmine_protocol::amm_core::constants::{
     OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side
 };
 
-use carmine_protocol::types::{Math64x61_, OptionSide, OptionType, Option_, Int};
+use carmine_protocol::types::basic::{Math64x61_, OptionSide, OptionType, Option_, Int};
 use carmine_protocol::amm_core::constants::{
     get_decimal, STOP_TRADING_BEFORE_MATURITY_SECONDS, RISK_FREE_RATE
 };
@@ -32,13 +32,11 @@ use carmine_protocol::amm_core::fees::get_fees;
 // TODO: make this functions generic
 
 fn assert_nn_cubit(num: Fixed, msg: felt252) {
-    let zero = FixedTrait::from_felt(0);
-    assert(num >= zero, msg);
+    assert(num >= FixedTrait::ZERO(), msg);
 }
 
 fn assert_nn_not_zero_cubit(num: Fixed, msg: felt252) {
-    let zero = FixedTrait::from_felt(0);
-    assert(num > zero, msg);
+    assert(num > FixedTrait::ZERO(), msg);
 }
 
 fn assert_option_side_exists(option_side: felt252, msg: felt252) {

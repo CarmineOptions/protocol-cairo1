@@ -2,7 +2,7 @@ mod Trading {
     use starknet::get_block_timestamp;
     use starknet::ContractAddress;
     use traits::{TryInto, Into};
-    use carmine_protocol::types::{Math64x61_, OptionType, OptionSide, LPTAddress, Int};
+    use carmine_protocol::types::basic::{Math64x61_, OptionType, OptionSide, LPTAddress, Int};
     use carmine_protocol::amm_core::helpers::{toU256_balance, legacyMath_to_cubit, check_deadline};
     use carmine_protocol::amm_core::fees::get_fees;
     use option::OptionTrait;

@@ -29,7 +29,7 @@ mod State {
 
     use carmine_protocol::amm_core::amm::AMM;
 
-    use carmine_protocol::types::{
+    use carmine_protocol::types::basic::{
         LPTAddress, OptionSide, OptionType, Maturity, Math64x61_, LegacyVolatility, LegacyStrike,
         LegacyOption, Volatility, Strike, Option_, LegacyOption_to_Option, Option_to_LegacyOption,
         Int, Pool

@@ -14,7 +14,7 @@ mod LiquidityPool {
 
     use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
 
-    use carmine_protocol::types::{LPTAddress, OptionType, OptionSide, Option_, Int, Pool};
+    use carmine_protocol::types::basic::{LPTAddress, OptionType, OptionSide, Option_, Int, Pool};
 
     use carmine_protocol::amm_core::oracles::agg::OracleAgg::get_terminal_price;
 

@@ -11,7 +11,7 @@ use option::OptionTrait;
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
 
-use carmine_protocol::types::{
+use carmine_protocol::types::basic::{
     OptionSide, OptionType, BlockNumber, Maturity, Math64x61_, Option_, Int, LPTAddress, Volatility,
     Strike
 };

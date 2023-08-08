@@ -1,7 +1,7 @@
 use starknet::ContractAddress;
 use array::ArrayTrait;
 
-use carmine_protocol::types::{OptionSide, OptionType, Math64x61_};
+use carmine_protocol::types::basic::{OptionSide, OptionType, Math64x61_};
 use carmine_protocol::amm_core::oracles::pragma::Pragma::PragmaCheckpoint;
 
 #[starknet::interface]
