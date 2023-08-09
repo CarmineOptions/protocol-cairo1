@@ -21,7 +21,7 @@ use carmine_protocol::amm_core::helpers::{
     split_option_locked_capital, assert_option_type_exists, assert_option_side_exists
 };
 
-use carmine_protocol::amm_core::option_pricing_helpers::{
+use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
     convert_amount_to_option_currency_from_base_uint256
 };
 

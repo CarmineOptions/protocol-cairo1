@@ -20,14 +20,14 @@ use carmine_protocol::types::basic::{Math64x61_, OptionSide, OptionType, Option_
 
 use carmine_protocol::amm_core::oracles::agg::OracleAgg::{get_terminal_price, get_current_price};
 
-use carmine_protocol::amm_core::option_pricing_helpers::{
+use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
     get_new_volatility, get_time_till_maturity, select_and_adjust_premia, add_premia_fees,
 };
 
 
-use carmine_protocol::amm_core::option_pricing::{black_scholes};
+use carmine_protocol::amm_core::pricing::option_pricing::black_scholes;
 
-use carmine_protocol::amm_core::fees::get_fees;
+use carmine_protocol::amm_core::pricing::fees::get_fees;
 
 // TODO: make this functions generic
 

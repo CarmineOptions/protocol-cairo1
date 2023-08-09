@@ -13,7 +13,7 @@ mod Trading {
     };
 
     use carmine_protocol::amm_core::helpers::{toU256_balance, legacyMath_to_cubit, check_deadline};
-    use carmine_protocol::amm_core::fees::get_fees;
+    use carmine_protocol::amm_core::pricing::fees::get_fees;
     use option::OptionTrait;
     use carmine_protocol::amm_core::state::State::{
         get_option_volatility, get_pool_volatility_adjustment_speed, set_option_volatility,
@@ -29,7 +29,7 @@ mod Trading {
         STOP_TRADING_BEFORE_MATURITY_SECONDS,
     };
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
-    use carmine_protocol::amm_core::option_pricing_helpers::{
+    use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
         convert_amount_to_option_currency_from_base_uint256, get_new_volatility,
         get_time_till_maturity, select_and_adjust_premia, add_premia_fees,
         assert_option_type_exists, assert_option_side_exists
@@ -40,7 +40,7 @@ mod Trading {
         get_current_price, get_terminal_price,
     };
 
-    use carmine_protocol::amm_core::option_pricing::{black_scholes, };
+    use carmine_protocol::amm_core::pricing::option_pricing::{black_scholes, };
 
 
     fn do_trade(
