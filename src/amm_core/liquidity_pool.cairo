@@ -14,7 +14,7 @@ mod LiquidityPool {
 
     use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
 
-    use carmine_protocol::types::basic::{LPTAddress, OptionType, OptionSide, Option_, Int, Pool};
+    use carmine_protocol::types::basic::{LPTAddress, OptionType, OptionSide, Option_, Int, Pool, Timestamp};
 
     use carmine_protocol::amm_core::oracles::agg::OracleAgg::get_terminal_price;
 
@@ -66,12 +66,12 @@ mod LiquidityPool {
     }
 
     fn get_value_of_pool_position(lptoken_address: LPTAddress) -> Fixed {
-        let mut i: felt252 = 0;
+        let mut i: u32 = 0;
         let mut pool_pos: Fixed = FixedTrait::from_felt(0);
 
         loop {
             let option = get_available_options(lptoken_address, i);
-            let option_sum = option.maturity + option.strike_price.mag.into();
+            let option_sum = option.maturity.into() + option.strike_price.mag;
 
             if option_sum == 0 {
                 break;
@@ -309,16 +309,13 @@ mod LiquidityPool {
 
     fn adjust_lpool_balance_and_pool_locked_capital_expired_options(
         lptoken_address: ContractAddress,
-        long_value: Fixed,
-        short_value: Fixed,
+        long_value: u256,
+        short_value: u256,
         option_size: Int,
         option_side: OptionSide,
-        maturity: Int,
+        maturity: Timestamp,
         strike_price: Fixed
     ) {
-        let lpool_underlying_token = get_underlying_token_address(lptoken_address);
-        let long_value = toU256_balance(long_value, lpool_underlying_token);
-        let short_value = toU256_balance(short_value, lpool_underlying_token);
 
         let current_lpool_balance = get_lpool_balance(lptoken_address);
         let current_locked_balance = get_pool_locked_capital(lptoken_address);
@@ -383,7 +380,7 @@ mod LiquidityPool {
         lptoken_address: ContractAddress,
         option_side: OptionSide,
         strike_price: Fixed,
-        maturity: Int,
+        maturity: Timestamp,
     ) {
         // TODO:
         // ExpireOptionTokenForPool.emit(
@@ -402,7 +399,7 @@ mod LiquidityPool {
 
         let current_block_time = get_block_timestamp();
 
-        assert(maturity.try_into().unwrap() <= current_block_time, 'Option not expired');
+        assert(maturity <= current_block_time, 'Option not expired');
 
         // Get terminal price of the option
         let terminal_price = get_terminal_price(
@@ -410,13 +407,18 @@ mod LiquidityPool {
         );
 
         let option_size_cubit = fromU256_balance(
-            u256 { low: option_size.try_into().expect('GPBF - Position size too big'), high: 0 },
+            option_size.into(),
             option.base_token_address
         );
 
         let (long_value, short_value) = split_option_locked_capital(
             option.option_type, option_side, option_size_cubit, strike_price, terminal_price
         );
+
+        let lpool_underlying_token = get_underlying_token_address(lptoken_address);
+        let long_value = toU256_balance(long_value, lpool_underlying_token);
+        let short_value = toU256_balance(short_value, lpool_underlying_token);
+
         adjust_lpool_balance_and_pool_locked_capital_expired_options(
             lptoken_address,
             long_value,

@@ -12,8 +12,8 @@ use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
 
 use carmine_protocol::types::basic::{
-    OptionSide, OptionType, BlockNumber, Maturity, Math64x61_, Option_, Int, LPTAddress, Volatility,
-    Strike
+    OptionSide, OptionType, Math64x61_, Option_, Int, LPTAddress, Volatility,
+    Strike, Timestamp
 };
 
 use carmine_protocol::amm_core::helpers::{
@@ -45,7 +45,7 @@ use carmine_protocol::traits::{
 
 fn add_option(
     option_side: OptionSide,
-    maturity: Maturity,
+    maturity: Timestamp,
     strike_price: Strike,
     quote_token_address: ContractAddress,
     base_token_address: ContractAddress,
@@ -69,7 +69,7 @@ fn add_option(
 
     assert(contr_opt_type == option_type, 'Option type input doesnt match');
     assert(contr_strike == cubit_to_legacyMath(strike_price), 'Strike price input doesnt match');
-    assert(contr_maturity == maturity, 'Maturity input doesnt match');
+    assert(contr_maturity == maturity.into(), 'Maturity input doesnt match');
     assert(contr_side == option_side, 'Option side input doesnt match');
 
     set_option_volatility(lptoken_address, maturity, strike_price, initial_volatility);
@@ -92,7 +92,7 @@ fn mint_option_token(
     option_size_in_pool_currency: u256,
     option_side: OptionSide,
     option_type: OptionType,
-    maturity: Maturity, // in seconds
+    maturity: Timestamp, // in seconds
     strike_price: Strike,
     premia_including_fees: Fixed, // either base or quote token
     underlying_price: Fixed,
@@ -108,7 +108,7 @@ fn mint_option_token(
 
     assert(contr_opt_type == option_type, 'Option type input doesnt match');
     assert(contr_strike == cubit_to_legacyMath(strike_price), 'Strike price input doesnt match');
-    assert(contr_maturity == maturity, 'Maturity input doesnt match');
+    assert(contr_maturity == maturity.into(), 'Maturity input doesnt match');
     assert(contr_side == option_side, 'Option side input doesnt match');
 
     if option_side == TRADE_SIDE_LONG {
@@ -140,7 +140,7 @@ fn mint_option_token(
     let adjspd_cubit = get_pool_volatility_adjustment_speed(lptoken_address);
 
     let max_opt_perc = get_max_option_size_percent_of_voladjspd();
-    let max_opt_perc_cubit = FixedTrait::from_unscaled_felt(max_opt_perc);
+    let max_opt_perc_cubit = FixedTrait::new(max_opt_perc, false);
     let ratio = max_opt_perc_cubit / hundred;
 
     let max_optsize_cubit = ratio * adjspd_cubit;
@@ -157,7 +157,7 @@ fn _mint_option_token_long(
     option_size_in_pool_currency: u256,
     premia_including_fees: Fixed,
     option_type: OptionType,
-    maturity: Int,
+    maturity: Timestamp,
     strike_price: Strike,
 ) {
     let curr_contract_address = get_contract_address();
@@ -174,7 +174,6 @@ fn _mint_option_token_long(
 
     // Move premia from user to the pool
     let premia_including_fees_u256 = toU256_balance(premia_including_fees, currency_address);
-    let option_size_u256: u256 = option_size.into();
 
     // TODO: Emit TradeOpen Event
 
@@ -190,26 +189,25 @@ fn _mint_option_token_long(
     // The nonnegativity of new_balance is checked inside of the set_lpool_balance
     set_lpool_balance(lptoken_address, new_balance);
 
-    let current_long_position: u256 = get_option_position(
+    let current_long_position = get_option_position(
         lptoken_address, TRADE_SIDE_LONG, maturity, strike_price
-    )
-        .into();
+    );
 
-    let current_short_position: u256 = get_option_position(
+    let current_short_position = get_option_position(
         lptoken_address, TRADE_SIDE_SHORT, maturity, strike_price
-    )
-        .into();
+    ).into();
 
     let current_locked_balance = get_pool_locked_capital(lptoken_address);
 
     // Get diffs to update everything
-    let decrease_long_by = min(option_size_u256, current_long_position);
-    let increase_short_by = option_size_u256 - decrease_long_by;
+    let decrease_long_by = min(option_size, current_long_position);
+    let increase_short_by = option_size - decrease_long_by;
+
     let strike_price_u256 = toU256_balance(strike_price, quote_address);
     let increase_locked_by = convert_amount_to_option_currency_from_base_uint256(
-        increase_short_by,
+        increase_short_by.into(),
         option_type,
-        strike_price.mag.into(), // Strike price should never be negative anyway
+        strike_price_u256, // Strike price should never be negative anyway
         base_address
     );
 
@@ -229,21 +227,21 @@ fn _mint_option_token_long(
         TRADE_SIDE_LONG,
         maturity,
         strike_price,
-        new_long_position.try_into().expect('MOTL - New long pos overflow')
+        new_long_position
     );
     set_option_position(
         lptoken_address,
         TRADE_SIDE_SHORT,
         maturity,
         strike_price,
-        new_short_position.try_into().expect('MOTL - New short pos overflow')
+        new_short_position
     );
     set_pool_locked_capital(lptoken_address, new_locked_capital);
 
     // Mint tokens
     IOptionTokenDispatcher {
         contract_address: option_token_address
-    }.mint(user_address, option_size_u256);
+    }.mint(user_address, option_size.into());
 
     // Transfer premia 
     let transfer_res = IERC20Dispatcher {
@@ -260,7 +258,7 @@ fn _mint_option_token_short(
     option_size_in_pool_currency: u256,
     premia_including_fees: Fixed,
     option_type: OptionType,
-    maturity: Int,
+    maturity: Timestamp,
     strike_price: Strike,
 ) {
     let curr_contract_address = get_contract_address();
@@ -275,7 +273,7 @@ fn _mint_option_token_short(
     assert(contract_address_to_felt252(curr_contract_address) != 0, 'MOTS - curr addr is zero');
     assert(contract_address_to_felt252(user_address) != 0, 'MOTS - user addr is zero');
 
-    let option_size_u256: u256 = option_size.into();
+    // let option_size_u256: u256 = option_size.into();
     let premia_including_fees_u256 = toU256_balance(premia_including_fees, currency_address);
     let to_be_paid_by_user = option_size_in_pool_currency - premia_including_fees_u256;
 
@@ -297,15 +295,8 @@ fn _mint_option_token_short(
     let pools_short_position = get_option_position(
         lptoken_address, TRADE_SIDE_SHORT, maturity, strike_price
     );
-    // TODO: these conversions are ugly just for the sake of using min and then
-    // converting them to felt again lol, 
-    // impport/implement partial ord for felt? or sth else pls
-    let opt_size_u256: u256 = option_size.into();
-    let pools_short_position_u256: u256 = pools_short_position.into();
 
-    let size_to_be_unlocked_in_base = min(option_size_u256, pools_short_position_u256)
-        .try_into()
-        .expect('MOTS - New short pos overflow');
+    let size_to_be_unlocked_in_base = min(option_size, pools_short_position);
 
     let new_pools_short_position = pools_short_position - size_to_be_unlocked_in_base;
     set_option_position(
@@ -318,7 +309,7 @@ fn _mint_option_token_short(
     );
     let size_to_increase_long_position = option_size - size_to_be_unlocked_in_base;
     let new_pools_long_position = pools_long_position + size_to_increase_long_position;
-    assert(new_pools_long_position.into() >= 0_u256, 'MOTS - New long pos negative');
+    assert(new_pools_long_position >= 0, 'MOTS - New long pos negative');
     set_option_position(
         lptoken_address, TRADE_SIDE_LONG, maturity, strike_price, new_pools_long_position
     );
@@ -339,7 +330,7 @@ fn _mint_option_token_short(
     // Mint tokens
     IOptionTokenDispatcher {
         contract_address: option_token_address
-    }.mint(user_address, option_size_u256);
+    }.mint(user_address, option_size.into());
 
     // Move (option_size minus (premia minus fees)) from user to the pool
     let transfer_res = IERC20Dispatcher {
@@ -356,7 +347,7 @@ fn burn_option_token(
     option_size_in_pool_currency: u256,
     option_side: OptionSide,
     option_type: OptionType,
-    maturity: Maturity, // in seconds
+    maturity: Timestamp, // in seconds
     strike_price: Strike,
     premia_including_fees: Fixed, // either base or quote token
     underlying_price: Fixed,
@@ -372,7 +363,7 @@ fn burn_option_token(
 
     assert(contr_opt_type == option_type, 'Option type input doesnt match');
     assert(contr_strike == cubit_to_legacyMath(strike_price), 'Strike price input doesnt match');
-    assert(contr_maturity == maturity, 'Maturity input doesnt match');
+    assert(contr_maturity == maturity.into(), 'Maturity input doesnt match');
     assert(contr_side == option_side, 'Option side input doesnt match');
 
     if option_side == TRADE_SIDE_LONG {
@@ -394,7 +385,7 @@ fn burn_option_token(
             option_size,
             option_size_in_pool_currency,
             premia_including_fees,
-            option_size,
+            option_side,
             option_type,
             maturity,
             strike_price,
@@ -406,7 +397,7 @@ fn burn_option_token(
     let adjspd_cubit = get_pool_volatility_adjustment_speed(lptoken_address);
 
     let max_opt_perc = get_max_option_size_percent_of_voladjspd();
-    let max_opt_perc_cubit = FixedTrait::from_unscaled_felt(max_opt_perc);
+    let max_opt_perc_cubit = FixedTrait::new_unscaled(max_opt_perc, false);
     let ratio = max_opt_perc_cubit / hundred;
 
     let max_optsize_cubit = ratio * adjspd_cubit;
@@ -423,7 +414,7 @@ fn _burn_option_token_long(
     premia_including_fees: Fixed,
     option_side: OptionSide,
     option_type: OptionType,
-    maturity: Int,
+    maturity: Timestamp,
     strike_price: Strike,
 ) {
     let curr_contract_address = get_contract_address();
@@ -535,7 +526,7 @@ fn _burn_option_token_short(
     premia_including_fees: Fixed,
     option_side: OptionSide,
     option_type: OptionType,
-    maturity: Int,
+    maturity: Timestamp,
     strike_price: Strike,
 ) {
     let curr_contract_address = get_contract_address();
@@ -674,7 +665,7 @@ fn expire_option_token(
     strike_price: Strike,
     terminal_price: Fixed,
     option_size: Int,
-    maturity: Int,
+    maturity: Timestamp,
 ) {
     // EXPIRES OPTIONS ONLY FOR USERS (OPTION TOKEN HOLDERS) NOT FOR POOL.
     // terminal price is price at which option is being settled
@@ -722,17 +713,16 @@ fn expire_option_token(
 
     let current_block_time = get_block_timestamp();
     assert(
-        maturity.try_into().expect('Tis sum boolshit') <= current_block_time,
+        maturity <= current_block_time,
         'EOT - contract not ripe'
     );
 
     // long_value and short_value are both in terms of locked capital
     let option_size_cubit = fromU256_balance(option_size.into(), base_token_address);
-
     let (long_value, short_value) = split_option_locked_capital(
         option_type,
         option_side,
-        legacyMath_to_cubit(option_size), // TODO: This is wrong, it should stay in Int
+        option_size_cubit, // TODO: This is wrong, it should stay in Int
         strike_price,
         terminal_price
     );

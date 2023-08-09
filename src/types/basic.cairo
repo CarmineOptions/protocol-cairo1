@@ -5,16 +5,18 @@ use starknet::ContractAddress;
 use core::traits::{TryInto, Into};
 use core::option::OptionTrait;
 
-type BlockNumber = felt252;
-type OptionSide = felt252; // TODO: Make this an enum
-type OptionType = felt252; // TODO: Make this an enum
-type Maturity = felt252;
 type LPTAddress = ContractAddress;
-type Int = felt252;
+type OptionSide = u8; // TODO: Make this an enum
+type OptionType = u8; // TODO: Make this an enum
+
+type Timestamp = u64; // In seconds, Block timestamps are also u64
+
+type Int = u128;
 
 type Math64x61_ = felt252; // legacy, for AMM trait definition
 type LegacyVolatility = Math64x61_;
 type LegacyStrike = Math64x61_;
+type Maturity = felt252; 
 
 type Volatility = Fixed;
 type Strike = Fixed;
@@ -22,7 +24,7 @@ type Strike = Fixed;
 #[derive(Copy, Drop, Serde, Store)]
 struct LegacyOption {
     option_side: OptionSide,
-    maturity: Maturity,
+    maturity: felt252,
     strike_price: LegacyStrike,
     quote_token_address: ContractAddress,
     base_token_address: ContractAddress,
@@ -39,7 +41,7 @@ struct LegacyOptionWithPremia {
 #[derive(Copy, Drop, Serde, Store)]
 struct Option_ {
     option_side: OptionSide,
-    maturity: Maturity,
+    maturity: Timestamp,
     strike_price: Fixed,
     quote_token_address: ContractAddress,
     base_token_address: ContractAddress,
@@ -59,7 +61,7 @@ struct Option_ {
 fn Option_to_LegacyOption(opt: Option_) -> LegacyOption {
     LegacyOption {
         option_side: opt.option_side,
-        maturity: opt.maturity,
+        maturity: opt.maturity.into(),
         strike_price: cubit_to_legacyMath(opt.strike_price),
         quote_token_address: opt.quote_token_address,
         base_token_address: opt.base_token_address,
@@ -70,7 +72,7 @@ fn Option_to_LegacyOption(opt: Option_) -> LegacyOption {
 fn LegacyOption_to_Option(opt: LegacyOption) -> Option_ {
     Option_ {
         option_side: opt.option_side,
-        maturity: opt.maturity,
+        maturity: opt.maturity.try_into().unwrap(),
         strike_price: legacyMath_to_cubit(opt.strike_price),
         quote_token_address: opt.quote_token_address,
         base_token_address: opt.base_token_address,

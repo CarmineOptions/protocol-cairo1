@@ -12,11 +12,11 @@ use cubit::f128::types::fixed::{Fixed, FixedTrait, MAX_u128, FixedInto};
 use carmine_protocol::amm_core::constants::{
     OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side
 };
-
-use carmine_protocol::types::basic::{Math64x61_, OptionSide, OptionType, Option_, Int};
 use carmine_protocol::amm_core::constants::{
     get_decimal, STOP_TRADING_BEFORE_MATURITY_SECONDS, RISK_FREE_RATE
 };
+
+use carmine_protocol::types::basic::{Math64x61_, OptionSide, OptionType, Option_, Int, Timestamp};
 
 use carmine_protocol::amm_core::oracles::agg::OracleAgg::{get_terminal_price, get_current_price};
 
@@ -39,11 +39,11 @@ fn assert_nn_not_zero_cubit(num: Fixed, msg: felt252) {
     assert(num > FixedTrait::ZERO(), msg);
 }
 
-fn assert_option_side_exists(option_side: felt252, msg: felt252) {
+fn assert_option_side_exists(option_side: u8, msg: felt252) {
     assert((option_side - TRADE_SIDE_LONG) * (option_side - TRADE_SIDE_SHORT) == 0, msg);
 }
 
-fn assert_option_type_exists(option_type: felt252, msg: felt252) {
+fn assert_option_type_exists(option_type: u8, msg: felt252) {
     assert((option_type - OPTION_CALL) * (option_type - OPTION_PUT) == 0, msg);
 }
 
@@ -79,10 +79,10 @@ fn assert_nn_fixed(num: Fixed, errmsg: felt252) {
     assert(num >= FixedTrait::from_felt(0), errmsg)
 }
 
-fn check_deadline(deadline: felt252) {
+fn check_deadline(deadline: Timestamp) {
     let current_block_time = get_block_timestamp();
     assert(
-        current_block_time <= deadline.try_into().expect('Deadline number too high'),
+        current_block_time <= deadline,
         'TX is too old'
     );
 }
@@ -192,7 +192,7 @@ fn split_option_locked_capital(
     strike_price: Fixed,
     terminal_price: Fixed,
 ) -> (Fixed, Fixed) {
-    assert((option_type - OPTION_CALL) * (option_type - OPTION_PUT) == 0, '');
+    assert_option_type_exists(option_type, 'SOLC - unknown option type');
 
     if option_type == OPTION_CALL {
         // User receives option_size * max(0,  (terminal_price - strike_price) / terminal_price) in base token for long
@@ -242,7 +242,7 @@ fn _get_premia_before_fees(
     // For clarity
     let option_size = position_size;
     let option_size_cubit = fromU256_balance(
-        u256 { low: position_size.try_into().expect('GPBF - Position size too big'), high: 0 },
+        position_size.into(),
         option.base_token_address
     );
 
@@ -302,10 +302,10 @@ fn _get_value_of_position(
     let zero = FixedTrait::from_felt(0);
 
     let current_block_time = get_block_timestamp();
-    let is_ripe = option.maturity.try_into().unwrap() <= current_block_time;
+    let is_ripe = option.maturity <= current_block_time;
 
     let position_size_cubit = fromU256_balance(
-        u256 { low: position_size.try_into().expect('GVoP - Position size too big'), high: 0 },
+        position_size.into(),
         option.base_token_address
     );
 
@@ -314,10 +314,6 @@ fn _get_value_of_position(
             option.quote_token_address, option.base_token_address, option.maturity
         );
 
-        let position_size_cubit = fromU256_balance(
-            u256 { low: position_size.try_into().expect('GVoP - Position size too big'), high: 0 },
-            option.base_token_address
-        );
         let (long_value, short_value) = split_option_locked_capital(
             option.option_type,
             option.option_side,
@@ -334,8 +330,8 @@ fn _get_value_of_position(
     }
 
     // Fail if the value of option that matures in 2 hours or less (can't price the option)
-    let stop_trading_by = option.maturity - STOP_TRADING_BEFORE_MATURITY_SECONDS.into();
-    assert(current_block_time <= stop_trading_by.try_into().unwrap(), 'GVoP - Wait till maturity');
+    let stop_trading_by = option.maturity - STOP_TRADING_BEFORE_MATURITY_SECONDS;
+    assert(current_block_time <= stop_trading_by, 'GVoP - Wait till maturity');
 
     let total_premia_before_fees = _get_premia_before_fees(
         option,

@@ -4,6 +4,7 @@ mod Pragma {
     use carmine_protocol::traits::{IPragmaOracleDispatcher, IPragmaOracleDispatcherTrait};
 
     use carmine_protocol::amm_core::oracles::oracle_helpers::{convert_from_int_to_Fixed};
+    use carmine_protocol::types::basic::{Timestamp};
 
     use starknet::ContractAddress;
     use traits::{TryInto, Into};
@@ -101,7 +102,10 @@ mod Pragma {
         account_for_stablecoin_divergence(res, quote_token_addr, 0)
     }
 
-    fn _get_pragma_terminal_price(key: felt252, maturity: felt252) -> Fixed {
+    fn _get_pragma_terminal_price(key: felt252, maturity: Timestamp) -> Fixed {
+
+        let maturity: felt252 = maturity.into();
+        
         let (last_checkpoint, _) = IPragmaOracleDispatcher {
             contract_address: PRAGMA_ORACLE_ADDRESS
                 .try_into()
@@ -121,7 +125,7 @@ mod Pragma {
     }
 
     fn get_pragma_terminal_price(
-        quote_token_addr: ContractAddress, base_token_addr: ContractAddress, maturity: felt252
+        quote_token_addr: ContractAddress, base_token_addr: ContractAddress, maturity: Timestamp
     ) -> Fixed {
         let key = _get_ticker_key(quote_token_addr, base_token_addr)
             .expect('Pragma/GPMP - Cant get spot key');
@@ -130,7 +134,7 @@ mod Pragma {
     }
 
     fn account_for_stablecoin_divergence(
-        price: Fixed, quote_token_addr: ContractAddress, maturity: felt252
+        price: Fixed, quote_token_addr: ContractAddress, maturity: Timestamp
     ) -> Fixed {
         let key = _get_stablecoin_key(quote_token_addr);
 

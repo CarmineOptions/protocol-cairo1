@@ -19,7 +19,7 @@ mod State {
     };
     use carmine_protocol::amm_core::amm::AMM::{
         pool_volatility_separate, option_volatility, pool_volatility_adjustment_speed,
-        new_pool_volatility_adjustment_speed, option_position_, new_option_position_,
+        new_pool_volatility_adjustment_speed, option_position_, new_option_position,
         option_token_address, new_option_token_address, available_options, new_available_options,
         new_available_options_usable_index, max_lpool_balance, lptoken_addr_for_given_pooled_token,
         trading_halted, available_lptoken_adresses, max_option_size_percent_of_voladjspd,
@@ -30,15 +30,15 @@ mod State {
     use carmine_protocol::amm_core::amm::AMM;
 
     use carmine_protocol::types::basic::{
-        LPTAddress, OptionSide, OptionType, Maturity, Math64x61_, LegacyVolatility, LegacyStrike,
+        LPTAddress, OptionSide, OptionType, Math64x61_, LegacyVolatility, LegacyStrike,
         LegacyOption, Volatility, Strike, Option_, LegacyOption_to_Option, Option_to_LegacyOption,
-        Int, Pool
+        Int, Pool, Timestamp
     };
 
     fn set_option_token_address(
         lptoken_address: LPTAddress,
         option_side: OptionSide,
-        maturity: Maturity,
+        maturity: Timestamp,
         strike_price: Strike,
         opt_address: ContractAddress
     ) {
@@ -46,7 +46,7 @@ mod State {
 
         assert_option_side_exists(option_side, 'SOTA - opt side 0');
         assert(contract_address_to_felt252(lptoken_address) != 0, 'SOTE - lpt addr 0');
-        assert(maturity.into() > 0_u256, 'SOTA - maturity <= 0');
+        assert(maturity > 0, 'SOTA - maturity <= 0');
         assert_nn_not_zero_cubit(strike_price, 'sota - maturity <= 0');
         assert(contract_address_to_felt252(opt_address) != 0, 'SOTE - opt addr 0');
 
@@ -67,7 +67,7 @@ mod State {
     fn get_option_token_address(
         lptoken_address: LPTAddress,
         option_side: OptionSide,
-        maturity: Maturity,
+        maturity: Timestamp,
         strike_price: Strike
     ) -> ContractAddress {
         let mut state = AMM::unsafe_new_contract_state();
@@ -105,7 +105,7 @@ mod State {
 
     fn set_option_volatility(
         lptoken_address: LPTAddress,
-        maturity: Maturity,
+        maturity: Timestamp,
         strike_price: Strike,
         volatility: Volatility
     ) {
@@ -136,7 +136,7 @@ mod State {
     }
 
     fn get_option_volatility(
-        lptoken_address: LPTAddress, maturity: Maturity, strike_price: Strike, 
+        lptoken_address: LPTAddress, maturity: Timestamp, strike_price: Strike, 
     ) -> Volatility {
         let mut state = AMM::unsafe_new_contract_state();
 
@@ -178,7 +178,7 @@ mod State {
     }
 
     // TODO: finish function below
-    fn get_available_options(lptoken_address: LPTAddress, idx: felt252) -> Option_ {
+    fn get_available_options(lptoken_address: LPTAddress, idx: u32) -> Option_ {
         let state = AMM::unsafe_new_contract_state();
 
         // In case this function is called before append_to_available_options
@@ -219,13 +219,13 @@ mod State {
     }
 
     // Migrates old options and returns first empty index
-    fn migrate_old_options(lptoken_address: ContractAddress, idx: felt252) -> felt252 {
+    fn migrate_old_options(lptoken_address: ContractAddress, idx: u32) -> u32 {
         let mut state =
             AMM::unsafe_new_contract_state(); // Todo: maybe pass this as an arg? Is it expensive to create it?
 
         // Get old option at index
         let old_option = available_options::InternalContractStateTrait::read(
-            @state.available_options, (lptoken_address, idx)
+            @state.available_options, (lptoken_address, idx.into())
         );
 
         // This means we've reached the end of list, so return current index
@@ -243,7 +243,7 @@ mod State {
         // TODO: Should we alse set old option at current index to zero to "delete" it? 
 
         // Continue to the next index
-        migrate_old_options(lptoken_address, idx)
+        migrate_old_options(lptoken_address, idx + 1)
     }
 
     fn set_pool_volatility_adjustment_speed(lptoken_address: LPTAddress, new_speed: Fixed) {
@@ -337,7 +337,7 @@ mod State {
     fn get_option_position(
         lptoken_address: LPTAddress,
         option_side: OptionSide,
-        maturity: Maturity,
+        maturity: Timestamp,
         strike_price: Strike
     ) -> Int {
         let mut state = AMM::unsafe_new_contract_state();
@@ -350,12 +350,18 @@ mod State {
 
         if res != 0 {
             // First assert it's not negative
-            assert(res > 0_u256, 'Old opt pos negative');
+            assert(res.into() > 0_u256, 'Old opt pos negative');
 
             // If it's not zero then move the old value to new storage var and set the old one to zero
 
             // Write old value to new storage var
-            set_option_position(lptoken_address, option_side, maturity, strike_price, 0);
+            set_option_position(
+                lptoken_address, 
+                option_side, 
+                maturity, 
+                strike_price, 
+                res.try_into().unwrap()
+            );
 
             // Set old value to zero
             option_position_::InternalContractStateTrait::write(
@@ -364,36 +370,36 @@ mod State {
                 0
             );
 
-            return res;
+            return res.try_into().unwrap();
         }
 
         // Otherwise just read and return from new storage var
-        new_option_position_::InternalContractStateTrait::read(
-            @state.new_option_position_, (lptoken_address, option_side, maturity, strike_price)
+        new_option_position::InternalContractStateTrait::read(
+            @state.new_option_position, (lptoken_address, option_side, maturity, strike_price)
         )
     }
 
     fn set_option_position(
         lptoken_address: LPTAddress,
         option_side: OptionSide,
-        maturity: Int,
+        maturity: Timestamp,
         strike_price: Strike,
         position: Int
     ) {
         let mut state = AMM::unsafe_new_contract_state();
 
         assert_nn_not_zero_cubit(strike_price, 'Strike zero/neg in set_opt_pos');
-        assert(position.into() > 0_u256, 'Pos zero/neg in set_opt_pos');
+        assert(position > 0, 'Pos zero/neg in set_opt_pos');
 
         // Also it's important to set corresponding option position in old storage var to zero se that if this function is called before get_option_position then the value in new storage var won't be overwritten by the old one
         option_position_::InternalContractStateTrait::write(
             ref state.option_position_,
             (lptoken_address, option_side, maturity, cubit_to_legacyMath(strike_price)),
-            position
+            0
         );
 
-        new_option_position_::InternalContractStateTrait::write(
-            ref state.new_option_position_,
+        new_option_position::InternalContractStateTrait::write(
+            ref state.new_option_position,
             (lptoken_address, option_side, maturity, strike_price),
             position
         )
@@ -481,13 +487,13 @@ mod State {
         );
     }
 
-    fn get_trading_halt() -> felt252 {
+    fn get_trading_halt() -> u8 {
         trading_halted::InternalContractStateTrait::read(
             @AMM::unsafe_new_contract_state().trading_halted
         )
     }
 
-    fn set_trading_halt(new_status: felt252) {
+    fn set_trading_halt(new_status: u8) {
         // TODO: implement check below
         // let caller_addr = get_caller_address();
         // let can_halt = can_halt_trading(caller_addr);
@@ -546,7 +552,7 @@ mod State {
         lptoken_address: ContractAddress,
         option_side: OptionSide,
         strike_price: Fixed,
-        maturity: Int
+        maturity: Timestamp
     ) -> bool {
         let option_addr = get_option_token_address(
             lptoken_address, option_side, maturity, strike_price
@@ -586,13 +592,13 @@ mod State {
         lptoken_address: ContractAddress,
         option_side: OptionSide,
         strike_price: Fixed,
-        maturity: Int,
+        maturity: Timestamp,
     ) -> Option_ {
-        let mut i: felt252 = 0;
+        let mut i: u32 = 0;
 
         let match_opt: Option_ = loop {
             let option_ = get_available_options(lptoken_address, i);
-            let option_sum = option_.maturity + option_.strike_price.mag.into();
+            let option_sum = option_.maturity.into() + option_.strike_price.mag;
             assert(option_sum != 0, 'Specified option unavailable');
 
             i += 1;

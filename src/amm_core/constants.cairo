@@ -10,16 +10,16 @@ use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
 const FEE_PROPORTION_PERCENT: u128 = 3_u128;
 const RISK_FREE_RATE: felt252 = 0;
 
-const OPTION_CALL: felt252 = 0;
-const OPTION_PUT: felt252 = 1;
+const OPTION_CALL: u8 = 0;
+const OPTION_PUT: u8 = 1;
 
-const TRADE_SIDE_LONG: felt252 = 0;
-const TRADE_SIDE_SHORT: felt252 = 1;
+const TRADE_SIDE_LONG: u8 = 0;
+const TRADE_SIDE_SHORT: u8 = 1;
 
-fn get_opposite_side(side: felt252) -> felt252 {
-    assert_option_side_exists(side, 'GES - invalid option side');
+fn get_opposite_side(trade_side: u8) -> u8 {
+    assert_option_side_exists(trade_side, 'GES - invalid option side');
 
-    if side == TRADE_SIDE_LONG {
+    if trade_side == TRADE_SIDE_LONG {
         TRADE_SIDE_SHORT
     } else {
         TRADE_SIDE_LONG

@@ -2,7 +2,16 @@ mod Trading {
     use starknet::get_block_timestamp;
     use starknet::ContractAddress;
     use traits::{TryInto, Into};
-    use carmine_protocol::types::basic::{Math64x61_, OptionType, OptionSide, LPTAddress, Int};
+
+    use carmine_protocol::types::basic::{
+        Math64x61_, 
+        OptionType, 
+        OptionSide, 
+        LPTAddress, 
+        Int, 
+        Timestamp
+    };
+
     use carmine_protocol::amm_core::helpers::{toU256_balance, legacyMath_to_cubit, check_deadline};
     use carmine_protocol::amm_core::fees::get_fees;
     use option::OptionTrait;
@@ -37,7 +46,7 @@ mod Trading {
     fn do_trade(
         option_type: OptionType,
         strike_price: Fixed,
-        maturity: Int,
+        maturity: Timestamp,
         side: OptionSide,
         option_size: Int,
         quote_token_address: ContractAddress,
@@ -49,18 +58,12 @@ mod Trading {
 
         // Helper Values
         let option_size_cubit = fromU256_balance(
-            u256 {
-                low: option_size.try_into().expect(''), high: 0
-            }, // TODO: I guess this is ugly/add errmsg
+            option_size.into(),
             base_token_address
         );
 
-        let opt_size_u256: u256 = u256 {
-            low: option_size.try_into().expect('DT - opt size too big'), high: 0
-        };
-
         let option_size_in_pool_currency = convert_amount_to_option_currency_from_base_uint256(
-            opt_size_u256,
+            option_size.into(),
             option_type,
             toU256_balance(strike_price, quote_token_address),
             base_token_address
@@ -94,7 +97,7 @@ mod Trading {
         let time_till_maturity = get_time_till_maturity(maturity);
 
         // 6) Risk free rate
-        let risk_free_rate = FixedTrait::from_felt(RISK_FREE_RATE);
+        let risk_free_rate = FixedTrait::from_unscaled_felt(RISK_FREE_RATE);
 
         // 7) Get premia
         let sigma = trade_volatility / hundred;
@@ -138,7 +141,7 @@ mod Trading {
     fn close_position(
         option_type: OptionType,
         strike_price: Fixed,
-        maturity: Int,
+        maturity: Timestamp,
         side: OptionSide,
         option_size: Int,
         quote_token_address: ContractAddress,
@@ -150,16 +153,12 @@ mod Trading {
         let opposite_side = get_opposite_side(side);
 
         // Helper Values
+        let opt_size_u256: u256 = option_size.into();
         let option_size_cubit = fromU256_balance(
-            u256 {
-                low: option_size.try_into().expect(''), high: 0
-            }, // TODO: I guess this is ugly/add errmsg
+            opt_size_u256, 
             base_token_address
         );
 
-        let opt_size_u256: u256 = u256 {
-            low: option_size.try_into().expect('DT - opt size too big'), high: 0
-        };
 
         let option_size_in_pool_currency = convert_amount_to_option_currency_from_base_uint256(
             opt_size_u256,
@@ -241,7 +240,7 @@ mod Trading {
     fn validate_trade_input(
         option_type: OptionType,
         strike_price: Fixed,
-        maturity: Int,
+        maturity: Timestamp,
         option_side: OptionSide,
         option_size: Int,
         quote_token_address: ContractAddress,
@@ -249,18 +248,13 @@ mod Trading {
         lptoken_address: ContractAddress,
         open_position: bool,
         limit_total_premia: Fixed,
-        tx_deadline: Int,
+        tx_deadline: Timestamp,
     ) {
-        let maturity: u64 = maturity.try_into().expect('VTI - cant convert maturity');
-        let tx_deadline: u64 = tx_deadline.try_into().expect('VTI - cant convert tx_deadline');
 
         let halt_status = get_trading_halt();
         assert(halt_status == 0, 'Trading halted');
 
-        assert(
-            option_size.try_into().expect('VTI - opt size too large') > 0_u128,
-            'VTI - opt size <= 0'
-        );
+        assert(option_size > 0_u128, 'VTI - opt size <= 0');
         assert_option_type_exists(option_type, 'VTI - invalid option type');
         assert_option_side_exists(option_side, 'VTI - invalid option side');
 
@@ -296,13 +290,13 @@ mod Trading {
     fn trade_open(
         option_type: OptionType,
         strike_price: Fixed,
-        maturity: Int,
+        maturity: Timestamp,
         option_side: OptionSide,
         option_size: Int, // in base token currency
         quote_token_address: ContractAddress, // part of underlying_asset definition
         base_token_address: ContractAddress, // part of underlying_asset definition
         limit_total_premia: Fixed, // The limit price that user wants
-        tx_deadline: Int, // Timestamp deadline for the transaction to happen
+        tx_deadline: Timestamp, // Timestamp deadline for the transaction to happen
     ) -> Fixed {
         let lptoken_address = get_lptoken_address_for_given_option(
             quote_token_address, base_token_address, option_type
@@ -340,13 +334,13 @@ mod Trading {
     fn trade_close(
         option_type: OptionType,
         strike_price: Fixed,
-        maturity: Int,
+        maturity: Timestamp,
         option_side: OptionSide,
         option_size: Int, // in base token currency
         quote_token_address: ContractAddress, // part of underlying_asset definition
         base_token_address: ContractAddress, // part of underlying_asset definition
         limit_total_premia: Fixed, // The limit price that user wants
-        tx_deadline: Int, // Timestamp deadline for the transaction to happen
+        tx_deadline: Timestamp, // Timestamp deadline for the transaction to happen
     ) -> Fixed {
         let lptoken_address = get_lptoken_address_for_given_option(
             quote_token_address, base_token_address, option_type
@@ -386,7 +380,7 @@ mod Trading {
     fn trade_settle(
         option_type: OptionType,
         strike_price: Fixed,
-        maturity: Int,
+        maturity: Timestamp,
         option_side: OptionSide,
         option_size: Int,
         quote_token_address: ContractAddress, // Identifies underlying_asset
@@ -412,7 +406,7 @@ mod Trading {
 
         // Position can be expired/settled only if the maturity has passed.
         let current_block_time = get_block_timestamp();
-        assert(maturity.try_into().unwrap() <= current_block_time, 'Settle - option not expired');
+        assert(maturity <= current_block_time, 'Settle - option not expired');
 
         let terminal_price = get_terminal_price(quote_token_address, base_token_address, maturity);
 

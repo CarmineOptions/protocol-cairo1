@@ -2,6 +2,8 @@ mod OracleAgg {
     use starknet::ContractAddress;
     use cubit::f128::types::fixed::{Fixed};
 
+    use carmine_protocol::types::basic::{Timestamp};
+
     use carmine_protocol::amm_core::oracles::pragma::Pragma::{
         get_pragma_median_price, get_pragma_terminal_price
     };
@@ -20,9 +22,9 @@ mod OracleAgg {
     }
 
     fn get_terminal_price(
-        quote_token_addr: ContractAddress, base_token_addr: ContractAddress, maturity: felt252
+        quote_token_addr: ContractAddress, base_token_addr: ContractAddress, maturity: Timestamp
     ) -> Fixed {
-        let price_pragma = get_pragma_terminal_price(quote_token_addr, base_token_addr, maturity, );
+        let price_pragma = get_pragma_terminal_price(quote_token_addr, base_token_addr, maturity);
 
         // Add other oracles here
 

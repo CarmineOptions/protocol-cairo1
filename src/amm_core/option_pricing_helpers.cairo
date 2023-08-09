@@ -8,7 +8,10 @@ use carmine_protocol::amm_core::helpers::{
     get_decimal, felt_power, assert_option_type_exists, assert_option_side_exists,
 };
 use carmine_protocol::amm_core::constants::{TRADE_SIDE_LONG, TRADE_SIDE_SHORT};
-use carmine_protocol::types::basic::{OptionType, OptionSide};
+
+use carmine_protocol::types::basic::{
+    OptionType, OptionSide, Timestamp
+};
 
 use carmine_protocol::amm_core::constants::{OPTION_CALL, OPTION_PUT};
 
@@ -30,10 +33,7 @@ fn convert_amount_to_option_currency_from_base_uint256(
     //  - for call into base token (ETH in case of ETH/USDC)
     //  - for put into quote token (USDC in case of ETH/USDC)   
 
-    assert(
-        (option_type - OPTION_CALL) * (option_type - OPTION_PUT) == 0,
-        'CATOCFBU - unknown option type'
-    );
+    assert_option_type_exists(option_type, 'CATOCFBU - unknown option type');
     assert(amount > 0, 'CATOCFBU - amt <= 0');
 
     if option_type == OPTION_PUT {
@@ -96,11 +96,11 @@ fn get_option_size_in_pool_currency(
     }
 }
 
-fn get_time_till_maturity(maturity: felt252) -> Fixed {
+fn get_time_till_maturity(maturity: Timestamp) -> Fixed {
     let curr_time = get_block_timestamp();
     let curr_time = FixedTrait::new_unscaled(curr_time.into(), false);
 
-    let maturity = FixedTrait::from_unscaled_felt(maturity);
+    let maturity = FixedTrait::new(maturity.into(), false);
 
     let secs_in_year = FixedTrait::from_felt(60 * 60 * 24 * 365);
 
