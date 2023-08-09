@@ -12,9 +12,11 @@ use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
 
 use carmine_protocol::types::basic::{
-    OptionSide, OptionType, Math64x61_, Option_, Int, LPTAddress, Volatility,
+    OptionSide, OptionType, Math64x61_, Int, LPTAddress, Volatility,
     Strike, Timestamp
 };
+
+use carmine_protocol::types::option_::{Option_};
 
 use carmine_protocol::amm_core::helpers::{
     legacyMath_to_cubit, cubit_to_legacyMath, toU256_balance, fromU256_balance,

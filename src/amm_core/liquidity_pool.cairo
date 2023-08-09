@@ -14,7 +14,8 @@ mod LiquidityPool {
 
     use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
 
-    use carmine_protocol::types::basic::{LPTAddress, OptionType, OptionSide, Option_, Int, Pool, Timestamp};
+    use carmine_protocol::types::basic::{LPTAddress, OptionType, OptionSide, Int, Pool, Timestamp};
+    use carmine_protocol::types::option_::{Option_};
 
     use carmine_protocol::amm_core::oracles::agg::OracleAgg::get_terminal_price;
 
@@ -38,17 +39,6 @@ mod LiquidityPool {
     use carmine_protocol::amm_core::constants::{
         OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT
     };
-
-
-    // @view
-    // func get_value_of_pool_position{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
-    //     lptoken_address: Address
-    // ) -> (res: Math64x61_) {
-    //     alloc_locals;
-
-    //     let (res) = _get_value_of_pool_position(lptoken_address, 0);
-    //     return (res = res);
-    // }
 
     fn get_value_of_position(
         option: Option_, position_size: Int, option_type: OptionType, current_volatility: Fixed

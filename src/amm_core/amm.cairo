@@ -12,9 +12,13 @@ mod AMM {
         Strike, 
         LPTAddress, 
         OptionSide, 
-        LegacyOption, 
         Pool, 
         Timestamp
+    };
+
+
+    use carmine_protocol::types::option_::{
+        LegacyOption
     };
 
     #[storage]

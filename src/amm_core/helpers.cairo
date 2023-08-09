@@ -16,7 +16,8 @@ use carmine_protocol::amm_core::constants::{
     get_decimal, STOP_TRADING_BEFORE_MATURITY_SECONDS, RISK_FREE_RATE
 };
 
-use carmine_protocol::types::basic::{Math64x61_, OptionSide, OptionType, Option_, Int, Timestamp};
+use carmine_protocol::types::basic::{Math64x61_, OptionSide, OptionType, Int, Timestamp};
+use carmine_protocol::types::option_::{Option_};
 
 use carmine_protocol::amm_core::oracles::agg::OracleAgg::{get_terminal_price, get_current_price};
 

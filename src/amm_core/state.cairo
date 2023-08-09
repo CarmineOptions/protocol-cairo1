@@ -31,8 +31,12 @@ mod State {
 
     use carmine_protocol::types::basic::{
         LPTAddress, OptionSide, OptionType, Math64x61_, LegacyVolatility, LegacyStrike,
-        LegacyOption, Volatility, Strike, Option_, LegacyOption_to_Option, Option_to_LegacyOption,
+        Volatility, Strike,
         Int, Pool, Timestamp
+    };
+
+    use carmine_protocol::types::option_::{
+        LegacyOption, Option_, LegacyOption_to_Option, Option_to_LegacyOption,
     };
 
     fn set_option_token_address(
