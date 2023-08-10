@@ -103,9 +103,8 @@ mod Pragma {
     }
 
     fn _get_pragma_terminal_price(key: felt252, maturity: Timestamp) -> Fixed {
-
         let maturity: felt252 = maturity.into();
-        
+
         let (last_checkpoint, _) = IPragmaOracleDispatcher {
             contract_address: PRAGMA_ORACLE_ADDRESS
                 .try_into()

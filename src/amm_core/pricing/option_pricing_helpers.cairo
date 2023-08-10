@@ -9,9 +9,7 @@ use carmine_protocol::amm_core::helpers::{
 };
 use carmine_protocol::amm_core::constants::{TRADE_SIDE_LONG, TRADE_SIDE_SHORT};
 
-use carmine_protocol::types::basic::{
-    OptionType, OptionSide, Timestamp
-};
+use carmine_protocol::types::basic::{OptionType, OptionSide, Timestamp};
 
 use carmine_protocol::amm_core::constants::{OPTION_CALL, OPTION_PUT};
 

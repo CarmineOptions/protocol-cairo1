@@ -12,8 +12,7 @@ use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
 
 use carmine_protocol::types::basic::{
-    OptionSide, OptionType, Math64x61_, Int, LPTAddress, Volatility,
-    Strike, Timestamp
+    OptionSide, OptionType, Math64x61_, Int, LPTAddress, Volatility, Strike, Timestamp
 };
 
 use carmine_protocol::types::option_::{Option_};
@@ -197,7 +196,8 @@ fn _mint_option_token_long(
 
     let current_short_position = get_option_position(
         lptoken_address, TRADE_SIDE_SHORT, maturity, strike_price
-    ).into();
+    )
+        .into();
 
     let current_locked_balance = get_pool_locked_capital(lptoken_address);
 
@@ -225,18 +225,10 @@ fn _mint_option_token_long(
     assert(new_locked_capital <= new_balance, 'MOTL - not enough unlocked');
 
     set_option_position(
-        lptoken_address,
-        TRADE_SIDE_LONG,
-        maturity,
-        strike_price,
-        new_long_position
+        lptoken_address, TRADE_SIDE_LONG, maturity, strike_price, new_long_position
     );
     set_option_position(
-        lptoken_address,
-        TRADE_SIDE_SHORT,
-        maturity,
-        strike_price,
-        new_short_position
+        lptoken_address, TRADE_SIDE_SHORT, maturity, strike_price, new_short_position
     );
     set_pool_locked_capital(lptoken_address, new_locked_capital);
 
@@ -714,10 +706,7 @@ fn expire_option_token(
     assert(user_tokens_owned > 0, 'EOT - User has no tokens');
 
     let current_block_time = get_block_timestamp();
-    assert(
-        maturity <= current_block_time,
-        'EOT - contract not ripe'
-    );
+    assert(maturity <= current_block_time, 'EOT - contract not ripe');
 
     // long_value and short_value are both in terms of locked capital
     let option_size_cubit = fromU256_balance(option_size.into(), base_token_address);

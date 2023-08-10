@@ -7,3 +7,4 @@ mod helpers;
 mod oracles;
 mod liquidity_pool;
 mod pricing;
+mod view;

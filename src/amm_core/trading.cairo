@@ -4,12 +4,7 @@ mod Trading {
     use traits::{TryInto, Into};
 
     use carmine_protocol::types::basic::{
-        Math64x61_, 
-        OptionType, 
-        OptionSide, 
-        LPTAddress, 
-        Int, 
-        Timestamp
+        Math64x61_, OptionType, OptionSide, LPTAddress, Int, Timestamp
     };
 
     use carmine_protocol::amm_core::helpers::{toU256_balance, legacyMath_to_cubit, check_deadline};
@@ -57,10 +52,7 @@ mod Trading {
         // TODO: ReentrancyGuard.start();
 
         // Helper Values
-        let option_size_cubit = fromU256_balance(
-            option_size.into(),
-            base_token_address
-        );
+        let option_size_cubit = fromU256_balance(option_size.into(), base_token_address);
 
         let option_size_in_pool_currency = convert_amount_to_option_currency_from_base_uint256(
             option_size.into(),
@@ -154,11 +146,7 @@ mod Trading {
 
         // Helper Values
         let opt_size_u256: u256 = option_size.into();
-        let option_size_cubit = fromU256_balance(
-            opt_size_u256, 
-            base_token_address
-        );
-
+        let option_size_cubit = fromU256_balance(opt_size_u256, base_token_address);
 
         let option_size_in_pool_currency = convert_amount_to_option_currency_from_base_uint256(
             opt_size_u256,
@@ -250,7 +238,6 @@ mod Trading {
         limit_total_premia: Fixed,
         tx_deadline: Timestamp,
     ) {
-
         let halt_status = get_trading_halt();
         assert(halt_status == 0, 'Trading halted');
 

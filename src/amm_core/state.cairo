@@ -30,9 +30,12 @@ mod State {
     use carmine_protocol::amm_core::amm::AMM;
 
     use carmine_protocol::types::basic::{
-        LPTAddress, OptionSide, OptionType, Math64x61_, LegacyVolatility, LegacyStrike,
-        Volatility, Strike,
-        Int, Pool, Timestamp
+        LPTAddress, OptionSide, OptionType, Math64x61_, LegacyVolatility, LegacyStrike, Volatility,
+        Strike, Int, Timestamp
+    };
+
+    use carmine_protocol::types::pool::{
+        Pool
     };
 
     use carmine_protocol::types::option_::{
@@ -317,7 +320,7 @@ mod State {
             contract_address_to_felt252(pool.quote_token_address) != 0, 'Quote addr doesnt exist'
         );
         assert(
-            contract_address_to_felt252(pool.base_token_address) != 0, 'Quote addr doesnt exist'
+            contract_address_to_felt252(pool.base_token_address) != 0, 'Base addr doesnt exist'
         );
         assert_option_type_exists(pool.option_type, 'Unknown option type');
 
@@ -360,11 +363,7 @@ mod State {
 
             // Write old value to new storage var
             set_option_position(
-                lptoken_address, 
-                option_side, 
-                maturity, 
-                strike_price, 
-                res.try_into().unwrap()
+                lptoken_address, option_side, maturity, strike_price, res.try_into().unwrap()
             );
 
             // Set old value to zero

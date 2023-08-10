@@ -1,3 +1,4 @@
+use carmine_protocol::types::option_::Option_Trait;
 mod LiquidityPool {
     use starknet::ContractAddress;
     use starknet::get_caller_address;
@@ -14,8 +15,9 @@ mod LiquidityPool {
 
     use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
 
-    use carmine_protocol::types::basic::{LPTAddress, OptionType, OptionSide, Int, Pool, Timestamp};
-    use carmine_protocol::types::option_::{Option_};
+    use carmine_protocol::types::basic::{LPTAddress, OptionType, OptionSide, Int, Timestamp};
+    use carmine_protocol::types::option_::{Option_, Option_Trait};
+    use carmine_protocol::types::pool::{Pool};
 
     use carmine_protocol::amm_core::oracles::agg::OracleAgg::get_terminal_price;
 
@@ -32,7 +34,7 @@ mod LiquidityPool {
     };
 
     use carmine_protocol::amm_core::helpers::{
-        _get_value_of_position, toU256_balance, assert_option_type_exists, assert_address_not_zero,
+        toU256_balance, assert_option_type_exists, assert_address_not_zero,
         get_underlying_from_option_data, fromU256_balance, split_option_locked_capital
     };
 
@@ -40,20 +42,11 @@ mod LiquidityPool {
         OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT
     };
 
-    fn get_value_of_position(
-        option: Option_, position_size: Int, option_type: OptionType, current_volatility: Fixed
-    ) -> Fixed {
-        let lptoken_address = get_lptoken_address_for_given_option(
-            option.quote_token_address, option.base_token_address, option.option_type
-        );
-        let pool_volatility_adjustment_speed = get_pool_volatility_adjustment_speed(
-            lptoken_address
-        );
-
-        _get_value_of_position(
-            option, position_size, option_type, current_volatility, pool_volatility_adjustment_speed
-        )
-    }
+    // fn get_value_of_position(
+    //     option: Option_, position_size: Int
+    // ) -> Fixed {
+    //     option.value_of_position(position_size)
+    // }
 
     fn get_value_of_pool_position(lptoken_address: LPTAddress) -> Fixed {
         let mut i: u32 = 0;
@@ -61,31 +54,18 @@ mod LiquidityPool {
 
         loop {
             let option = get_available_options(lptoken_address, i);
-            let option_sum = option.maturity.into() + option.strike_price.mag;
 
-            if option_sum == 0 {
+            if option.sum() == 0 {
                 break;
             }
+            i += 1;
 
-            let option_position = get_option_position(
-                lptoken_address, option.option_side, option.maturity, option.strike_price
-            );
-
+            let option_position = option.pools_position();
             if option_position == 0 {
-                i += 1;
                 continue;
             }
 
-            let current_volatility = get_option_volatility(
-                lptoken_address, option.maturity, option.strike_price
-            );
-
-            let value_of_option = get_value_of_position(
-                option, option_position, option.option_type, current_volatility, 
-            );
-
-            pool_pos += value_of_option;
-            i += 1;
+            pool_pos += option.value_of_position(option_position);
         };
 
         return pool_pos;
@@ -306,7 +286,6 @@ mod LiquidityPool {
         maturity: Timestamp,
         strike_price: Fixed
     ) {
-
         let current_lpool_balance = get_lpool_balance(lptoken_address);
         let current_locked_balance = get_pool_locked_capital(lptoken_address);
 
@@ -396,10 +375,7 @@ mod LiquidityPool {
             option.quote_token_address, option.base_token_address, maturity
         );
 
-        let option_size_cubit = fromU256_balance(
-            option_size.into(),
-            option.base_token_address
-        );
+        let option_size_cubit = fromU256_balance(option_size.into(), option.base_token_address);
 
         let (long_value, short_value) = split_option_locked_capital(
             option.option_type, option_side, option_size_cubit, strike_price, terminal_price
