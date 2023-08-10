@@ -28,6 +28,11 @@ use carmine_protocol::amm_core::pricing::option_pricing::{black_scholes};
 
 use carmine_protocol::amm_core::oracles::agg::OracleAgg::{get_current_price, get_terminal_price};
 
+use carmine_protocol::traits::{
+    IOptionTokenDispatcher, IOptionTokenDispatcherTrait, IERC20Dispatcher, IERC20DispatcherTrait
+};
+
+
 // Option used in c0 AMM
 #[derive(Copy, Drop, Serde, Store)]
 struct LegacyOption {
@@ -62,6 +67,7 @@ trait Option_Trait {
     fn value_of_position(self: Option_, position_size: Int) -> Fixed;
     fn pools_position(self: Option_) -> Int;
     fn value_of_user_position(self: Option_, position_size: Int) -> Fixed;
+    fn get_dispatcher(self: Option_) -> IOptionTokenDispatcher;
 }
 
 
@@ -273,6 +279,12 @@ impl Option_Impl of Option_Trait {
         // Value of an option should be value that user would be able to get 
         // if they were to close the position, so we need to pretend we're closing the position
         self.correct_side(true).premia_with_fees(position_size)
+    }
+
+    fn get_dispatcher(self: Option_) -> IOptionTokenDispatcher{
+        IOptionTokenDispatcher {
+            contract_address: self.opt_address()
+        }
     }
 }
 

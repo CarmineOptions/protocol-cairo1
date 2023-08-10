@@ -2,14 +2,17 @@ mod Trading {
     use starknet::get_block_timestamp;
     use starknet::ContractAddress;
     use traits::{TryInto, Into};
+    use option::OptionTrait;
+
+    use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
     use carmine_protocol::types::basic::{
         Math64x61_, OptionType, OptionSide, LPTAddress, Int, Timestamp
     };
 
+    use carmine_protocol::amm_core::helpers::{fromU256_balance, };
     use carmine_protocol::amm_core::helpers::{toU256_balance, legacyMath_to_cubit, check_deadline};
-    use carmine_protocol::amm_core::pricing::fees::get_fees;
-    use option::OptionTrait;
+    
     use carmine_protocol::amm_core::state::State::{
         get_option_volatility, get_pool_volatility_adjustment_speed, set_option_volatility,
         get_trading_halt, is_option_available, get_lptoken_address_for_given_option,
@@ -23,19 +26,19 @@ mod Trading {
         RISK_FREE_RATE, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side,
         STOP_TRADING_BEFORE_MATURITY_SECONDS,
     };
-    use cubit::f128::types::fixed::{Fixed, FixedTrait};
+
+    use carmine_protocol::amm_core::pricing::option_pricing::{black_scholes, };
+    use carmine_protocol::amm_core::pricing::fees::get_fees;
     use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
         convert_amount_to_option_currency_from_base_uint256, get_new_volatility,
         get_time_till_maturity, select_and_adjust_premia, add_premia_fees,
         assert_option_type_exists, assert_option_side_exists
     };
-    use carmine_protocol::amm_core::helpers::{fromU256_balance, };
 
     use carmine_protocol::amm_core::oracles::agg::OracleAgg::{
         get_current_price, get_terminal_price,
     };
 
-    use carmine_protocol::amm_core::pricing::option_pricing::{black_scholes, };
 
 
     fn do_trade(
@@ -246,7 +249,7 @@ mod Trading {
         assert_option_side_exists(option_side, 'VTI - invalid option side');
 
         let is_opt_available = is_option_available(
-            lptoken_address, option_side, strike_price, maturity.into()
+            lptoken_address, option_side, strike_price, maturity
         );
         assert(is_opt_available, 'VTI - opt unavailable');
 

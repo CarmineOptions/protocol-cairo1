@@ -16,23 +16,25 @@ mod AMM {
     #[storage]
     struct Storage {
         // Storage vars with new types
-        underlying_token_address: LegacyMap<LPTAddress, ContractAddress>,
+        
         pool_volatility_adjustment_speed: LegacyMap<LPTAddress, Math64x61_>,
         new_pool_volatility_adjustment_speed: LegacyMap<LPTAddress, Fixed>,
-        pool_volatility_separate: LegacyMap::<(LPTAddress, Maturity, LegacyStrike),
-        LegacyVolatility>,
-        option_volatility: LegacyMap::<(LPTAddress, Maturity, Strike),
-        Volatility>, // This is actually options vol, not pools
+        
+        pool_volatility_separate: LegacyMap::<(LPTAddress, Maturity, LegacyStrike), LegacyVolatility>,
+        option_volatility: LegacyMap::<(LPTAddress, Maturity, Strike), Volatility>, // This is actually options vol, not pools
+
         option_position_: LegacyMap<(LPTAddress, OptionSide, Maturity, LegacyStrike), felt252>,
         new_option_position: LegacyMap<(LPTAddress, OptionSide, Timestamp, Strike), Int>,
-        option_token_address: LegacyMap::<(LPTAddress, OptionSide, Maturity, LegacyStrike),
-        ContractAddress>,
-        new_option_token_address: LegacyMap::<(LPTAddress, OptionSide, Timestamp, Strike),
-        ContractAddress>,
+        option_token_address: LegacyMap::<(LPTAddress, OptionSide, Maturity, LegacyStrike), ContractAddress>,
+
+        new_option_token_address: LegacyMap::<(LPTAddress, OptionSide, Timestamp, Strike), ContractAddress>,
         available_options: LegacyMap::<(LPTAddress, felt252), LegacyOption>,
+
         new_available_options: LegacyMap::<(LPTAddress, u32), Option_>,
         new_available_options_usable_index: u32,
+        
         // Storage vars that are basically the same
+        underlying_token_address: LegacyMap<LPTAddress, ContractAddress>,
         max_lpool_balance: LegacyMap::<ContractAddress, u256>,
         pool_locked_capital_: LegacyMap<LPTAddress, u256>,
         lpool_balance_: LegacyMap<LPTAddress, u256>,
