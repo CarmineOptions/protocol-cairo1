@@ -1,4 +1,3 @@
-use carmine_protocol::types::option_::Option_Trait;
 mod LiquidityPool {
     use starknet::ContractAddress;
     use starknet::get_caller_address;

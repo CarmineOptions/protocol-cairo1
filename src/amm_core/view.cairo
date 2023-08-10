@@ -17,7 +17,9 @@ mod Views {
         get_available_lptoken_addresses
     };
 
-    use carmine_protocol::types::option_::{Option_, Option_Trait, OptionWithPremia, OptionWithUsersPosition};
+    use carmine_protocol::types::option_::{
+        Option_, Option_Trait, OptionWithPremia, OptionWithUsersPosition
+    };
     use carmine_protocol::types::pool::{UserPoolInfo, PoolInfo, PoolInfoTrait, PoolTrait, Pool};
 
     use carmine_protocol::types::basic::{LPTAddress, Int};
@@ -60,16 +62,17 @@ mod Views {
                 continue;
             }
 
-            let total_premia = opt.premia_with_fees(
-                1, // TODO: Resolve this type
-            );
+            let total_premia = opt.premia_with_fees(1, // TODO: Resolve this type
+             );
 
             arr.append(OptionWithPremia { option: opt, premia: total_premia });
         };
         arr
     }
 
-    fn get_option_with_position_of_user(user_address: ContractAddress) -> Array<OptionWithUsersPosition> {
+    fn get_option_with_position_of_user(
+        user_address: ContractAddress
+    ) -> Array<OptionWithUsersPosition> {
         let mut pool_idx: felt252 = 0;
         let mut opt_idx: u32 = 0;
         let mut arr = ArrayTrait::<OptionWithUsersPosition>::new();
@@ -78,11 +81,10 @@ mod Views {
             let lptoken_addr = get_available_lptoken_addresses(pool_idx);
             if contract_address_to_felt252(lptoken_addr) == 0 {
                 break;
-            }           
+            }
 
             loop {
                 let option = get_available_options(lptoken_addr, opt_idx);
-
 
                 if option.sum() == 0 {
                     pool_idx += 1;
@@ -90,23 +92,20 @@ mod Views {
                     break;
                 }
 
-                let pos_size = IERC20Dispatcher { contract_address: option.opt_address() }
-                    .balanceOf(user_address);
+                let pos_size = IERC20Dispatcher {
+                    contract_address: option.opt_address()
+                }.balanceOf(user_address);
 
                 if pos_size == 0 {
                     opt_idx += 1;
                     break;
                 }
 
-
-                let premia_with_fees = option.value_of_user_position(
-                    pos_size.try_into().unwrap(),
-                );
+                let premia_with_fees = option
+                    .value_of_user_position(pos_size.try_into().unwrap(), );
 
                 let new_opt = OptionWithUsersPosition {
-                    option: option,
-                    position_size: pos_size,
-                    value_of_position: premia_with_fees
+                    option: option, position_size: pos_size, value_of_position: premia_with_fees
                 };
 
                 arr.append(new_opt);
@@ -185,6 +184,5 @@ mod Views {
             correct_option.premia_with_fees(pos_size_int)
         )
     }
-
 }
 

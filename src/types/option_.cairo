@@ -3,48 +3,30 @@ use core::traits::{TryInto, Into};
 use core::option::OptionTrait;
 use starknet::get_block_timestamp;
 use carmine_protocol::amm_core::helpers::{
-    legacyMath_to_cubit, cubit_to_legacyMath,
-    fromU256_balance,
-    split_option_locked_capital
+    legacyMath_to_cubit, cubit_to_legacyMath, fromU256_balance, split_option_locked_capital
 };
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
 use carmine_protocol::types::basic::{OptionSide, OptionType, Timestamp, LegacyStrike, Int};
 use carmine_protocol::amm_core::state::State::{
-    get_lptoken_address_for_given_option,
-    get_option_volatility,
-    get_pool_volatility_adjustment_speed,
-    get_option_position,
-    get_option_token_address
+    get_lptoken_address_for_given_option, get_option_volatility,
+    get_pool_volatility_adjustment_speed, get_option_position, get_option_token_address
 };
 
 use carmine_protocol::amm_core::constants::{
-    RISK_FREE_RATE,
-    TRADE_SIDE_LONG,
-    STOP_TRADING_BEFORE_MATURITY_SECONDS,
-    get_opposite_side,
+    RISK_FREE_RATE, TRADE_SIDE_LONG, STOP_TRADING_BEFORE_MATURITY_SECONDS, get_opposite_side,
     OPTION_CALL,
 };
 
 use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
-    get_new_volatility,
-    get_time_till_maturity,
-    select_and_adjust_premia,
-    add_premia_fees
+    get_new_volatility, get_time_till_maturity, select_and_adjust_premia, add_premia_fees
 };
 
-use carmine_protocol::amm_core::pricing::fees::{
-    get_fees
-};
+use carmine_protocol::amm_core::pricing::fees::{get_fees};
 
-use carmine_protocol::amm_core::pricing::option_pricing::{
-    black_scholes
-};
+use carmine_protocol::amm_core::pricing::option_pricing::{black_scholes};
 
-use carmine_protocol::amm_core::oracles::agg::OracleAgg::{
-    get_current_price,
-    get_terminal_price
-};
+use carmine_protocol::amm_core::oracles::agg::OracleAgg::{get_current_price, get_terminal_price};
 
 // Option used in c0 AMM
 #[derive(Copy, Drop, Serde, Store)]
@@ -93,7 +75,7 @@ impl Option_Impl of Option_Trait {
             let correct_side = get_opposite_side(self.option_side);
             Option_ {
                 option_side: get_opposite_side(self.option_side),
-                maturity: self.maturity, 
+                maturity: self.maturity,
                 strike_price: self.strike_price,
                 quote_token_address: self.quote_token_address,
                 base_token_address: self.base_token_address,
@@ -112,34 +94,27 @@ impl Option_Impl of Option_Trait {
 
     fn opt_address(self: Option_) -> ContractAddress {
         get_option_token_address(
-            self.lpt_addr(),
-            self.option_side,
-            self.maturity,
-            self.strike_price
+            self.lpt_addr(), self.option_side, self.maturity, self.strike_price
         )
     }
 
     fn lpt_addr(self: Option_) -> ContractAddress {
         get_lptoken_address_for_given_option(
-            self.quote_token_address,
-            self.base_token_address,
-            self.option_type
-        )
-    }
-    
-    fn volatility(self: Option_) -> Fixed {
-        get_option_volatility(
-            self.lpt_addr(),
-            self.maturity,
-            self.strike_price
+            self.quote_token_address, self.base_token_address, self.option_type
         )
     }
 
+    fn volatility(self: Option_) -> Fixed {
+        get_option_volatility(self.lpt_addr(), self.maturity, self.strike_price)
+    }
+
     fn premia_before_fees(self: Option_, position_size: Int) -> Fixed {
-            // For clarity
+        // For clarity
         let option_size = position_size;
         let option_size_cubit = fromU256_balance(position_size.into(), self.base_token_address);
-        let pool_volatility_adjustment_speed = get_pool_volatility_adjustment_speed(self.lpt_addr());
+        let pool_volatility_adjustment_speed = get_pool_volatility_adjustment_speed(
+            self.lpt_addr()
+        );
 
         // 1) Get current underlying price
         let underlying_price = get_current_price(self.quote_token_address, self.base_token_address);
@@ -177,7 +152,9 @@ impl Option_Impl of Option_Trait {
         assert(call_premia >= zero, 'GPBF - call_premia < 0');
         assert(put_premia >= zero, 'GPBF - put_premia < 0');
 
-        let premia = select_and_adjust_premia(call_premia, put_premia, self.option_type, underlying_price);
+        let premia = select_and_adjust_premia(
+            call_premia, put_premia, self.option_type, underlying_price
+        );
 
         let total_premia_before_fees = premia * option_size_cubit;
 
@@ -189,9 +166,7 @@ impl Option_Impl of Option_Trait {
 
 
     fn premia_with_fees(self: Option_, position_size: Int) -> Fixed {
-        let total_premia_before_fees = self.premia_before_fees(
-            position_size,
-        );
+        let total_premia_before_fees = self.premia_before_fees(position_size, );
         assert(total_premia_before_fees >= FixedTrait::ZERO(), 'GPWF - total premia < 0');
 
         let total_fees = get_fees(total_premia_before_fees);
@@ -238,9 +213,7 @@ impl Option_Impl of Option_Trait {
         let stop_trading_by = self.maturity - STOP_TRADING_BEFORE_MATURITY_SECONDS;
         assert(current_block_time <= stop_trading_by, 'GVoP - Wait till maturity');
 
-        let total_premia_before_fees = self.premia_before_fees(
-            position_size,
-        );
+        let total_premia_before_fees = self.premia_before_fees(position_size, );
 
         // Get fees and total premia
         let total_fees = get_fees(total_premia_before_fees);
@@ -271,26 +244,20 @@ impl Option_Impl of Option_Trait {
     }
 
     fn pools_position(self: Option_) -> Int {
-        get_option_position(
-            self.lpt_addr(),
-            self.option_side,
-            self.maturity,
-            self.strike_price
-        )
+        get_option_position(self.lpt_addr(), self.option_side, self.maturity, self.strike_price)
     }
 
 
     fn value_of_user_position(self: Option_, position_size: Int) -> Fixed {
-
         if self.is_ripe() {
             let terminal_price = get_terminal_price(
                 self.quote_token_address, self.base_token_address, self.maturity
-            ); 
+            );
 
             let (long_value, short_value) = split_option_locked_capital(
                 self.option_type,
                 self.option_side,
-                fromU256_balance(position_size.into(), self.base_token_address), 
+                fromU256_balance(position_size.into(), self.base_token_address),
                 self.strike_price,
                 terminal_price
             );
@@ -300,7 +267,7 @@ impl Option_Impl of Option_Trait {
             } else {
                 return short_value;
             }
-        } 
+        }
 
         // TODO: is this correct?
         // Value of an option should be value that user would be able to get 
@@ -320,7 +287,7 @@ struct OptionWithPremia {
 #[derive(Drop)]
 struct OptionWithUsersPosition {
     option: Option_,
-    position_size: u256, 
+    position_size: u256,
     value_of_position: Fixed
 }
 

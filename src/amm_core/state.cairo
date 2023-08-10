@@ -34,12 +34,10 @@ mod State {
         Strike, Int, Timestamp
     };
 
-    use carmine_protocol::types::pool::{
-        Pool
-    };
+    use carmine_protocol::types::pool::{Pool};
 
     use carmine_protocol::types::option_::{
-        LegacyOption, Option_, LegacyOption_to_Option, Option_to_LegacyOption,
+        LegacyOption, Option_, LegacyOption_to_Option, Option_to_LegacyOption, Option_Trait
     };
 
     fn set_option_token_address(
@@ -319,9 +317,7 @@ mod State {
         assert(
             contract_address_to_felt252(pool.quote_token_address) != 0, 'Quote addr doesnt exist'
         );
-        assert(
-            contract_address_to_felt252(pool.base_token_address) != 0, 'Base addr doesnt exist'
-        );
+        assert(contract_address_to_felt252(pool.base_token_address) != 0, 'Base addr doesnt exist');
         assert_option_type_exists(pool.option_type, 'Unknown option type');
 
         return pool;
@@ -601,8 +597,7 @@ mod State {
 
         let match_opt: Option_ = loop {
             let option_ = get_available_options(lptoken_address, i);
-            let option_sum = option_.maturity.into() + option_.strike_price.mag;
-            assert(option_sum != 0, 'Specified option unavailable');
+            assert(option_.sum() != 0, 'Specified option unavailable');
 
             i += 1;
             if !(option_.option_side == option_side) {

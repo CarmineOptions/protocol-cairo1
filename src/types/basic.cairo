@@ -17,4 +17,3 @@ type Maturity = felt252;
 type Volatility = Fixed;
 type Strike = Fixed;
 
-
