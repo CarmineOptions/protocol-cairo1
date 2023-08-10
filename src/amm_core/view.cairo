@@ -98,9 +98,6 @@ mod Views {
                     break;
                 }
 
-                // Value of an option should be value that user would be able to get 
-                // if they were to close the position, so we need to pretend we're closing the position
-                let option = option.correct_side(true);
 
                 let premia_with_fees = option.value_of_user_position(
                     pos_size.try_into().unwrap(),
@@ -191,14 +188,3 @@ mod Views {
 
 }
 
-
-
-
-
-
-// $2100	Friday, 11 August at 01:59:59 CEST	ETH 0.0000
-// $2100	Friday, 25 August at 01:59:59 CEST	ETH 0.0096
-// $2000	Friday, 11 August at 01:59:59 CEST	ETH 0.0000
-// $2000	Friday, 25 August at 01:59:59 CEST	ETH 0.0116
-// $1900	Friday, 11 August at 01:59:59 CEST	ETH 0.0018
-// $1900	Friday, 25 August at 01:59:59 CEST	ETH 0.0228
