@@ -1,4 +1,5 @@
 use starknet::ContractAddress;
+use debug::PrintTrait;
 use core::traits::{TryInto, Into};
 use core::option::OptionTrait;
 use starknet::get_block_timestamp;
@@ -320,5 +321,27 @@ fn LegacyOption_to_Option(opt: LegacyOption) -> Option_ {
         quote_token_address: opt.quote_token_address,
         base_token_address: opt.base_token_address,
         option_type: opt.option_type
+    }
+}
+
+impl Option_Print of PrintTrait<Option_> {
+    fn print(self: Option_) {
+        self.option_side.print();
+        self.maturity.print();
+        self.strike_price.print();
+        self.quote_token_address.print();
+        self.base_token_address.print();
+        self.option_type.print();
+    }
+}
+
+impl LegacyOptionPrint of PrintTrait<LegacyOption> {
+    fn print(self: LegacyOption) {
+        self.option_side.print();
+        self.maturity.print();
+        self.strike_price.print();
+        self.quote_token_address.print();
+        self.base_token_address.print();
+        self.option_type.print();
     }
 }
