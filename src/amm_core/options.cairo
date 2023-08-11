@@ -11,6 +11,8 @@ use option::OptionTrait;
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
 use carmine_protocol::amm_core::amm::AMM::{TradeOpen, TradeClose, TradeSettle, emit_event};
+use carmine_protocol::amm_core::liquidity_pool::LiquidityPool::expire_option_token_for_pool;
+
 
 use carmine_protocol::types::basic::{
     OptionSide, OptionType, Math64x61_, Int, LPTAddress, Volatility, Strike, Timestamp
@@ -711,14 +713,12 @@ fn expire_option_token(
     );
 
     if (current_pool_position != 0) {
-        assert(1 == 0, 'EOT - pool pos not zero');
-    // TODO: Below
-    // expire_option_token_for_pool(
-    //     lptoken_address=lptoken_address,
-    //     option_side=option_side,
-    //     strike_price=strike_price,
-    //     maturity=maturity,
-    // );
+        expire_option_token_for_pool(
+           lptoken_address,
+           option_side,
+           strike_price,
+           maturity,
+        );
     }
     // Check that the pool's position was expired correctly
     let current_pool_position_2 =

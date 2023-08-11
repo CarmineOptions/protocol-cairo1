@@ -226,7 +226,7 @@ mod State {
     // Migrates old options and returns first empty index
     fn migrate_old_options(lptoken_address: ContractAddress, idx: u32) -> u32 {
         let mut state =
-            AMM::unsafe_new_contract_state(); // Todo: maybe pass this as an arg? Is it expensive to create it?
+            AMM::unsafe_new_contract_state(); 
 
         // Get old option at index
         let old_option = available_options::InternalContractStateTrait::read(

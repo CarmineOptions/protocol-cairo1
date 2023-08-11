@@ -1,43 +1,59 @@
+use starknet::contract_address::{contract_address_to_felt252, contract_address_try_from_felt252};
 use starknet::get_block_timestamp;
 use starknet::ContractAddress;
 use traits::Into;
 use traits::TryInto;
 use option::OptionTrait;
 
-use starknet::contract_address::{contract_address_to_felt252, contract_address_try_from_felt252};
 use core::cmp::{max, min};
 
 use cubit::f128::types::fixed::{Fixed, FixedTrait, MAX_u128, FixedInto};
 
-use carmine_protocol::amm_core::constants::{
-    OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side
-};
-use carmine_protocol::amm_core::constants::{
-    get_decimal, STOP_TRADING_BEFORE_MATURITY_SECONDS, RISK_FREE_RATE
-};
+use carmine_protocol::amm_core::oracles::agg::OracleAgg::{get_terminal_price, get_current_price};
 
 use carmine_protocol::types::basic::{Math64x61_, OptionSide, OptionType, Int, Timestamp};
 use carmine_protocol::types::option_::{Option_};
 
-use carmine_protocol::amm_core::oracles::agg::OracleAgg::{get_terminal_price, get_current_price};
-
+use carmine_protocol::amm_core::pricing::option_pricing::black_scholes;
+use carmine_protocol::amm_core::pricing::fees::get_fees;
 use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
     get_new_volatility, get_time_till_maturity, select_and_adjust_premia, add_premia_fees,
 };
 
+use carmine_protocol::amm_core::constants::{
+    OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side,
+    get_decimal, STOP_TRADING_BEFORE_MATURITY_SECONDS, RISK_FREE_RATE
+};
 
-use carmine_protocol::amm_core::pricing::option_pricing::black_scholes;
+trait FixedHelpersTrait {
+    fn assert_nn_not_zero(self: Fixed, msg: felt252);
+    fn assert_nn(self: Fixed, errmsg: felt252);
+    fn to_legacyMath(self: Fixed) -> Math64x61_;
+    fn from_legacyMath(num: Math64x61_) -> Fixed;
 
-use carmine_protocol::amm_core::pricing::fees::get_fees;
-
-// TODO: make this functions generic
-
-fn assert_nn_cubit(num: Fixed, msg: felt252) {
-    assert(num >= FixedTrait::ZERO(), msg);
 }
 
-fn assert_nn_not_zero_cubit(num: Fixed, msg: felt252) {
-    assert(num > FixedTrait::ZERO(), msg);
+impl FixedHelpersImpl of FixedHelpersTrait {
+    fn assert_nn_not_zero(self: Fixed, msg: felt252) {
+        assert(self > FixedTrait::ZERO(), msg);
+    }
+
+    fn assert_nn(self: Fixed, errmsg: felt252) {
+        assert(self >= FixedTrait::ZERO(), errmsg)
+    }
+
+    fn to_legacyMath(self: Fixed) -> Math64x61_ {
+        // TODO: Find better way to do this, this is just wrong
+        // Fixed is 8 times the old math
+        let new: felt252 = (self / FixedTrait::from_unscaled_felt(8)).into();
+        new
+    }
+
+    fn from_legacyMath(num: Math64x61_) -> Fixed {
+        // 2**61 is 8 times smaller than 2**64
+        // so we can just multiply old legacy math number by 8 to get cubit 
+        FixedTrait::from_felt(num * 8)
+    }
 }
 
 fn assert_option_side_exists(option_side: u8, msg: felt252) {
@@ -52,22 +68,6 @@ fn assert_address_not_zero(addr: ContractAddress, msg: felt252) {
     assert(contract_address_to_felt252(addr) != 0, msg);
 }
 
-
-// #[panic_with('unable to convert to cubit', legacyMath_to_cubit)]
-fn legacyMath_to_cubit(num: Math64x61_) -> Fixed {
-    // 2**61 is 8 times smaller than 2**64
-    // so we can just multiply old legacy math number by 8 to get cubit 
-    FixedTrait::from_felt(num * 8)
-// TODO: Check for overflow/make it panic
-}
-
-fn cubit_to_legacyMath(num: Fixed) -> Math64x61_ {
-    // TODO: Find better way to do this, this is just wrong
-    // Fixed is 8 times the old math
-    let new: felt252 = (num / FixedTrait::from_unscaled_felt(8)).into();
-    new
-}
-
 // TODO: Implement felt252**pow
 fn felt_power(num: felt252, pow: felt252) -> felt252 {
     // num ** pow
@@ -76,9 +76,6 @@ fn felt_power(num: felt252, pow: felt252) -> felt252 {
 
 // TODO: Make this generic/for more types (impl Eq or sum shit)
 // cairo1 repo has similar functions in tests/test_utils.cairo or sth
-fn assert_nn_fixed(num: Fixed, errmsg: felt252) {
-    assert(num >= FixedTrait::from_felt(0), errmsg)
-}
 
 fn check_deadline(deadline: Timestamp) {
     let current_block_time = get_block_timestamp();

@@ -3,7 +3,7 @@ use core::traits::{TryInto, Into};
 use core::option::OptionTrait;
 use starknet::get_block_timestamp;
 use carmine_protocol::amm_core::helpers::{
-    legacyMath_to_cubit, cubit_to_legacyMath, fromU256_balance, split_option_locked_capital
+    fromU256_balance, split_option_locked_capital, FixedHelpersTrait
 };
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
@@ -153,10 +153,9 @@ impl Option_Impl of Option_Trait {
             risk_free_rate_annualized,
             false
         );
-        let zero = FixedTrait::from_felt(0);
 
-        assert(call_premia >= zero, 'GPBF - call_premia < 0');
-        assert(put_premia >= zero, 'GPBF - put_premia < 0');
+        call_premia.assert_nn('GPBF - call_premia < 0');
+        put_premia.assert_nn('GPBF - put_premia < 0');
 
         let premia = select_and_adjust_premia(
             call_premia, put_premia, self.option_type, underlying_price
@@ -164,8 +163,9 @@ impl Option_Impl of Option_Trait {
 
         let total_premia_before_fees = premia * option_size_cubit;
 
-        assert(premia >= zero, 'GPBF - premia < 0');
-        assert(total_premia_before_fees >= zero, 'GPBF - premia_before_fees < 0');
+        premia.assert_nn('GPBF - premia < 0');
+        total_premia_before_fees.assert_nn('GPBF - premia_before_fees < 0');
+
 
         total_premia_before_fees
     }
@@ -173,22 +173,21 @@ impl Option_Impl of Option_Trait {
 
     fn premia_with_fees(self: Option_, position_size: Int) -> Fixed {
         let total_premia_before_fees = self.premia_before_fees(position_size, );
-        assert(total_premia_before_fees >= FixedTrait::ZERO(), 'GPWF - total premia < 0');
+        total_premia_before_fees.assert_nn('GPWF - total premia < 0');
 
         let total_fees = get_fees(total_premia_before_fees);
-        assert(total_fees >= FixedTrait::ZERO(), 'GPWF - total fees < 0');
+        total_fees.assert_nn('GPWF - total fees < 0');
 
         let premia_with_fees = add_premia_fees(
             self.option_side, total_premia_before_fees, total_fees
         );
-        assert(premia_with_fees >= FixedTrait::ZERO(), 'GPWF - premia w/ fees < 0');
+        premia_with_fees.assert_nn('GPWF - premia w/ fees < 0');
 
         premia_with_fees
     }
 
 
     fn value_of_position(self: Option_, position_size: Int) -> Fixed {
-        let zero = FixedTrait::ZERO();
 
         let current_block_time = get_block_timestamp();
         let is_ripe = self.maturity <= current_block_time;
@@ -223,13 +222,13 @@ impl Option_Impl of Option_Trait {
 
         // Get fees and total premia
         let total_fees = get_fees(total_premia_before_fees);
-        assert(total_fees >= zero, 'GVoP - total fees < 0');
+        total_fees.assert_nn('GVoP - total fees < 0');
 
         let opposite_side = get_opposite_side(self.option_side);
 
         let premia_with_fees = add_premia_fees(opposite_side, total_premia_before_fees, total_fees);
+        premia_with_fees.assert_nn('GVoP - premia w fees < 0');
 
-        assert(premia_with_fees >= zero, 'GVoP - premia w fees < 0');
 
         if self.option_side == TRADE_SIDE_LONG {
             return premia_with_fees;
@@ -237,13 +236,13 @@ impl Option_Impl of Option_Trait {
 
         if self.option_type == OPTION_CALL {
             let locked_and_premia_with_fees = position_size_cubit - premia_with_fees;
-            assert(locked_and_premia_with_fees >= zero, 'GVoP - locked_prem_fee < 0');
+            locked_and_premia_with_fees.assert_nn('GVoP - locked_prem_fee < 0');
 
             return locked_and_premia_with_fees;
         } else {
             let locked_capital = position_size_cubit * self.strike_price;
             let locked_and_premia_with_fees = locked_capital - premia_with_fees;
-            assert(locked_and_premia_with_fees >= zero, 'GVoP - locked_prem_fee < 0');
+            locked_and_premia_with_fees.assert_nn('GVoP - locked_prem_fee < 0');
 
             return locked_and_premia_with_fees;
         }
@@ -306,7 +305,7 @@ fn Option_to_LegacyOption(opt: Option_) -> LegacyOption {
     LegacyOption {
         option_side: opt.option_side,
         maturity: opt.maturity.into(),
-        strike_price: cubit_to_legacyMath(opt.strike_price),
+        strike_price: opt.strike_price.to_legacyMath(),
         quote_token_address: opt.quote_token_address,
         base_token_address: opt.base_token_address,
         option_type: opt.option_type
@@ -317,7 +316,7 @@ fn LegacyOption_to_Option(opt: LegacyOption) -> Option_ {
     Option_ {
         option_side: opt.option_side,
         maturity: opt.maturity.try_into().unwrap(),
-        strike_price: legacyMath_to_cubit(opt.strike_price),
+        strike_price: FixedHelpersTrait::from_legacyMath(opt.strike_price),
         quote_token_address: opt.quote_token_address,
         base_token_address: opt.base_token_address,
         option_type: opt.option_type

@@ -55,29 +55,12 @@ fn get_decimal(token_address: ContractAddress) -> Option<felt252> {
 
     let decimals = IERC20Dispatcher { contract_address: token_address }.decimals();
     assert(decimals != 0, 'Token has decimals = 0');
-
-    let decimals_felt: felt252 = decimals.into();
-    return Option::Some(decimals_felt);
-// TODO: Following code breaks my LSP :/
-// match token_address {
-//     TOKEN_ETH_ADDRESS => {
-//         return 18_u8;
-//     },
-//     TOKEN_USD_ADDRESS => {
-//         return 6_u8;
-//     },
-//     _ => {
-//         assert(contract_address_to_felt252(token_address) != 0, 'Token address is zero');
-
-//         let decimals = IERC20Dispatcher{contract_address: token_address}.decimals();
-
-//         assert(decimals != 0, 'Token has decimals = 0');
-
-//         let decimals_felt: felt252 = decimals.into();
-//         return decimals_felt;
-
-//     }
-// }
-
+    
+    if decimals == 0 {
+        return Option::None(());
+    } else {
+        let decimals_felt: felt252 = decimals.into();
+        return Option::Some(decimals_felt);
+    }
 }
 
