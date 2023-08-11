@@ -1,3 +1,4 @@
+use carmine_protocol::amm_core::helpers::FixedHelpersTrait;
 mod State {
     use starknet::ContractAddress;
     use traits::{Into, TryInto};
@@ -9,8 +10,7 @@ mod State {
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
     use carmine_protocol::amm_core::helpers::{
-        legacyMath_to_cubit, cubit_to_legacyMath, assert_nn_not_zero_cubit,
-        assert_option_side_exists, assert_option_type_exists, assert_address_not_zero,
+        assert_option_side_exists, assert_option_type_exists, assert_address_not_zero, FixedHelpersTrait
     };
 
     use carmine_protocol::amm_core::constants::{
@@ -52,13 +52,13 @@ mod State {
         assert_option_side_exists(option_side, 'SOTA - opt side 0');
         assert(contract_address_to_felt252(lptoken_address) != 0, 'SOTE - lpt addr 0');
         assert(maturity > 0, 'SOTA - maturity <= 0');
-        assert_nn_not_zero_cubit(strike_price, 'sota - maturity <= 0');
+        strike_price.assert_nn_not_zero('sota - maturity <= 0');
         assert(contract_address_to_felt252(opt_address) != 0, 'SOTE - opt addr 0');
 
         // Set old storage var to zero in case this function get called before the getter
         option_token_address::InternalContractStateTrait::write(
             ref state.option_token_address,
-            (lptoken_address, option_side, maturity, cubit_to_legacyMath(strike_price)),
+            (lptoken_address, option_side, maturity, strike_price.to_legacyMath()),
             contract_address_try_from_felt252(0).unwrap()
         );
 
@@ -80,7 +80,7 @@ mod State {
         // First read the old value
         let option_token_addr = option_token_address::InternalContractStateTrait::read(
             @state.option_token_address,
-            (lptoken_address, option_side, maturity, cubit_to_legacyMath(strike_price))
+            (lptoken_address, option_side, maturity, strike_price.to_legacyMath())
         );
 
         if contract_address_to_felt252(option_token_addr) != 0 {
@@ -90,7 +90,7 @@ mod State {
             // Set old storage var to zero
             option_token_address::InternalContractStateTrait::write(
                 ref state.option_token_address,
-                (lptoken_address, option_side, maturity, cubit_to_legacyMath(strike_price)),
+                (lptoken_address, option_side, maturity, strike_price.to_legacyMath()),
                 contract_address_try_from_felt252(0).unwrap()
             );
 
@@ -131,7 +131,7 @@ mod State {
         // Set old storage var to zero in case this function get called before the getter
         pool_volatility_separate::InternalContractStateTrait::write(
             ref state.pool_volatility_separate,
-            (lptoken_address, maturity, cubit_to_legacyMath(strike_price)),
+            (lptoken_address, maturity, strike_price.to_legacyMath()),
             0
         );
 
@@ -148,7 +148,7 @@ mod State {
         // First let's try to read from the old storage var
         let res = pool_volatility_separate::InternalContractStateTrait::read(
             @state.pool_volatility_separate,
-            (lptoken_address, maturity, cubit_to_legacyMath(strike_price))
+            (lptoken_address, maturity, strike_price.to_legacyMath())
         );
 
         if res != 0 {
@@ -157,7 +157,7 @@ mod State {
 
             // If it's not zero then move the old value to new storage var and set the old one to zero
 
-            let res_cubit = legacyMath_to_cubit(res);
+            let res_cubit = FixedHelpersTrait::from_legacyMath(res);
 
             // Write old value to new storage var
             set_option_volatility(lptoken_address, maturity, strike_price, res_cubit);
@@ -165,7 +165,7 @@ mod State {
             // Set old value to zero
             pool_volatility_separate::InternalContractStateTrait::write(
                 ref state.pool_volatility_separate,
-                (lptoken_address, maturity, cubit_to_legacyMath(strike_price)),
+                (lptoken_address, maturity, strike_price.to_legacyMath()),
                 0
             );
 
@@ -177,7 +177,7 @@ mod State {
             @state.option_volatility, (lptoken_address, maturity, strike_price)
         );
 
-        assert_nn_not_zero_cubit(res, 'Opt vol <= 0');
+        res.assert_nn_not_zero('Opt vol <= 0');
 
         return res;
     }
@@ -252,7 +252,7 @@ mod State {
     }
 
     fn set_pool_volatility_adjustment_speed(lptoken_address: LPTAddress, new_speed: Fixed) {
-        assert_nn_not_zero_cubit(new_speed, 'Pool vol adjspd cant <= 0');
+        new_speed.assert_nn_not_zero('Pool vol adjspd cant <= 0');
 
         let mut state = AMM::unsafe_new_contract_state();
 
@@ -279,7 +279,7 @@ mod State {
             assert(res.into() > 0_u256, 'Old pool vol adj spd negative');
 
             // if it's not zero then move the old value to new storage var and set the old one to zero
-            let res_cubit = legacyMath_to_cubit(res);
+            let res_cubit = FixedHelpersTrait::from_legacyMath(res);
 
             // Write old value to new storage var
             set_pool_volatility_adjustment_speed(lptoken_address, res_cubit);
@@ -297,7 +297,7 @@ mod State {
             @state.new_pool_volatility_adjustment_speed, lptoken_address
         );
 
-        assert_nn_not_zero_cubit(res, 'New pool vol adj spd is <= 0');
+        res.assert_nn_not_zero('New pool vol adj spd is <= 0');
 
         return res;
     }
@@ -348,7 +348,7 @@ mod State {
         // First let's try to read from the old storage var
         let res = option_position_::InternalContractStateTrait::read(
             @state.option_position_,
-            (lptoken_address, option_side, maturity, cubit_to_legacyMath(strike_price))
+            (lptoken_address, option_side, maturity, strike_price.to_legacyMath())
         );
 
         if res != 0 {
@@ -365,7 +365,7 @@ mod State {
             // Set old value to zero
             option_position_::InternalContractStateTrait::write(
                 ref state.option_position_,
-                (lptoken_address, option_side, maturity, cubit_to_legacyMath(strike_price)),
+                (lptoken_address, option_side, maturity, strike_price.to_legacyMath()),
                 0
             );
 
@@ -387,13 +387,13 @@ mod State {
     ) {
         let mut state = AMM::unsafe_new_contract_state();
 
-        assert_nn_not_zero_cubit(strike_price, 'Strike zero/neg in set_opt_pos');
+        strike_price.assert_nn_not_zero('Strike zero/neg in set_opt_pos');
         assert(position > 0, 'Pos zero/neg in set_opt_pos');
 
         // Also it's important to set corresponding option position in old storage var to zero se that if this function is called before get_option_position then the value in new storage var won't be overwritten by the old one
         option_position_::InternalContractStateTrait::write(
             ref state.option_position_,
-            (lptoken_address, option_side, maturity, cubit_to_legacyMath(strike_price)),
+            (lptoken_address, option_side, maturity, strike_price.to_legacyMath()),
             0
         );
 

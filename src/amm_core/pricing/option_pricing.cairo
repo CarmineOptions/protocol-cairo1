@@ -48,12 +48,12 @@ fn std_normal_cdf(x: Fixed) -> Fixed {
     let THREE = FixedTrait::from_unscaled_felt(3);
 
     if x.sign == true {
-        let dist_symmetric_value = std_normal_cdf(FixedTrait::new(x.mag, false));
+        let dist_symmetric_value = std_normal_cdf(x.abs());
         return (ONE - dist_symmetric_value);
     };
 
-    // TODO: Add assert for x<8
-
+    assert(x <= (TWO.pow(THREE)), 'STD_NC - x > 8');
+    
     let x_squared = x * x;
     let x_sq_half = x_squared / TWO;
     let numerator = inv_exp_big_x(x_sq_half);

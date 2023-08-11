@@ -11,7 +11,7 @@ mod Trading {
     };
 
     use carmine_protocol::amm_core::helpers::{fromU256_balance, };
-    use carmine_protocol::amm_core::helpers::{toU256_balance, legacyMath_to_cubit, check_deadline};
+    use carmine_protocol::amm_core::helpers::{toU256_balance, check_deadline};
 
     use carmine_protocol::amm_core::state::State::{
         get_option_volatility, get_pool_volatility_adjustment_speed, set_option_volatility,

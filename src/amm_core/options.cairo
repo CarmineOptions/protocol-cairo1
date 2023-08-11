@@ -21,9 +21,9 @@ use carmine_protocol::types::basic::{
 use carmine_protocol::types::option_::{Option_};
 
 use carmine_protocol::amm_core::helpers::{
-    legacyMath_to_cubit, cubit_to_legacyMath, toU256_balance, fromU256_balance,
+    toU256_balance, fromU256_balance, FixedHelpersTrait,
     split_option_locked_capital, assert_option_type_exists, assert_option_side_exists,
-    assert_address_not_zero
+    assert_address_not_zero,
 };
 
 use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
@@ -73,7 +73,7 @@ fn add_option(
     let contr_side = IOptionTokenDispatcher { contract_address: opt_address }.side();
 
     assert(contr_opt_type == option_type, 'Option type input doesnt match');
-    assert(contr_strike == cubit_to_legacyMath(strike_price), 'Strike price input doesnt match');
+    assert(contr_strike == strike_price.to_legacyMath(), 'Strike price input doesnt match');
     assert(contr_maturity == maturity.into(), 'Maturity input doesnt match');
     assert(contr_side == option_side, 'Option side input doesnt match');
 
@@ -112,7 +112,7 @@ fn mint_option_token(
     let contr_side = IOptionTokenDispatcher { contract_address: opt_address }.side();
 
     assert(contr_opt_type == option_type, 'Option type input doesnt match');
-    assert(contr_strike == cubit_to_legacyMath(strike_price), 'Strike price input doesnt match');
+    assert(contr_strike == strike_price.to_legacyMath(), 'Strike price input doesnt match');
     assert(contr_maturity == maturity.into(), 'Maturity input doesnt match');
     assert(contr_side == option_side, 'Option side input doesnt match');
 
@@ -373,7 +373,7 @@ fn burn_option_token(
     let contr_side = IOptionTokenDispatcher { contract_address: opt_address }.side();
 
     assert(contr_opt_type == option_type, 'Option type input doesnt match');
-    assert(contr_strike == cubit_to_legacyMath(strike_price), 'Strike price input doesnt match');
+    assert(contr_strike == strike_price.to_legacyMath(), 'Strike price input doesnt match');
     assert(contr_maturity == maturity.into(), 'Maturity input doesnt match');
     assert(contr_side == option_side, 'Option side input doesnt match');
 
