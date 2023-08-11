@@ -18,6 +18,11 @@ mod LiquidityPool {
     use carmine_protocol::types::option_::{Option_, Option_Trait};
     use carmine_protocol::types::pool::{Pool};
 
+
+    use carmine_protocol::amm_core::amm::AMM::{
+        DepositLiquidity, WithdrawLiquidity, ExpireOptionTokenForPool, emit_event
+    };
+
     use carmine_protocol::amm_core::oracles::agg::OracleAgg::get_terminal_price;
 
     use carmine_protocol::amm_core::state::State::{
@@ -197,13 +202,14 @@ mod LiquidityPool {
 
         let mint_amount = get_lptokens_for_underlying(lptoken_address, amount);
 
-        // TODO:
-        // DepositLiquidity.emit(
-        //     caller=caller_addr,
-        //     lp_token=lptoken_address,
-        //     capital_transfered=amount,
-        //     lp_tokens_minted=mint_amount,
-        // );
+        emit_event(
+            DepositLiquidity {
+                caller: caller_addr,
+                lp_token: lptoken_address,
+                capital_transfered: amount,
+                lp_tokens_minted: mint_amount,
+            }
+        );
 
         // Update the lpool_balance after the mint_amount has been computed
         // (get_lptokens_for_underlying uses lpool_balance)
@@ -253,13 +259,14 @@ mod LiquidityPool {
         assert(underlying_amount <= free_capital, 'Not enough capital');
         assert(free_capital != 0, 'Free capital is zero');
 
-        // TODO:
-        // WithdrawLiquidity.emit(
-        //     caller=caller_addr,
-        //     lp_token=lptoken_address,
-        //     capital_transfered=underlying_amount_uint256,
-        //     lp_tokens_burned=lp_token_amount,
-        // );
+        emit_event(
+            WithdrawLiquidity {
+                caller: caller_addr,
+                lp_token: lptoken_address,
+                capital_transfered: underlying_amount,
+                lp_tokens_burned: lp_token_amount,
+            }
+        );
 
         let current_balance = get_lpool_balance(lptoken_address);
         let unlocked_capital = get_unlocked_capital(lptoken_address);
@@ -350,13 +357,14 @@ mod LiquidityPool {
         strike_price: Fixed,
         maturity: Timestamp,
     ) {
-        // TODO:
-        // ExpireOptionTokenForPool.emit(
-        //     lptoken_address=lptoken_address,
-        //     option_side=option_side,
-        //     strike_price=strike_price,
-        //     maturity=maturity,
-        // );
+        emit_event(
+            ExpireOptionTokenForPool {
+                lptoken_address: lptoken_address,
+                option_side: option_side,
+                strike_price: strike_price,
+                maturity: maturity,
+            }
+        );
 
         let option = get_option_info(lptoken_address, option_side, strike_price, maturity, );
         let option_size = get_option_position(lptoken_address, option_side, maturity, strike_price);

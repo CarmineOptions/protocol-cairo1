@@ -10,6 +10,7 @@ use option::OptionTrait;
 
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
+use carmine_protocol::amm_core::amm::AMM::{TradeOpen, TradeClose, TradeSettle, emit_event};
 
 use carmine_protocol::types::basic::{
     OptionSide, OptionType, Math64x61_, Int, LPTAddress, Volatility, Strike, Timestamp
@@ -44,7 +45,7 @@ use carmine_protocol::traits::{
 };
 
 // TODO: Add annotations
-
+// TODO: What about new options that are written in c2?
 fn add_option(
     option_side: OptionSide,
     maturity: Timestamp,
@@ -177,7 +178,14 @@ fn _mint_option_token_long(
     // Move premia from user to the pool
     let premia_including_fees_u256 = toU256_balance(premia_including_fees, currency_address);
 
-    // TODO: Emit TradeOpen Event
+    emit_event(
+        TradeOpen {
+            caller: user_address,
+            option_token: option_token_address,
+            capital_transfered: premia_including_fees_u256,
+            option_tokens_minted: option_size.into()
+        }
+    );
 
     // Pool is locking in capital only if there is no previous position to cover the user's long
     //      -> if pool does not have sufficient long to "pass down to user", it has to lock
@@ -272,7 +280,14 @@ fn _mint_option_token_short(
     let premia_including_fees_u256 = toU256_balance(premia_including_fees, currency_address);
     let to_be_paid_by_user = option_size_in_pool_currency - premia_including_fees_u256;
 
-    // TODO: Emit TradeOpen event
+    emit_event(
+        TradeOpen {
+            caller: user_address,
+            option_token: option_token_address,
+            capital_transfered: premia_including_fees_u256,
+            option_tokens_minted: option_size.into()
+        }
+    );
 
     // Decrease lpool_balance by premia_including_fees -> this also decreases unlocked capital
     // since only locked_capital storage_var exists
@@ -426,7 +441,14 @@ fn _burn_option_token_long(
     let option_size_u256: u256 = option_size.into();
     let premia_including_fees_u256 = toU256_balance(premia_including_fees, currency_address);
 
-    // TODO: Emit TradeClose event
+    emit_event(
+        TradeClose {
+            caller: user_address,
+            option_token: option_token_address,
+            capital_transfered: premia_including_fees_u256,
+            option_tokens_burned: option_size.into()
+        }
+    );
 
     // Decrease lpool_balance by premia_including_fees -> this also decreases unlocked capital
     // This decrease is happening because burning long is similar to minting short,
@@ -540,7 +562,14 @@ fn _burn_option_token_short(
 
     let total_user_payment = option_size_in_pool_currency - premia_including_fees_u256;
 
-    // TODO: Emit TradeClose Event
+    emit_event(
+        TradeClose {
+            caller: user_address,
+            option_token: option_token_address,
+            capital_transfered: premia_including_fees_u256,
+            option_tokens_burned: option_size.into()
+        }
+    );
 
     // Increase lpool_balance by premia_including_fees -> this also increases unlocked capital
     // This increase is happening because burning short is similar to minting long,
@@ -741,13 +770,14 @@ fn expire_option_token(
         }.transfer(user_address, long_value_u256, );
 
         assert(transfer_res, 'EOT: unable to transfer funds');
-    // TODO: Emit: 
-    // TradeSettle.emit(
-    //     caller=user_address,
-    //     option_token=option_token_address,
-    //     capital_transfered=long_value_uint256,
-    //     option_tokens_burned=option_size_uint256,
-    // );
+        emit_event(
+            TradeSettle {
+                caller: user_address,
+                option_token: option_token_address,
+                capital_transfered: long_value_u256,
+                option_tokens_burned: option_size_u256,
+            }
+        );
     } else {
         // User is short
         // User locked in capital (no locking happened from pool - no locked capital and similar
@@ -758,13 +788,15 @@ fn expire_option_token(
         }.transfer(user_address, short_value_u256, );
 
         assert(transfer_res, 'EOT: unable to transfer funds');
-    // TODO: Emit:
-    // TradeSettle.emit(
-    //     caller=user_address,
-    //     option_token=option_token_address,
-    //     capital_transfered=short_value_uint256,
-    //     option_tokens_burned=option_size_uint256,
-    // );
+
+        emit_event(
+            TradeSettle {
+                caller: user_address,
+                option_token: option_token_address,
+                capital_transfered: short_value_u256,
+                option_tokens_burned: option_size_u256,
+            }
+        );
     }
 // TODO: Insert ReentrancyGuard.end()
 

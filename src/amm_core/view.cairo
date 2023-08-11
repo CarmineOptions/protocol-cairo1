@@ -101,8 +101,7 @@ mod Views {
                     break;
                 }
 
-                let premia_with_fees = option
-                    .value_of_user_position(pos_size.try_into().unwrap());
+                let premia_with_fees = option.value_of_user_position(pos_size.try_into().unwrap());
 
                 let new_opt = OptionWithUsersPosition {
                     option: option, position_size: pos_size, value_of_position: premia_with_fees

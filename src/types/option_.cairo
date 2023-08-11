@@ -281,10 +281,8 @@ impl Option_Impl of Option_Trait {
         self.correct_side(true).premia_with_fees(position_size)
     }
 
-    fn get_dispatcher(self: Option_) -> IOptionTokenDispatcher{
-        IOptionTokenDispatcher {
-            contract_address: self.opt_address()
-        }
+    fn get_dispatcher(self: Option_) -> IOptionTokenDispatcher {
+        IOptionTokenDispatcher { contract_address: self.opt_address() }
     }
 }
 

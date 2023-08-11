@@ -12,7 +12,7 @@ mod Trading {
 
     use carmine_protocol::amm_core::helpers::{fromU256_balance, };
     use carmine_protocol::amm_core::helpers::{toU256_balance, legacyMath_to_cubit, check_deadline};
-    
+
     use carmine_protocol::amm_core::state::State::{
         get_option_volatility, get_pool_volatility_adjustment_speed, set_option_volatility,
         get_trading_halt, is_option_available, get_lptoken_address_for_given_option,
@@ -38,7 +38,6 @@ mod Trading {
     use carmine_protocol::amm_core::oracles::agg::OracleAgg::{
         get_current_price, get_terminal_price,
     };
-
 
 
     fn do_trade(
