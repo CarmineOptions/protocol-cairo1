@@ -134,6 +134,12 @@ fn toU256_balance(x: Fixed, currency_address: ContractAddress) -> u256 {
 
     let decimals: u128 = get_decimal(currency_address)
         .expect('toU256 - Unable to get decimals').into();
+
+    _toU256_balance(x, decimals)
+}
+
+fn _toU256_balance(x: Fixed, decimals: u128) -> u256 {
+
     let five_to_dec = _pow(5, decimals);
 
     let x_5 = x.mag * five_to_dec;
@@ -168,10 +174,15 @@ fn fromU256_balance(x: u256, currency_address: ContractAddress) -> Fixed {
     // We can split the 10*18 to (2**18 * 5**18)
     // (1.2 * 10**18) * 2**64 / (5**18 * 2**18)
 
-    let decimal: u128 = get_decimal(currency_address)
+    let decimals: u128 = get_decimal(currency_address)
         .expect('fromU256 - decimals zero').into();
 
-    let five_to_dec = _pow(5, decimal);
+    _fromU256_balance(x, decimals)
+}
+
+fn _fromU256_balance(x: u256, decimals: u128) -> Fixed {
+
+    let five_to_dec = _pow(5, decimals);
 
     // (1.2 * 10**18) * 2**64 / (5**18 * 2**18)
     // so we have
@@ -180,7 +191,7 @@ fn fromU256_balance(x: u256, currency_address: ContractAddress) -> Fixed {
     // (1.2 * 10**18) / 5**18 * (2**64 / 2**18)
     // (1.2 * 10**18) / 5**18 * 2**(64-18)
     // x / five_to_dec * 2**(sixty_one_minus_dec)
-    let sixty_four_minus_dec = 64 - decimal;
+    let sixty_four_minus_dec = 64 - decimals;
     let decreased_FRACT_PART = _pow(2, sixty_four_minus_dec);
     let x_ = x.low * decreased_FRACT_PART;
     // x / five_to_dec * decreased_FRACT_PART
