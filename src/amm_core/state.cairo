@@ -84,14 +84,20 @@ mod State {
         );
 
         if contract_address_to_felt252(option_token_addr) != 0 {
-            // Write it to new storage var
-            // set_option_token_address();
+            // Write value to new storage var
+            set_option_token_address(
+                lptoken_address,
+                option_side,
+                maturity,
+                strike_price,
+                option_token_addr
+            );
 
             // Set old storage var to zero
             option_token_address::InternalContractStateTrait::write(
                 ref state.option_token_address,
                 (lptoken_address, option_side, maturity, strike_price.to_legacyMath()),
-                contract_address_try_from_felt252(0).unwrap()
+                contract_address_try_from_felt252(0).expect('Cannot create addr from 0')
             );
 
             return option_token_addr;
