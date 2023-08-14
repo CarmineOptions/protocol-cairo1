@@ -34,7 +34,7 @@ mod AMM {
         new_available_options_usable_index: u32,
         // Storage vars that are basically the same
         underlying_token_address: LegacyMap<LPTAddress, ContractAddress>,
-        max_lpool_balance: LegacyMap::<ContractAddress, u256>,
+        max_lpool_balance: LegacyMap::<LPTAddress, u256>,
         pool_locked_capital_: LegacyMap<LPTAddress, u256>,
         lpool_balance_: LegacyMap<LPTAddress, u256>,
         max_option_size_percent_of_voladjspd: Int, // TODO: This was felt252 in old amm

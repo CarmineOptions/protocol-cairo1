@@ -168,7 +168,7 @@ mod LiquidityPool {
         }
 
         set_pool_volatility_adjustment_speed(lptoken_address, volatility_adjustment_speed);
-        set_max_lpool_balance(pooled_token_addr, max_lpool_bal);
+        set_max_lpool_balance(lptoken_address, max_lpool_bal);
     }
 
     fn deposit_liquidity(
@@ -217,7 +217,7 @@ mod LiquidityPool {
         let new_balance = current_balance + amount;
         set_lpool_balance(lptoken_address, new_balance);
 
-        let max_balance = get_max_lpool_balance(pooled_token_address);
+        let max_balance = get_max_lpool_balance(lptoken_address);
 
         assert(current_balance <= max_balance, 'Lpool bal exceeds maximum');
 

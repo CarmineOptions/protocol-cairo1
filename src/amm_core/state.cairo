@@ -432,13 +432,13 @@ mod State {
         )
     }
 
-    fn get_max_lpool_balance(pooled_token_address: ContractAddress) -> u256 {
+    fn get_max_lpool_balance(lpt_addr: LPTAddress) -> u256 {
         max_lpool_balance::InternalContractStateTrait::read(
-            @AMM::unsafe_new_contract_state().max_lpool_balance, pooled_token_address
+            @AMM::unsafe_new_contract_state().max_lpool_balance, lpt_addr
         )
     }
 
-    fn set_max_lpool_balance(pooled_token_address: ContractAddress, max_bal: u256) {
+    fn set_max_lpool_balance(lpt_addr: LPTAddress, max_bal: u256) {
         let mut state = AMM::unsafe_new_contract_state();
         // TODO: Assert admin only!!!!!!!!!!!
 
@@ -446,7 +446,7 @@ mod State {
         assert(max_bal >= 0, 'Max lpool bal < 0');
 
         max_lpool_balance::InternalContractStateTrait::write(
-            ref state.max_lpool_balance, pooled_token_address, max_bal
+            ref state.max_lpool_balance, lpt_addr, max_bal
         );
     }
 
