@@ -7,6 +7,8 @@ use option::OptionTrait;
 
 use core::cmp::{max, min};
 
+use integer::U128DivRem;
+
 use cubit::f128::types::fixed::{Fixed, FixedTrait, MAX_u128, FixedInto};
 
 use carmine_protocol::amm_core::oracles::agg::OracleAgg::{get_terminal_price, get_current_price};
@@ -68,22 +70,47 @@ fn assert_address_not_zero(addr: ContractAddress, msg: felt252) {
     assert(contract_address_to_felt252(addr) != 0, msg);
 }
 
-// TODO: Implement felt252**pow
-fn felt_power(num: felt252, pow: felt252) -> felt252 {
-    // num ** pow
-    num
-}
-
-// TODO: Make this generic/for more types (impl Eq or sum shit)
-// cairo1 repo has similar functions in tests/test_utils.cairo or sth
-
 fn check_deadline(deadline: Timestamp) {
     let current_block_time = get_block_timestamp();
     assert(current_block_time <= deadline, 'TX is too old');
 }
 
+// fn pow<S, impl Mult: Mul<S>>(x: S, y: S) -> S {
+// Only helper function, not to be used anywhere else
+fn _pow(a: u128, b: u128) -> u128 {
+
+    let mut x: u128 = 1; 
+    let mut n = b;
+
+    if n == 0 {
+        return 1;
+    }
+
+    let mut y = 1;
+    let two = integer::u128_as_non_zero(2);
+
+    loop {
+        if n <= 1 {
+            break;
+        }
+
+        let (div, rem) = integer::u128_safe_divmod(
+            n, two
+        );
+
+        if rem == 1 {
+            y = x * y;
+        }
+
+        x = x * x;
+        n = div;
+    };
+    x * y
+}
+
+
 // @notice Converts the value into Uint256 balance
-// @dev Conversions from Math64_61 to Uint256
+// @dev Conversions from Cubit to Uint256
 // @dev Only for balances/token amounts, takes care of getting decimals etc
 // @dev This function was done in several steps to optimize this in terms precision. It's pretty
 //      nasty in terms of deconstruction. I would suggest checking tests, it might be faster.
@@ -99,85 +126,72 @@ fn toU256_balance(x: Fixed, currency_address: ContractAddress) -> u256 {
     // x = 1.2 * 2**61 (example input... 2**61 since it is Math64x61)
     // We want to divide the number by 2**61 and multiply by 10**18 to get number in the "wei style
     // But the order is important, first multiply and then divide, otherwise the .2 would be lost.
-    // (1.2 * 2**61) * 10**18 / 2**61
+    // (1.2 * 2**64) * 10**18 / 2**64
     // We can split the 10*18 to (2**18 * 5**18)
-    // (1.2 * 2**61) * 2**18 * 5**18 / 2**61
+    // (1.2 * 2**64) * 2**18 * 5**18 / 2**64
 
-    // let decimals = get_decimal(currency_address).expect('toU256 - Unable to get decimals');
-    // let five_to_dec = FixedTrait::from_unscaled_felt(felt_power(5, decimals));
+    x.assert_nn('toU256 - x is zero'); //  Now we can just use the mag in Fixed
 
-    // let x_5 = x * five_to_dec;
+    let decimals: u128 = get_decimal(currency_address)
+        .expect('toU256 - Unable to get decimals').into();
+    let five_to_dec = _pow(5, decimals);
 
-    // assert_nn_fixed(x_5, 'x negative in toUint256_bal');
-    // // TODO: Check below is late, it would've failed already
-    // assert(x_5 <= FixedTrait::new(MAX_u128 - 1, false), 'x out of bound in toUint256_bal');
+    let x_5 = x.mag * five_to_dec;
 
     // // we can rearange a little again
     // // (1.2 * 2**61 * 5**18) / (2**61 / 2**18)
     // // (1.2 * 2**61 * 5**18) / 2**(61 - 18)
-    // let _64_minus_dec = 64 - decimals;
-    // assert_nn_fixed(FixedTrait::from_felt(_64_minus_dec), '64 - dec negative toUint256_bal');
+    let _64_minus_dec = 64 - decimals;
 
-    // let decreased_part = felt_power(2, _64_minus_dec);
-    // let decreased_part_u128: u128 = decreased_part
-    //     .try_into()
-    //     .expect('dec_part felt252 -> u128 failed');
+    let decreased_part = _pow(2, _64_minus_dec);
 
-    // let x_5_u128: u128 = x_5.try_into().expect('x_5 felt252 -> u128 failed');
+    let (q, r) = integer::u128_safe_divmod(
+        x_5, decreased_part.try_into().expect('toU256 - dp zero')
+    );
 
-    // let (q, r) = integer::u128_safe_divmod(
-    //     x_5_u128, decreased_part_u128.try_into().expect('Division by 0 in toUint256_bal')
-    // );
-
-    // return q.into();
-    return u256 { low: 1, high: 1 };
+    q.into()
 }
 
-// @notice Converts the value from Uint256 balance to Math64_61
-// @dev Conversions from Uint256 to Math64_61
+// @notice Converts the value from Uint256 balance to Cubit
+// @dev Conversions from Uint256 to Cubit
 // @dev Only for balances/token amounts, takes care of getting decimals etc
 // @param x: Value to be converted
 // @param currency_address: Address of the currency - used to get decimals
 // @return Input converted to Math64_61
 fn fromU256_balance(x: u256, currency_address: ContractAddress) -> Fixed {
-    // TODO: This function is 100% wrong, finish pls
-
-    // converts for example 1.2*10**18 wei to 1.2*2**61 (Math64x61).
 
     // We will guide you through with an example
     // x = 1.2*10**18 (example input... 10**18 since it is ETH)
-    // We want to divide the number by 10**18 and multiply by 2**61 to get Math64x61 number
+    // We want to divide the number by 10**18 and multiply by 2**64 to get Math64x61 number
     // But the order is important, first multiply and then divide, otherwise the .2 would be lost.
     // (1.2 * 10**18) * 2**61 / 10**18
     // We can split the 10*18 to (2**18 * 5**18)
-    // (1.2 * 10**18) * 2**61 / (5**18 * 2**18)
+    // (1.2 * 10**18) * 2**64 / (5**18 * 2**18)
 
-    // let decimal = get_decimal(currency_address).expect('fromU256 - cant to get decimals');
-    // let five_to_dec = felt_power(5, decimal);
+    let decimal: u128 = get_decimal(currency_address)
+        .expect('fromU256 - decimals zero').into();
 
-    // let sixty_four_plus_dec = 64 + decimal;
-    // let increased_INT_PART = felt_power(2, sixty_four_plus_dec);
-    // assert_le(x_low, increased_INT_PART);
-    // assert_le(-increased_INT_PART, x_low);
+    let five_to_dec = _pow(5, decimal);
 
-    // (1.2 * 10**18) * 2**61 / (5**18 * 2**18)
+    // (1.2 * 10**18) * 2**64 / (5**18 * 2**18)
     // so we have
-    // x * 2**61 / (five_to_dec * 2**18)
+    // x * 2**64 / (five_to_dec * 2**18)
     // and with a little bit of rearanging
-    // (1.2 * 10**18) / 5**18 * (2**61 / 2**18)
-    // (1.2 * 10**18) / 5**18 * 2**(61-18)
+    // (1.2 * 10**18) / 5**18 * (2**64 / 2**18)
+    // (1.2 * 10**18) / 5**18 * 2**(64-18)
     // x / five_to_dec * 2**(sixty_one_minus_dec)
-    // let sixty_four_minus_dec = 64 - decimal;
-    // let decreased_FRACT_PART = felt_power(2, sixty_four_minus_dec);
+    let sixty_four_minus_dec = 64 - decimal;
+    let decreased_FRACT_PART = _pow(2, sixty_four_minus_dec);
+    let x_ = x.low * decreased_FRACT_PART;
     // x / five_to_dec * decreased_FRACT_PART
-    // x * decreased_FRACT_PART / five_to_dec
-    // let x_ = x * FixedTrait::from_felt(decreased_FRACT_PART);
+    // x * decreased_FRACT_PART / five_t_dec
 
     // x_ / five_to_dec
-    // let (x__, _) = unsigned_div_rem(x_, five_to_dec);
-    // Just checking the final number is not out of bounds.
-    // Math64x61.assert64x61(x__);
-    FixedTrait::from_felt(1)
+    let (q, rem) = U128DivRem::div_rem(x_, five_to_dec.try_into().expect('fromU256 - ftd zero'));
+    Fixed {
+        mag: q, // TODO: Add rem
+        sign: false
+    }
 }
 
 fn split_option_locked_capital(

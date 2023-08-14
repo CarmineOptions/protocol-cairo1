@@ -3,7 +3,7 @@ use starknet::ContractAddress;
 use starknet::contract_address::contract_address_to_felt252;
 use traits::Into;
 
-use carmine_protocol::amm_core::helpers::{assert_option_side_exists, };
+use carmine_protocol::amm_core::helpers::{assert_option_side_exists, assert_address_not_zero};
 
 use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
 
@@ -42,7 +42,7 @@ const TOKEN_USDC_ADDRESS: felt252 =
 // @dev 18 for ETH, 6 for USDC
 // @param token_address: Address of the token for which decimals are being retrieved
 // @return dec: Decimal count
-fn get_decimal(token_address: ContractAddress) -> Option<felt252> {
+fn get_decimal(token_address: ContractAddress) -> Option<u8> {
     if token_address == TOKEN_ETH_ADDRESS.try_into()? {
         return Option::Some(18);
     }
@@ -51,7 +51,7 @@ fn get_decimal(token_address: ContractAddress) -> Option<felt252> {
         return Option::Some(6);
     }
 
-    assert(contract_address_to_felt252(token_address) != 0, 'Token address is zero');
+    assert_address_not_zero(token_address, 'Token address is zero');
 
     let decimals = IERC20Dispatcher { contract_address: token_address }.decimals();
     assert(decimals != 0, 'Token has decimals = 0');
@@ -60,7 +60,7 @@ fn get_decimal(token_address: ContractAddress) -> Option<felt252> {
         return Option::None(());
     } else {
         let decimals_felt: felt252 = decimals.into();
-        return Option::Some(decimals_felt);
+        return Option::Some(decimals_felt.try_into()?);
     }
 }
 
