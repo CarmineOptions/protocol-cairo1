@@ -314,6 +314,15 @@ mod State {
         )
     }
 
+    fn set_max_option_size_percent_of_voladjspd(value: Int) {
+        // TODO: Assert admin
+        let mut state = AMM::unsafe_new_contract_state();
+        max_option_size_percent_of_voladjspd::InternalContractStateTrait::write(
+            ref state.max_option_size_percent_of_voladjspd,
+            value
+        )
+    }
+
     fn get_pool_definition_from_lptoken_address(lptoken_address: LPTAddress) -> Pool {
         let state = AMM::unsafe_new_contract_state();
         let pool = pool_definition_from_lptoken_address::InternalContractStateTrait::read(
@@ -492,19 +501,19 @@ mod State {
         );
     }
 
-    fn get_trading_halt() -> u8 {
+    fn get_trading_halt() -> bool {
         trading_halted::InternalContractStateTrait::read(
             @AMM::unsafe_new_contract_state().trading_halted
         )
     }
 
-    fn set_trading_halt(new_status: u8) {
+    fn set_trading_halt(new_status: bool) {
         // TODO: implement check below
         // let caller_addr = get_caller_address();
         // let can_halt = can_halt_trading(caller_addr);
         // assert(can_halt, 'Noperrino')
 
-        assert_option_type_exists(new_status, 'This is unacceptableeeeeeeeeeee');
+        // assert_option_type_exists(new_status, 'This is unacceptableeeeeeeeeeee'); TODO: this check
         let mut state = AMM::unsafe_new_contract_state();
 
         trading_halted::InternalContractStateTrait::write(ref state.trading_halted, new_status)

@@ -18,7 +18,7 @@ mod Trading {
         get_trading_halt, is_option_available, get_lptoken_address_for_given_option,
     };
 
-    use carmine_protocol::amm_core::options::{
+    use carmine_protocol::amm_core::options::Options::{
         mint_option_token, burn_option_token, expire_option_token
     };
 
@@ -27,7 +27,7 @@ mod Trading {
         STOP_TRADING_BEFORE_MATURITY_SECONDS,
     };
 
-    use carmine_protocol::amm_core::pricing::option_pricing::{black_scholes, };
+    use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing::{black_scholes, };
     use carmine_protocol::amm_core::pricing::fees::get_fees;
     use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
         convert_amount_to_option_currency_from_base_uint256, get_new_volatility,
@@ -241,7 +241,7 @@ mod Trading {
         tx_deadline: Timestamp,
     ) {
         let halt_status = get_trading_halt();
-        assert(halt_status == 0, 'Trading halted');
+        assert(halt_status, 'Trading halted');
 
         assert(option_size > 0_u128, 'VTI - opt size <= 0');
         assert_option_type_exists(option_type, 'VTI - invalid option type');

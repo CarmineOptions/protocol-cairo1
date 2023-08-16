@@ -1,4 +1,4 @@
-mod Views {
+mod View {
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
     use core::traits::{TryInto, Into};
     use starknet::get_block_timestamp;

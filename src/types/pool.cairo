@@ -63,7 +63,7 @@ impl PoolImpl of PoolTrait {
 }
 
 
-#[derive(Drop)]
+#[derive(Drop, Serde)]
 struct PoolInfo {
     pool: Pool,
     lptoken_address: ContractAddress,
@@ -90,7 +90,7 @@ impl PoolInfoImpl of PoolInfoTrait {
     }
 }
 
-#[derive(Drop)]
+#[derive(Drop, Serde)]
 struct UserPoolInfo {
     value_of_user_stake: u256,
     size_of_users_tokens: u256,

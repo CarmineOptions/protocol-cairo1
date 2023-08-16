@@ -288,13 +288,13 @@ impl Option_Impl of Option_Trait {
 
 
 // Helper structs for View functions
-#[derive(Drop)]
+#[derive(Drop, Copy, Serde)]
 struct OptionWithPremia {
     option: Option_,
     premia: Fixed,
 }
 
-#[derive(Drop)]
+#[derive(Drop, Serde)]
 struct OptionWithUsersPosition {
     option: Option_,
     position_size: u256,

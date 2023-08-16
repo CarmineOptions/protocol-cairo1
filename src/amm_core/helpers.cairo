@@ -16,7 +16,7 @@ use carmine_protocol::amm_core::oracles::agg::OracleAgg::{get_terminal_price, ge
 use carmine_protocol::types::basic::{Math64x61_, OptionSide, OptionType, Int, Timestamp};
 use carmine_protocol::types::option_::{Option_};
 
-use carmine_protocol::amm_core::pricing::option_pricing::black_scholes;
+use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing::black_scholes;
 use carmine_protocol::amm_core::pricing::fees::get_fees;
 use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
     get_new_volatility, get_time_till_maturity, select_and_adjust_premia, add_premia_fees,
