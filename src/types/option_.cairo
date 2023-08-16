@@ -25,7 +25,7 @@ use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
 
 use carmine_protocol::amm_core::pricing::fees::{get_fees};
 
-use carmine_protocol::amm_core::pricing::option_pricing::{black_scholes};
+use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing::black_scholes;
 
 use carmine_protocol::amm_core::oracles::agg::OracleAgg::{get_current_price, get_terminal_price};
 
