@@ -2,7 +2,7 @@
 name = "carmine_protocol"
 version = "0.1.0"
 description = "Code for Carmine Option AMM"
-cairo-version = "2.1.0"
+cairo-version = "2.1.1"
 homepage = "https://github.com/CarmineOptions/protocol-cairo1"
 
 
