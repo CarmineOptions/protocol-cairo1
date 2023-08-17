@@ -14,18 +14,34 @@ mod LiquidityPool {
 
     use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
 
-    use carmine_protocol::types::basic::{LPTAddress, OptionType, OptionSide, Int, Timestamp};
-    use carmine_protocol::types::option_::{Option_, Option_Trait};
-    use carmine_protocol::types::pool::{Pool};
+    // use carmine_protocol::basic::{LPTAddress, OptionType, OptionSide, Int, Timestamp};
+
+type LPTAddress = ContractAddress;
+type OptionSide = u8; // TODO: Make this an enum
+type OptionType = u8; // TODO: Make this an enum
+type Timestamp = u64; // In seconds, Block timestamps are also u64
+
+type Int = u128;
+
+type Math64x61_ = felt252; // legacy, for AMM trait definition
+type LegacyVolatility = Math64x61_;
+type LegacyStrike = Math64x61_;
+type Maturity = felt252;
+
+type Volatility = Fixed;
+type Strike = Fixed;
+
+    use carmine_protocol::option_::{Option_, Option_Trait};
+    use carmine_protocol::pool::{Pool};
 
 
-    use carmine_protocol::amm_core::amm::AMM::{
+    use carmine_protocol::amm::AMM::{
         DepositLiquidity, WithdrawLiquidity, ExpireOptionTokenForPool, emit_event
     };
 
-    use carmine_protocol::amm_core::oracles::agg::OracleAgg::get_terminal_price;
+    use carmine_protocol::agg::OracleAgg::get_terminal_price;
 
-    use carmine_protocol::amm_core::state::State::{
+    use carmine_protocol::state::State::{
         get_available_options, get_option_position, get_option_volatility,
         get_lptoken_address_for_given_option, get_pool_volatility_adjustment_speed,
         get_unlocked_capital, get_underlying_token_address,
@@ -37,12 +53,12 @@ mod LiquidityPool {
         get_option_info, set_option_position
     };
 
-    use carmine_protocol::amm_core::helpers::{
+    use carmine_protocol::helpers::{
         toU256_balance, assert_option_type_exists, assert_address_not_zero,
         get_underlying_from_option_data, fromU256_balance, split_option_locked_capital
     };
 
-    use carmine_protocol::amm_core::constants::{
+    use carmine_protocol::constants::{
         OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT
     };
 

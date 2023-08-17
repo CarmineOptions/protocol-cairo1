@@ -1,7 +1,23 @@
 use starknet::ContractAddress;
-use carmine_protocol::types::basic::{OptionType, OptionSide};
-use carmine_protocol::types::option_::{Option_, OptionWithPremia, OptionWithUsersPosition};
-use carmine_protocol::types::pool::{PoolInfo, UserPoolInfo, Pool};
+// use carmine_protocol::basic::{OptionType, OptionSide};
+
+type LPTAddress = ContractAddress;
+type OptionSide = u8; // TODO: Make this an enum
+type OptionType = u8; // TODO: Make this an enum
+type Timestamp = u64; // In seconds, Block timestamps are also u64
+// 
+type Int = u128;
+// 
+type Math64x61_ = felt252; // legacy, for AMM trait definition
+type LegacyVolatility = Math64x61_;
+type LegacyStrike = Math64x61_;
+type Maturity = felt252;
+// 
+type Volatility = Fixed;
+type Strike = Fixed;
+
+use carmine_protocol::option_::{Option_, OptionWithPremia, OptionWithUsersPosition};
+use carmine_protocol::pool::{PoolInfo, UserPoolInfo, Pool};
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
 #[starknet::interface]
@@ -196,9 +212,25 @@ mod AMM {
     use starknet::ContractAddress;
 
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
-    use carmine_protocol::types::basic::{Math64x61_, LegacyVolatility, LegacyStrike, Volatility, Strike, LPTAddress, OptionSide, Timestamp, OptionType};
-    use carmine_protocol::types::pool::Pool;
-    use carmine_protocol::types::option_::{LegacyOption, Option_};
+    // use carmine_protocol::basic::{Math64x61_, LegacyVolatility, LegacyStrike, Volatility, Strike, LPTAddress, OptionSide, Timestamp, OptionType};
+
+type LPTAddress = ContractAddress;
+type OptionSide = u8; // TODO: Make this an enum
+type OptionType = u8; // TODO: Make this an enum
+type Timestamp = u64; // In seconds, Block timestamps are also u64
+
+type Int = u128;
+
+type Math64x61_ = felt252; // legacy, for AMM trait definition
+type LegacyVolatility = Math64x61_;
+type LegacyStrike = Math64x61_;
+type Maturity = felt252;
+
+type Volatility = Fixed;
+type Strike = Fixed;
+
+    use carmine_protocol::pool::Pool;
+    use carmine_protocol::option_::{LegacyOption, Option_};
 
     // TODO: Constructor
     
@@ -305,15 +337,15 @@ mod AMM {
     }
 
 
-    use carmine_protocol::amm_core::trading::Trading;
-    use carmine_protocol::amm_core::state::State;
-    use carmine_protocol::amm_core::liquidity_pool::LiquidityPool;
-    use carmine_protocol::amm_core::options::Options;
-    use carmine_protocol::amm_core::view::View;
-    use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing;
+    use carmine_protocol::trading::Trading;
+    use carmine_protocol::state::State;
+    use carmine_protocol::liquidity_pool::LiquidityPool;
+    use carmine_protocol::options::Options;
+    use carmine_protocol::view::View;
+    use carmine_protocol::option_pricing::OptionPricing;
 
-    use carmine_protocol::types::option_::{OptionWithPremia, OptionWithUsersPosition};
-    use carmine_protocol::types::pool::{PoolInfo, UserPoolInfo};
+    use carmine_protocol::option_::{OptionWithPremia, OptionWithUsersPosition};
+    use carmine_protocol::pool::{PoolInfo, UserPoolInfo};
 
     #[external(v0)]
     impl Amm of super::IAMM<ContractState> {

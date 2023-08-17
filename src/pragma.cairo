@@ -3,8 +3,10 @@ mod Pragma {
 
     use carmine_protocol::traits::{IPragmaOracleDispatcher, IPragmaOracleDispatcherTrait};
 
-    use carmine_protocol::amm_core::oracles::oracle_helpers::{convert_from_int_to_Fixed};
-    use carmine_protocol::types::basic::{Timestamp};
+    use carmine_protocol::oracle_helpers::{convert_from_int_to_Fixed};
+    // use carmine_protocol::basic::{Timestamp};
+
+type Timestamp = u64; // In seconds, Block timestamps are also u64
 
     use starknet::ContractAddress;
     use traits::{TryInto, Into};
@@ -13,7 +15,7 @@ mod Pragma {
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
 
-    use carmine_protocol::amm_core::constants::{TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, };
+    use carmine_protocol::constants::{TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, };
 
     const PRAGMA_ORACLE_ADDRESS: felt252 =
         0x0346c57f094d641ad94e43468628d8e9c574dcb2803ec372576ccc60a40be2c4;

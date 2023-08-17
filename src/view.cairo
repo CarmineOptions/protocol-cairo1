@@ -12,19 +12,34 @@ mod View {
     use starknet::contract_address::{
         contract_address_to_felt252, contract_address_try_from_felt252
     };
-    use carmine_protocol::amm_core::state::State::{
+    use carmine_protocol::state::State::{
         get_available_options, get_option_volatility, get_pool_volatility_adjustment_speed,
         get_available_lptoken_addresses
     };
 
-    use carmine_protocol::types::option_::{
+    use carmine_protocol::option_::{
         Option_, Option_Trait, OptionWithPremia, OptionWithUsersPosition
     };
-    use carmine_protocol::types::pool::{UserPoolInfo, PoolInfo, PoolInfoTrait, PoolTrait, Pool};
+    use carmine_protocol::pool::{UserPoolInfo, PoolInfo, PoolInfoTrait, PoolTrait, Pool};
 
-    use carmine_protocol::types::basic::{LPTAddress, Int};
 
-    use carmine_protocol::amm_core::helpers::fromU256_balance;
+
+type LPTAddress = ContractAddress;
+type OptionSide = u8; // TODO: Make this an enum
+type OptionType = u8; // TODO: Make this an enum
+type Timestamp = u64; // In seconds, Block timestamps are also u64
+
+type Int = u128;
+
+type Math64x61_ = felt252; // legacy, for AMM trait definition
+type LegacyVolatility = Math64x61_;
+type LegacyStrike = Math64x61_;
+type Maturity = felt252;
+
+type Volatility = Fixed;
+type Strike = Fixed;
+
+    use carmine_protocol::helpers::fromU256_balance;
 
 
     fn get_all_options(lpt_addr: LPTAddress) -> Array<Option_> {

@@ -11,18 +11,35 @@ use integer::U128DivRem;
 
 use cubit::f128::types::fixed::{Fixed, FixedTrait, MAX_u128, FixedInto};
 
-use carmine_protocol::amm_core::oracles::agg::OracleAgg::{get_terminal_price, get_current_price};
+use carmine_protocol::agg::OracleAgg::{get_terminal_price, get_current_price};
 
-use carmine_protocol::types::basic::{Math64x61_, OptionSide, OptionType, Int, Timestamp};
-use carmine_protocol::types::option_::{Option_};
+// use carmine_protocol::basic::{Math64x61_, OptionSide, OptionType, Int, Timestamp};
 
-use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing::black_scholes;
-use carmine_protocol::amm_core::pricing::fees::get_fees;
-use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
+
+type LPTAddress = ContractAddress;
+type OptionSide = u8; // TODO: Make this an enum
+type OptionType = u8; // TODO: Make this an enum
+type Timestamp = u64; // In seconds, Block timestamps are also u64
+
+type Int = u128;
+
+type Math64x61_ = felt252; // legacy, for AMM trait definition
+type LegacyVolatility = Math64x61_;
+type LegacyStrike = Math64x61_;
+type Maturity = felt252;
+
+type Volatility = Fixed;
+type Strike = Fixed;
+
+use carmine_protocol::option_::{Option_};
+
+use carmine_protocol::option_pricing::OptionPricing::black_scholes;
+use carmine_protocol::fees::get_fees;
+use carmine_protocol::option_pricing_helpers::{
     get_new_volatility, get_time_till_maturity, select_and_adjust_premia, add_premia_fees,
 };
 
-use carmine_protocol::amm_core::constants::{
+use carmine_protocol::constants::{
     OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side,
     get_decimal, STOP_TRADING_BEFORE_MATURITY_SECONDS, RISK_FREE_RATE
 };

@@ -1,18 +1,21 @@
 use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 use starknet::ContractAddress;
-use carmine_protocol::types::basic::OptionType;
+// use carmine_protocol::basic::OptionType;
 
-use carmine_protocol::amm_core::state::State::{
+
+type OptionType = u8; // TODO: Make this an enum
+
+use carmine_protocol::state::State::{
     get_lptoken_address_for_given_option, get_lpool_balance, get_unlocked_capital,
     get_pool_definition_from_lptoken_address
 };
 
-use carmine_protocol::amm_core::liquidity_pool::LiquidityPool::{
+use carmine_protocol::liquidity_pool::LiquidityPool::{
     get_value_of_pool_position, get_underlying_for_lptokens
 };
 
-#[derive(Copy, Drop, Serde, Store)]
+#[derive(Copy, Drop, Serde, starknet::Store)]
 struct Pool {
     quote_token_address: ContractAddress,
     base_token_address: ContractAddress,

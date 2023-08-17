@@ -6,36 +6,52 @@ mod Trading {
 
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
-    use carmine_protocol::types::basic::{
-        Math64x61_, OptionType, OptionSide, LPTAddress, Int, Timestamp
-    };
+    // use carmine_protocol::basic::{
+    //     Math64x61_, OptionType, OptionSide, LPTAddress, Int, Timestamp
+    // };
 
-    use carmine_protocol::amm_core::helpers::{fromU256_balance, };
-    use carmine_protocol::amm_core::helpers::{toU256_balance, check_deadline};
+type LPTAddress = ContractAddress;
+type OptionSide = u8; // TODO: Make this an enum
+type OptionType = u8; // TODO: Make this an enum
+type Timestamp = u64; // In seconds, Block timestamps are also u64
 
-    use carmine_protocol::amm_core::state::State::{
+type Int = u128;
+
+type Math64x61_ = felt252; // legacy, for AMM trait definition
+type LegacyVolatility = Math64x61_;
+type LegacyStrike = Math64x61_;
+type Maturity = felt252;
+
+type Volatility = Fixed;
+type Strike = Fixed;
+
+
+    use carmine_protocol::helpers::{fromU256_balance, };
+    use carmine_protocol::helpers::{toU256_balance, check_deadline};
+
+    use carmine_protocol::state::State::{
         get_option_volatility, get_pool_volatility_adjustment_speed, set_option_volatility,
         get_trading_halt, is_option_available, get_lptoken_address_for_given_option,
     };
 
-    use carmine_protocol::amm_core::options::Options::{
+    use carmine_protocol::options::Options::{
         mint_option_token, burn_option_token, expire_option_token
     };
 
-    use carmine_protocol::amm_core::constants::{
+    use carmine_protocol::constants::{
         RISK_FREE_RATE, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side,
         STOP_TRADING_BEFORE_MATURITY_SECONDS,
     };
 
-    use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing::{black_scholes, };
-    use carmine_protocol::amm_core::pricing::fees::get_fees;
-    use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
+    use carmine_protocol::option_pricing::OptionPricing::{black_scholes, };
+    use carmine_protocol::fees::get_fees;
+    use carmine_protocol::option_pricing_helpers::{
         convert_amount_to_option_currency_from_base_uint256, get_new_volatility,
         get_time_till_maturity, select_and_adjust_premia, add_premia_fees,
         assert_option_type_exists, assert_option_side_exists
     };
 
-    use carmine_protocol::amm_core::oracles::agg::OracleAgg::{
+    use carmine_protocol::agg::OracleAgg::{
         get_current_price, get_terminal_price,
     };
 

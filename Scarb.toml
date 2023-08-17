@@ -7,4 +7,11 @@ homepage = "https://github.com/CarmineOptions/protocol-cairo1"
 
 
 [dependencies]
-cubit = { git = "https://github.com/tensojka/cubit.git", branch = "chore/2.1.0" }
+cubit = { git = "https://github.com/influenceth/cubit.git", branch = "main" }
+starknet = ">=2.1.1"
+
+
+
+[[target.starknet-contract]]
+sierra = true
+casm = false

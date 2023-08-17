@@ -3,7 +3,7 @@ use starknet::ContractAddress;
 use starknet::contract_address::contract_address_to_felt252;
 use traits::Into;
 
-use carmine_protocol::amm_core::helpers::{assert_option_side_exists, assert_address_not_zero};
+use carmine_protocol::helpers::{assert_option_side_exists, assert_address_not_zero};
 
 use carmine_protocol::traits::IERC20Dispatcher; 
 use carmine_protocol::traits::IERC20DispatcherTrait;

@@ -1,4 +1,3 @@
-use carmine_protocol::amm_core::helpers::FixedHelpersTrait;
 mod State {
     use starknet::ContractAddress;
     use traits::{Into, TryInto};
@@ -9,15 +8,15 @@ mod State {
 
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
-    use carmine_protocol::amm_core::helpers::{
+    use carmine_protocol::helpers::{
         assert_option_side_exists, assert_option_type_exists, assert_address_not_zero, FixedHelpersTrait
     };
 
-    use carmine_protocol::amm_core::constants::{
+    use carmine_protocol::constants::{
         SEPARATE_VOLATILITIES_FOR_DIFFERENT_STRIKES, VOLATILITY_LOWER_BOUND, VOLATILITY_UPPER_BOUND,
         OPTION_CALL, OPTION_PUT
     };
-    use carmine_protocol::amm_core::amm::AMM::{
+    use carmine_protocol::amm::AMM::{
         pool_volatility_separate, option_volatility, pool_volatility_adjustment_speed,
         new_pool_volatility_adjustment_speed, option_position_, new_option_position,
         option_token_address, new_option_token_address, available_options, new_available_options,
@@ -27,16 +26,33 @@ mod State {
         pool_locked_capital_
     };
 
-    use carmine_protocol::amm_core::amm::AMM;
+    use carmine_protocol::amm::AMM;
 
-    use carmine_protocol::types::basic::{
-        LPTAddress, OptionSide, OptionType, Math64x61_, LegacyVolatility, LegacyStrike, Volatility,
-        Strike, Int, Timestamp
-    };
+    // use carmine_protocol::basic::{
+    //     LPTAddress, OptionSide, OptionType, Math64x61_, LegacyVolatility, LegacyStrike, Volatility,
+    //     Strike, Int, Timestamp
+    // };
 
-    use carmine_protocol::types::pool::{Pool};
+type LPTAddress = ContractAddress;
+type OptionSide = u8; // TODO: Make this an enum
+type OptionType = u8; // TODO: Make this an enum
+type Timestamp = u64; // In seconds, Block timestamps are also u64
 
-    use carmine_protocol::types::option_::{
+type Int = u128;
+
+type Math64x61_ = felt252; // legacy, for AMM trait definition
+type LegacyVolatility = Math64x61_;
+type LegacyStrike = Math64x61_;
+type Maturity = felt252;
+
+type Volatility = Fixed;
+type Strike = Fixed;
+
+
+
+    use carmine_protocol::pool::{Pool};
+
+    use carmine_protocol::option_::{
         LegacyOption, Option_, LegacyOption_to_Option, Option_to_LegacyOption, Option_Trait
     };
 
@@ -58,7 +74,7 @@ mod State {
         // Set old storage var to zero in case this function get called before the getter
         option_token_address::InternalContractStateTrait::write(
             ref state.option_token_address,
-            (lptoken_address, option_side, maturity, strike_price.to_legacyMath()),
+            (lptoken_address, option_side, maturity.into(), strike_price.to_legacyMath()),
             contract_address_try_from_felt252(0).unwrap()
         );
 
@@ -80,7 +96,7 @@ mod State {
         // First read the old value
         let option_token_addr = option_token_address::InternalContractStateTrait::read(
             @state.option_token_address,
-            (lptoken_address, option_side, maturity, strike_price.to_legacyMath())
+            (lptoken_address, option_side, maturity.into(), strike_price.to_legacyMath())
         );
 
         if contract_address_to_felt252(option_token_addr) != 0 {
@@ -96,7 +112,7 @@ mod State {
             // Set old storage var to zero
             option_token_address::InternalContractStateTrait::write(
                 ref state.option_token_address,
-                (lptoken_address, option_side, maturity, strike_price.to_legacyMath()),
+                (lptoken_address, option_side, maturity.into(), strike_price.to_legacyMath()),
                 contract_address_try_from_felt252(0).expect('Cannot create addr from 0')
             );
 
@@ -137,12 +153,12 @@ mod State {
         // Set old storage var to zero in case this function get called before the getter
         pool_volatility_separate::InternalContractStateTrait::write(
             ref state.pool_volatility_separate,
-            (lptoken_address, maturity, strike_price.to_legacyMath()),
+            (lptoken_address, maturity.into(), strike_price.to_legacyMath()),
             0
         );
 
         option_volatility::InternalContractStateTrait::write(
-            ref state.option_volatility, (lptoken_address, maturity, strike_price), volatility
+            ref state.option_volatility, (lptoken_address, maturity.into(), strike_price), volatility
         );
     }
 
@@ -154,7 +170,7 @@ mod State {
         // First let's try to read from the old storage var
         let res = pool_volatility_separate::InternalContractStateTrait::read(
             @state.pool_volatility_separate,
-            (lptoken_address, maturity, strike_price.to_legacyMath())
+            (lptoken_address, maturity.into(), strike_price.to_legacyMath())
         );
 
         if res != 0 {
@@ -171,7 +187,7 @@ mod State {
             // Set old value to zero
             pool_volatility_separate::InternalContractStateTrait::write(
                 ref state.pool_volatility_separate,
-                (lptoken_address, maturity, strike_price.to_legacyMath()),
+                (lptoken_address, maturity.into(), strike_price.to_legacyMath()),
                 0
             );
 
@@ -180,7 +196,7 @@ mod State {
 
         // If value in old storage var was zero then we can try to read from new storage var
         let res = option_volatility::InternalContractStateTrait::read(
-            @state.option_volatility, (lptoken_address, maturity, strike_price)
+            @state.option_volatility, (lptoken_address, maturity.into(), strike_price)
         );
 
         res.assert_nn_not_zero('Opt vol <= 0');
@@ -363,7 +379,7 @@ mod State {
         // First let's try to read from the old storage var
         let res = option_position_::InternalContractStateTrait::read(
             @state.option_position_,
-            (lptoken_address, option_side, maturity, strike_price.to_legacyMath())
+            (lptoken_address, option_side, maturity.into(), strike_price.to_legacyMath())
         );
 
         if res != 0 {
@@ -380,7 +396,7 @@ mod State {
             // Set old value to zero
             option_position_::InternalContractStateTrait::write(
                 ref state.option_position_,
-                (lptoken_address, option_side, maturity, strike_price.to_legacyMath()),
+                (lptoken_address, option_side, maturity.into(), strike_price.to_legacyMath()),
                 0
             );
 
@@ -408,7 +424,7 @@ mod State {
         // Also it's important to set corresponding option position in old storage var to zero se that if this function is called before get_option_position then the value in new storage var won't be overwritten by the old one
         option_position_::InternalContractStateTrait::write(
             ref state.option_position_,
-            (lptoken_address, option_side, maturity, strike_price.to_legacyMath()),
+            (lptoken_address, option_side, maturity.into(), strike_price.to_legacyMath()),
             0
         );
 

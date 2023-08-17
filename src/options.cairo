@@ -13,31 +13,46 @@ mod Options {
 
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
-    use carmine_protocol::amm_core::amm::AMM::{TradeOpen, TradeClose, TradeSettle, emit_event};
-    use carmine_protocol::amm_core::liquidity_pool::LiquidityPool::expire_option_token_for_pool;
+    use carmine_protocol::amm::AMM::{TradeOpen, TradeClose, TradeSettle, emit_event};
+    use carmine_protocol::liquidity_pool::LiquidityPool::expire_option_token_for_pool;
 
 
-    use carmine_protocol::types::basic::{
-        OptionSide, OptionType, Math64x61_, Int, LPTAddress, Volatility, Strike, Timestamp
-    };
+    // use carmine_protocol::basic::{
+    //     OptionSide, OptionType, Math64x61_, Int, LPTAddress, Volatility, Strike, Timestamp
+    // };
+type LPTAddress = ContractAddress;
+type OptionSide = u8; // TODO: Make this an enum
+type OptionType = u8; // TODO: Make this an enum
+type Timestamp = u64; // In seconds, Block timestamps are also u64
 
-    use carmine_protocol::types::option_::{Option_};
+type Int = u128;
 
-    use carmine_protocol::amm_core::helpers::{
+type Math64x61_ = felt252; // legacy, for AMM trait definition
+type LegacyVolatility = Math64x61_;
+type LegacyStrike = Math64x61_;
+type Maturity = felt252;
+
+type Volatility = Fixed;
+type Strike = Fixed;
+    
+
+    use carmine_protocol::option_::{Option_};
+
+    use carmine_protocol::helpers::{
         toU256_balance, fromU256_balance, FixedHelpersTrait,
         split_option_locked_capital, assert_option_type_exists, assert_option_side_exists,
         assert_address_not_zero,
     };
 
-    use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
+    use carmine_protocol::option_pricing_helpers::{
         convert_amount_to_option_currency_from_base_uint256
     };
 
-    use carmine_protocol::amm_core::constants::{
+    use carmine_protocol::constants::{
         OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT,
     };
 
-    use carmine_protocol::amm_core::state::State::{
+    use carmine_protocol::state::State::{
         get_option_token_address, set_option_volatility, append_to_available_options,
         get_pool_volatility_adjustment_speed, get_max_option_size_percent_of_voladjspd,
         get_underlying_token_address, get_pool_definition_from_lptoken_address, get_lpool_balance,
