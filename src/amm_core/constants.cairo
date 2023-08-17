@@ -5,7 +5,8 @@ use traits::Into;
 
 use carmine_protocol::amm_core::helpers::{assert_option_side_exists, assert_address_not_zero};
 
-use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
+use carmine_protocol::traits::IERC20Dispatcher; 
+use carmine_protocol::traits::IERC20DispatcherTrait;
 
 const FEE_PROPORTION_PERCENT: u128 = 3_u128;
 const RISK_FREE_RATE: felt252 = 0;
