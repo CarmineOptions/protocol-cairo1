@@ -28,27 +28,10 @@ mod State {
 
     use carmine_protocol::amm_core::amm::AMM;
 
-    // use carmine_protocol::basic::{
-    //     LPTAddress, OptionSide, OptionType, Math64x61_, LegacyVolatility, LegacyStrike, Volatility,
-    //     Strike, Int, Timestamp
-    // };
-
-type LPTAddress = ContractAddress;
-type OptionSide = u8; // TODO: Make this an enum
-type OptionType = u8; // TODO: Make this an enum
-type Timestamp = u64; // In seconds, Block timestamps are also u64
-
-type Int = u128;
-
-type Math64x61_ = felt252; // legacy, for AMM trait definition
-type LegacyVolatility = Math64x61_;
-type LegacyStrike = Math64x61_;
-type Maturity = felt252;
-
-type Volatility = Fixed;
-type Strike = Fixed;
-
-
+    use carmine_protocol::types::basic::{
+        LPTAddress, OptionSide, OptionType, Math64x61_, LegacyVolatility, LegacyStrike, Volatility,
+        Strike, Int, Timestamp
+    };
 
     use carmine_protocol::types::pool::{Pool};
     use carmine_protocol::types::option_::{

@@ -4,9 +4,7 @@ mod Pragma {
     use carmine_protocol::traits::{IPragmaOracleDispatcher, IPragmaOracleDispatcherTrait};
 
     use carmine_protocol::amm_core::oracles::oracle_helpers::{convert_from_int_to_Fixed};
-    // use carmine_protocol::basic::{Timestamp};
-
-type Timestamp = u64; // In seconds, Block timestamps are also u64
+    use carmine_protocol::types::basic::{Timestamp};
 
     use starknet::ContractAddress;
     use traits::{TryInto, Into};

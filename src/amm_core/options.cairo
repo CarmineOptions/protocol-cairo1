@@ -17,24 +17,9 @@ mod Options {
     use carmine_protocol::amm_core::liquidity_pool::LiquidityPool::expire_option_token_for_pool;
 
 
-    // use carmine_protocol::basic::{
-    //     OptionSide, OptionType, Math64x61_, Int, LPTAddress, Volatility, Strike, Timestamp
-    // };
-type LPTAddress = ContractAddress;
-type OptionSide = u8; // TODO: Make this an enum
-type OptionType = u8; // TODO: Make this an enum
-type Timestamp = u64; // In seconds, Block timestamps are also u64
-
-type Int = u128;
-
-type Math64x61_ = felt252; // legacy, for AMM trait definition
-type LegacyVolatility = Math64x61_;
-type LegacyStrike = Math64x61_;
-type Maturity = felt252;
-
-type Volatility = Fixed;
-type Strike = Fixed;
-    
+    use carmine_protocol::types::basic::{
+        OptionSide, OptionType, Math64x61_, Int, LPTAddress, Volatility, Strike, Timestamp
+    };
 
     use carmine_protocol::types::option_::{Option_};
 

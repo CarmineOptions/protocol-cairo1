@@ -1,20 +1,5 @@
 use starknet::ContractAddress;
-// use carmine_protocol::basic::{OptionType, OptionSide};
-
-type LPTAddress = ContractAddress;
-type OptionSide = u8; // TODO: Make this an enum
-type OptionType = u8; // TODO: Make this an enum
-type Timestamp = u64; // In seconds, Block timestamps are also u64
-// 
-type Int = u128;
-// 
-type Math64x61_ = felt252; // legacy, for AMM trait definition
-type LegacyVolatility = Math64x61_;
-type LegacyStrike = Math64x61_;
-type Maturity = felt252;
-// 
-type Volatility = Fixed;
-type Strike = Fixed;
+use carmine_protocol::types::basic::{OptionType, OptionSide};
 
 use carmine_protocol::types::option_::{Option_, OptionWithPremia, OptionWithUsersPosition};
 use carmine_protocol::types::pool::{PoolInfo, UserPoolInfo, Pool};
@@ -212,22 +197,7 @@ mod AMM {
     use starknet::ContractAddress;
 
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
-    // use carmine_protocol::basic::{Math64x61_, LegacyVolatility, LegacyStrike, Volatility, Strike, LPTAddress, OptionSide, Timestamp, OptionType};
-
-    type LPTAddress = ContractAddress;
-    type OptionSide = u8; // TODO: Make this an enum
-    type OptionType = u8; // TODO: Make this an enum
-    type Timestamp = u64; // In seconds, Block timestamps are also u64
-
-    type Int = u128;
-
-    type Math64x61_ = felt252; // legacy, for AMM trait definition
-    type LegacyVolatility = Math64x61_;
-    type LegacyStrike = Math64x61_;
-    type Maturity = felt252;
-
-    type Volatility = Fixed;
-    type Strike = Fixed;
+    use carmine_protocol::types::basic::{Math64x61_, LegacyVolatility, LegacyStrike, Volatility, Strike, LPTAddress, OptionSide, Timestamp, OptionType, Maturity, Int};
 
     use carmine_protocol::types::pool::Pool;
     use carmine_protocol::types::option_::{LegacyOption, Option_};
