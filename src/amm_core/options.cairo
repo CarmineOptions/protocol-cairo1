@@ -1,6 +1,4 @@
-
 mod Options {
-
     use core::traits::TryInto;
     use core::cmp::min;
     use starknet::get_block_timestamp;
@@ -24,9 +22,8 @@ mod Options {
     use carmine_protocol::types::option_::{Option_};
 
     use carmine_protocol::amm_core::helpers::{
-        toU256_balance, fromU256_balance, FixedHelpersTrait,
-        split_option_locked_capital, assert_option_type_exists, assert_option_side_exists,
-        assert_address_not_zero,
+        toU256_balance, fromU256_balance, FixedHelpersTrait, split_option_locked_capital,
+        assert_option_type_exists, assert_option_side_exists, assert_address_not_zero,
     };
 
     use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
@@ -513,10 +510,12 @@ mod Options {
             );
 
             // Update pool's long position
-            let size_to_increase_long_position = option_size.into() - size_to_be_unlocked_in_base_u256;
+            let size_to_increase_long_position = option_size.into()
+                - size_to_be_unlocked_in_base_u256;
             assert(size_to_increase_long_position >= 0, 'BOTL - increase long negative');
 
-            let new_pools_long_position = pool_long_position.into() + size_to_increase_long_position;
+            let new_pools_long_position = pool_long_position.into()
+                + size_to_increase_long_position;
             assert(new_pools_long_position >= 0, 'BOTL - new long pos negative');
             set_option_position(
                 lptoken_address,
@@ -716,12 +715,7 @@ mod Options {
         );
 
         if (current_pool_position != 0) {
-            expire_option_token_for_pool(
-            lptoken_address,
-            option_side,
-            strike_price,
-            maturity,
-            );
+            expire_option_token_for_pool(lptoken_address, option_side, strike_price, maturity, );
         }
         // Check that the pool's position was expired correctly
         let current_pool_position_2 =

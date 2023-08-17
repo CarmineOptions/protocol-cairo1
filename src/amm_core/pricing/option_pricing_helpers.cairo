@@ -36,7 +36,8 @@ fn convert_amount_to_option_currency_from_base_uint256(
 
     if option_type == OPTION_PUT {
         let base_token_decimals: u128 = get_decimal(base_token_address)
-            .expect('CATOCFBU - Cant get decimals').into();
+            .expect('CATOCFBU - Cant get decimals')
+            .into();
         let dec: u256 = _pow(10, base_token_decimals).into();
 
         let adj_amount = amount * strike_price;

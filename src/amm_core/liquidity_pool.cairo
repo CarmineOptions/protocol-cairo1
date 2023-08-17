@@ -47,9 +47,7 @@ mod LiquidityPool {
         OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT
     };
 
-    fn get_value_of_position(
-        option: Option_, position_size: Int
-    ) -> Fixed {
+    fn get_value_of_position(option: Option_, position_size: Int) -> Fixed {
         option.value_of_position(position_size)
     }
 

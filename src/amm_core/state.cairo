@@ -9,7 +9,8 @@ mod State {
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
     use carmine_protocol::amm_core::helpers::{
-        assert_option_side_exists, assert_option_type_exists, assert_address_not_zero, FixedHelpersTrait
+        assert_option_side_exists, assert_option_type_exists, assert_address_not_zero,
+        FixedHelpersTrait
     };
 
     use carmine_protocol::amm_core::constants::{
@@ -84,11 +85,7 @@ mod State {
         if contract_address_to_felt252(option_token_addr) != 0 {
             // Write value to new storage var
             set_option_token_address(
-                lptoken_address,
-                option_side,
-                maturity,
-                strike_price,
-                option_token_addr
+                lptoken_address, option_side, maturity, strike_price, option_token_addr
             );
 
             // Set old storage var to zero
@@ -103,7 +100,8 @@ mod State {
 
         // Read from new storage var
         let res = new_option_token_address::InternalContractStateTrait::read(
-            @state.new_option_token_address, (lptoken_address, option_side, maturity, strike_price.mag)
+            @state.new_option_token_address,
+            (lptoken_address, option_side, maturity, strike_price.mag)
         );
 
         return res;
@@ -140,7 +138,9 @@ mod State {
         );
 
         option_volatility::InternalContractStateTrait::write(
-            ref state.option_volatility, (lptoken_address, maturity.into(), strike_price.mag), volatility
+            ref state.option_volatility,
+            (lptoken_address, maturity.into(), strike_price.mag),
+            volatility
         );
     }
 
@@ -229,8 +229,7 @@ mod State {
 
     // Migrates old options and returns first empty index
     fn migrate_old_options(lptoken_address: ContractAddress, idx: u32) -> u32 {
-        let mut state =
-            AMM::unsafe_new_contract_state(); 
+        let mut state = AMM::unsafe_new_contract_state();
 
         // Get old option at index
         let old_option = available_options::InternalContractStateTrait::read(
@@ -316,8 +315,7 @@ mod State {
         // TODO: Assert admin
         let mut state = AMM::unsafe_new_contract_state();
         max_option_size_percent_of_voladjspd::InternalContractStateTrait::write(
-            ref state.max_option_size_percent_of_voladjspd,
-            value
+            ref state.max_option_size_percent_of_voladjspd, value
         )
     }
 

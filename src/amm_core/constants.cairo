@@ -5,7 +5,7 @@ use traits::Into;
 
 use carmine_protocol::amm_core::helpers::{assert_option_side_exists, assert_address_not_zero};
 
-use carmine_protocol::traits::IERC20Dispatcher; 
+use carmine_protocol::traits::IERC20Dispatcher;
 use carmine_protocol::traits::IERC20DispatcherTrait;
 
 const FEE_PROPORTION_PERCENT: u128 = 3_u128;
@@ -56,7 +56,7 @@ fn get_decimal(token_address: ContractAddress) -> Option<u8> {
 
     let decimals = IERC20Dispatcher { contract_address: token_address }.decimals();
     assert(decimals != 0, 'Token has decimals = 0');
-    
+
     if decimals == 0 {
         return Option::None(());
     } else {

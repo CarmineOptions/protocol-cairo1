@@ -3,7 +3,6 @@ use cubit::f128::types::fixed::{Fixed, FixedTrait};
 use starknet::ContractAddress;
 // use carmine_protocol::basic::OptionType;
 
-
 type OptionType = u8; // TODO: Make this an enum
 
 use carmine_protocol::amm_core::state::State::{
