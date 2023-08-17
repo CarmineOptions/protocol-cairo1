@@ -1,6 +1,6 @@
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
-use carmine_protocol::constants::FEE_PROPORTION_PERCENT;
+use carmine_protocol::amm_core::constants::FEE_PROPORTION_PERCENT;
 
 //
 // @title Fees Module

@@ -4,10 +4,10 @@ use option::OptionTrait;
 use starknet::get_block_timestamp;
 
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
-use carmine_protocol::helpers::{
+use carmine_protocol::amm_core::helpers::{
     get_decimal, assert_option_type_exists, assert_option_side_exists, _pow
 };
-use carmine_protocol::constants::{TRADE_SIDE_LONG, TRADE_SIDE_SHORT};
+use carmine_protocol::amm_core::constants::{TRADE_SIDE_LONG, TRADE_SIDE_SHORT};
 
 // use carmine_protocol::basic::{OptionType, OptionSide, Timestamp};
 type LPTAddress = ContractAddress;
@@ -26,7 +26,7 @@ type Volatility = Fixed;
 type Strike = Fixed;
 
 
-use carmine_protocol::constants::{OPTION_CALL, OPTION_PUT};
+use carmine_protocol::amm_core::constants::{OPTION_CALL, OPTION_PUT};
 
 // @notice Converts amount to the currency used by the option
 // @dev Amount is in base tokens (in ETH in case of ETH/USDC)

@@ -3,7 +3,7 @@ use debug::PrintTrait;
 use core::traits::{TryInto, Into};
 use core::option::OptionTrait;
 use starknet::get_block_timestamp;
-use carmine_protocol::helpers::{
+use carmine_protocol::amm_core::helpers::{
     fromU256_balance, split_option_locked_capital, FixedHelpersTrait
 };
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
@@ -21,25 +21,25 @@ type LegacyStrike = Math64x61_;
 
 
 
-use carmine_protocol::state::State::{
+use carmine_protocol::amm_core::state::State::{
     get_lptoken_address_for_given_option, get_option_volatility,
     get_pool_volatility_adjustment_speed, get_option_position, get_option_token_address
 };
 
-use carmine_protocol::constants::{
+use carmine_protocol::amm_core::constants::{
     RISK_FREE_RATE, TRADE_SIDE_LONG, STOP_TRADING_BEFORE_MATURITY_SECONDS, get_opposite_side,
     OPTION_CALL,
 };
 
-use carmine_protocol::pricing::option_pricing_helpers::{
+use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
     get_new_volatility, get_time_till_maturity, select_and_adjust_premia, add_premia_fees
 };
 
-use carmine_protocol::pricing::fees::{get_fees};
 
-use carmine_protocol::pricing::option_pricing::OptionPricing::black_scholes;
+use carmine_protocol::amm_core::pricing::fees::{get_fees};
+use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing::black_scholes;
 
-use carmine_protocol::oracles::agg::OracleAgg::{get_current_price, get_terminal_price};
+use carmine_protocol::amm_core::oracles::agg::OracleAgg::{get_current_price, get_terminal_price};
 
 use carmine_protocol::traits::{
     IOptionTokenDispatcher, IOptionTokenDispatcherTrait, IERC20Dispatcher, IERC20DispatcherTrait

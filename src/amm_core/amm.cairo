@@ -338,12 +338,12 @@ mod AMM {
     }
 
 
-    use carmine_protocol::trading::Trading;
-    use carmine_protocol::state::State;
-    use carmine_protocol::liquidity_pool::LiquidityPool;
-    use carmine_protocol::options::Options;
-    use carmine_protocol::view::View;
-    use carmine_protocol::pricing::option_pricing::OptionPricing;
+    use carmine_protocol::amm_core::trading::Trading;
+    use carmine_protocol::amm_core::state::State;
+    use carmine_protocol::amm_core::liquidity_pool::LiquidityPool;
+    use carmine_protocol::amm_core::options::Options;
+    use carmine_protocol::amm_core::view::View;
+    use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing;
 
     use carmine_protocol::types::option_::{OptionWithPremia, OptionWithUsersPosition};
     use carmine_protocol::types::pool::{PoolInfo, UserPoolInfo};

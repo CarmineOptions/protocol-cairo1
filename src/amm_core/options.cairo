@@ -13,8 +13,8 @@ mod Options {
 
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
-    use carmine_protocol::amm::AMM::{TradeOpen, TradeClose, TradeSettle, emit_event};
-    use carmine_protocol::liquidity_pool::LiquidityPool::expire_option_token_for_pool;
+    use carmine_protocol::amm_core::amm::AMM::{TradeOpen, TradeClose, TradeSettle, emit_event};
+    use carmine_protocol::amm_core::liquidity_pool::LiquidityPool::expire_option_token_for_pool;
 
 
     // use carmine_protocol::basic::{
@@ -38,21 +38,21 @@ type Strike = Fixed;
 
     use carmine_protocol::types::option_::{Option_};
 
-    use carmine_protocol::helpers::{
+    use carmine_protocol::amm_core::helpers::{
         toU256_balance, fromU256_balance, FixedHelpersTrait,
         split_option_locked_capital, assert_option_type_exists, assert_option_side_exists,
         assert_address_not_zero,
     };
 
-    use carmine_protocol::pricing::option_pricing_helpers::{
+    use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
         convert_amount_to_option_currency_from_base_uint256
     };
 
-    use carmine_protocol::constants::{
+    use carmine_protocol::amm_core::constants::{
         OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT,
     };
 
-    use carmine_protocol::state::State::{
+    use carmine_protocol::amm_core::state::State::{
         get_option_token_address, set_option_volatility, append_to_available_options,
         get_pool_volatility_adjustment_speed, get_max_option_size_percent_of_voladjspd,
         get_underlying_token_address, get_pool_definition_from_lptoken_address, get_lpool_balance,

@@ -26,32 +26,32 @@ type Volatility = Fixed;
 type Strike = Fixed;
 
 
-    use carmine_protocol::helpers::{fromU256_balance, };
-    use carmine_protocol::helpers::{toU256_balance, check_deadline};
+    use carmine_protocol::amm_core::helpers::{fromU256_balance, };
+    use carmine_protocol::amm_core::helpers::{toU256_balance, check_deadline};
 
-    use carmine_protocol::state::State::{
+    use carmine_protocol::amm_core::state::State::{
         get_option_volatility, get_pool_volatility_adjustment_speed, set_option_volatility,
         get_trading_halt, is_option_available, get_lptoken_address_for_given_option,
     };
 
-    use carmine_protocol::options::Options::{
+    use carmine_protocol::amm_core::options::Options::{
         mint_option_token, burn_option_token, expire_option_token
     };
 
-    use carmine_protocol::constants::{
+    use carmine_protocol::amm_core::constants::{
         RISK_FREE_RATE, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side,
         STOP_TRADING_BEFORE_MATURITY_SECONDS,
     };
 
-    use carmine_protocol::pricing::option_pricing::OptionPricing::{black_scholes, };
-    use carmine_protocol::pricing::fees::get_fees;
-    use carmine_protocol::pricing::option_pricing_helpers::{
+    use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing::{black_scholes, };
+    use carmine_protocol::amm_core::pricing::fees::get_fees;
+    use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
         convert_amount_to_option_currency_from_base_uint256, get_new_volatility,
         get_time_till_maturity, select_and_adjust_premia, add_premia_fees,
         assert_option_type_exists, assert_option_side_exists
     };
 
-    use carmine_protocol::oracles::agg::OracleAgg::{
+    use carmine_protocol::amm_core::oracles::agg::OracleAgg::{
         get_current_price, get_terminal_price,
     };
 

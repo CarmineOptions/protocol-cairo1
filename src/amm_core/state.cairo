@@ -8,15 +8,15 @@ mod State {
 
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
-    use carmine_protocol::helpers::{
+    use carmine_protocol::amm_core::helpers::{
         assert_option_side_exists, assert_option_type_exists, assert_address_not_zero, FixedHelpersTrait
     };
 
-    use carmine_protocol::constants::{
+    use carmine_protocol::amm_core::constants::{
         SEPARATE_VOLATILITIES_FOR_DIFFERENT_STRIKES, VOLATILITY_LOWER_BOUND, VOLATILITY_UPPER_BOUND,
         OPTION_CALL, OPTION_PUT
     };
-    use carmine_protocol::amm::AMM::{
+    use carmine_protocol::amm_core::amm::AMM::{
         pool_volatility_separate, option_volatility, pool_volatility_adjustment_speed,
         new_pool_volatility_adjustment_speed, option_position_, new_option_position,
         option_token_address, new_option_token_address, available_options, new_available_options,
@@ -26,7 +26,7 @@ mod State {
         pool_locked_capital_
     };
 
-    use carmine_protocol::amm::AMM;
+    use carmine_protocol::amm_core::amm::AMM;
 
     // use carmine_protocol::basic::{
     //     LPTAddress, OptionSide, OptionType, Math64x61_, LegacyVolatility, LegacyStrike, Volatility,

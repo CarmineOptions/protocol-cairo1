@@ -6,12 +6,12 @@ use starknet::ContractAddress;
 
 type OptionType = u8; // TODO: Make this an enum
 
-use carmine_protocol::state::State::{
+use carmine_protocol::amm_core::state::State::{
     get_lptoken_address_for_given_option, get_lpool_balance, get_unlocked_capital,
     get_pool_definition_from_lptoken_address
 };
 
-use carmine_protocol::liquidity_pool::LiquidityPool::{
+use carmine_protocol::amm_core::liquidity_pool::LiquidityPool::{
     get_value_of_pool_position, get_underlying_for_lptokens
 };
 

@@ -35,13 +35,13 @@ type Strike = Fixed;
     use carmine_protocol::types::pool::{Pool};
 
 
-    use carmine_protocol::amm::AMM::{
+    use carmine_protocol::amm_core::amm::AMM::{
         DepositLiquidity, WithdrawLiquidity, ExpireOptionTokenForPool, emit_event
     };
 
-    use carmine_protocol::oracles::agg::OracleAgg::get_terminal_price;
+    use carmine_protocol::amm_core::oracles::agg::OracleAgg::get_terminal_price;
 
-    use carmine_protocol::state::State::{
+    use carmine_protocol::amm_core::state::State::{
         get_available_options, get_option_position, get_option_volatility,
         get_lptoken_address_for_given_option, get_pool_volatility_adjustment_speed,
         get_unlocked_capital, get_underlying_token_address,
@@ -53,12 +53,12 @@ type Strike = Fixed;
         get_option_info, set_option_position
     };
 
-    use carmine_protocol::helpers::{
+    use carmine_protocol::amm_core::helpers::{
         toU256_balance, assert_option_type_exists, assert_address_not_zero,
         get_underlying_from_option_data, fromU256_balance, split_option_locked_capital
     };
 
-    use carmine_protocol::constants::{
+    use carmine_protocol::amm_core::constants::{
         OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT
     };
 

@@ -18,7 +18,7 @@ type Maturity = felt252;
 // type Strike = Fixed;
 
 
-use carmine_protocol::oracles::pragma::Pragma::PragmaCheckpoint;
+use carmine_protocol::amm_core::oracles::pragma::Pragma::PragmaCheckpoint;
 
 #[starknet::interface]
 trait IERC20<TContractState> {
