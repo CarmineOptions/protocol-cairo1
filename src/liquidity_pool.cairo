@@ -31,15 +31,15 @@ type Maturity = felt252;
 type Volatility = Fixed;
 type Strike = Fixed;
 
-    use carmine_protocol::option_::{Option_, Option_Trait};
-    use carmine_protocol::pool::{Pool};
+    use carmine_protocol::types::option_::{Option_, Option_Trait};
+    use carmine_protocol::types::pool::{Pool};
 
 
     use carmine_protocol::amm::AMM::{
         DepositLiquidity, WithdrawLiquidity, ExpireOptionTokenForPool, emit_event
     };
 
-    use carmine_protocol::agg::OracleAgg::get_terminal_price;
+    use carmine_protocol::oracles::agg::OracleAgg::get_terminal_price;
 
     use carmine_protocol::state::State::{
         get_available_options, get_option_position, get_option_volatility,

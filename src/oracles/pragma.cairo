@@ -3,7 +3,7 @@ mod Pragma {
 
     use carmine_protocol::traits::{IPragmaOracleDispatcher, IPragmaOracleDispatcherTrait};
 
-    use carmine_protocol::oracle_helpers::{convert_from_int_to_Fixed};
+    use carmine_protocol::oracles::oracle_helpers::{convert_from_int_to_Fixed};
     // use carmine_protocol::basic::{Timestamp};
 
 type Timestamp = u64; // In seconds, Block timestamps are also u64

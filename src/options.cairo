@@ -36,7 +36,7 @@ type Volatility = Fixed;
 type Strike = Fixed;
     
 
-    use carmine_protocol::option_::{Option_};
+    use carmine_protocol::types::option_::{Option_};
 
     use carmine_protocol::helpers::{
         toU256_balance, fromU256_balance, FixedHelpersTrait,
@@ -44,7 +44,7 @@ type Strike = Fixed;
         assert_address_not_zero,
     };
 
-    use carmine_protocol::option_pricing_helpers::{
+    use carmine_protocol::pricing::option_pricing_helpers::{
         convert_amount_to_option_currency_from_base_uint256
     };
 

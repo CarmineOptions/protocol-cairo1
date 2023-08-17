@@ -5,7 +5,7 @@ mod OracleAgg {
     // use carmine_protocol::basic::{Timestamp};
     type Timestamp = u64; // In seconds, Block timestamps are also u64
 
-    use carmine_protocol::pragma::Pragma::{
+    use carmine_protocol::oracles::pragma::Pragma::{
         get_pragma_median_price, get_pragma_terminal_price
     };
 

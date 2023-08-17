@@ -43,15 +43,15 @@ type Strike = Fixed;
         STOP_TRADING_BEFORE_MATURITY_SECONDS,
     };
 
-    use carmine_protocol::option_pricing::OptionPricing::{black_scholes, };
-    use carmine_protocol::fees::get_fees;
-    use carmine_protocol::option_pricing_helpers::{
+    use carmine_protocol::pricing::option_pricing::OptionPricing::{black_scholes, };
+    use carmine_protocol::pricing::fees::get_fees;
+    use carmine_protocol::pricing::option_pricing_helpers::{
         convert_amount_to_option_currency_from_base_uint256, get_new_volatility,
         get_time_till_maturity, select_and_adjust_premia, add_premia_fees,
         assert_option_type_exists, assert_option_side_exists
     };
 
-    use carmine_protocol::agg::OracleAgg::{
+    use carmine_protocol::oracles::agg::OracleAgg::{
         get_current_price, get_terminal_price,
     };
 

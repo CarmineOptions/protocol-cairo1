@@ -50,9 +50,8 @@ type Strike = Fixed;
 
 
 
-    use carmine_protocol::pool::{Pool};
-
-    use carmine_protocol::option_::{
+    use carmine_protocol::types::pool::{Pool};
+    use carmine_protocol::types::option_::{
         LegacyOption, Option_, LegacyOption_to_Option, Option_to_LegacyOption, Option_Trait
     };
 
@@ -80,7 +79,7 @@ type Strike = Fixed;
 
         new_option_token_address::InternalContractStateTrait::write(
             ref state.new_option_token_address,
-            (lptoken_address, option_side, maturity, strike_price),
+            (lptoken_address, option_side, maturity, strike_price.mag),
             opt_address
         );
     }
@@ -121,7 +120,7 @@ type Strike = Fixed;
 
         // Read from new storage var
         let res = new_option_token_address::InternalContractStateTrait::read(
-            @state.new_option_token_address, (lptoken_address, option_side, maturity, strike_price)
+            @state.new_option_token_address, (lptoken_address, option_side, maturity, strike_price.mag)
         );
 
         return res;
@@ -158,7 +157,7 @@ type Strike = Fixed;
         );
 
         option_volatility::InternalContractStateTrait::write(
-            ref state.option_volatility, (lptoken_address, maturity.into(), strike_price), volatility
+            ref state.option_volatility, (lptoken_address, maturity.into(), strike_price.mag), volatility
         );
     }
 
@@ -196,7 +195,7 @@ type Strike = Fixed;
 
         // If value in old storage var was zero then we can try to read from new storage var
         let res = option_volatility::InternalContractStateTrait::read(
-            @state.option_volatility, (lptoken_address, maturity.into(), strike_price)
+            @state.option_volatility, (lptoken_address, maturity.into(), strike_price.mag)
         );
 
         res.assert_nn_not_zero('Opt vol <= 0');
@@ -405,7 +404,7 @@ type Strike = Fixed;
 
         // Otherwise just read and return from new storage var
         new_option_position::InternalContractStateTrait::read(
-            @state.new_option_position, (lptoken_address, option_side, maturity, strike_price)
+            @state.new_option_position, (lptoken_address, option_side, maturity, strike_price.mag)
         )
     }
 
@@ -430,7 +429,7 @@ type Strike = Fixed;
 
         new_option_position::InternalContractStateTrait::write(
             ref state.new_option_position,
-            (lptoken_address, option_side, maturity, strike_price),
+            (lptoken_address, option_side, maturity, strike_price.mag),
             position
         )
     }

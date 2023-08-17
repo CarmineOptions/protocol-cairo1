@@ -16,8 +16,8 @@ type Maturity = felt252;
 type Volatility = Fixed;
 type Strike = Fixed;
 
-use carmine_protocol::option_::{Option_, OptionWithPremia, OptionWithUsersPosition};
-use carmine_protocol::pool::{PoolInfo, UserPoolInfo, Pool};
+use carmine_protocol::types::option_::{Option_, OptionWithPremia, OptionWithUsersPosition};
+use carmine_protocol::types::pool::{PoolInfo, UserPoolInfo, Pool};
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
 #[starknet::interface]
@@ -214,26 +214,25 @@ mod AMM {
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
     // use carmine_protocol::basic::{Math64x61_, LegacyVolatility, LegacyStrike, Volatility, Strike, LPTAddress, OptionSide, Timestamp, OptionType};
 
-type LPTAddress = ContractAddress;
-type OptionSide = u8; // TODO: Make this an enum
-type OptionType = u8; // TODO: Make this an enum
-type Timestamp = u64; // In seconds, Block timestamps are also u64
+    type LPTAddress = ContractAddress;
+    type OptionSide = u8; // TODO: Make this an enum
+    type OptionType = u8; // TODO: Make this an enum
+    type Timestamp = u64; // In seconds, Block timestamps are also u64
 
-type Int = u128;
+    type Int = u128;
 
-type Math64x61_ = felt252; // legacy, for AMM trait definition
-type LegacyVolatility = Math64x61_;
-type LegacyStrike = Math64x61_;
-type Maturity = felt252;
+    type Math64x61_ = felt252; // legacy, for AMM trait definition
+    type LegacyVolatility = Math64x61_;
+    type LegacyStrike = Math64x61_;
+    type Maturity = felt252;
 
-type Volatility = Fixed;
-type Strike = Fixed;
+    type Volatility = Fixed;
+    type Strike = Fixed;
 
-    use carmine_protocol::pool::Pool;
-    use carmine_protocol::option_::{LegacyOption, Option_};
+    use carmine_protocol::types::pool::Pool;
+    use carmine_protocol::types::option_::{LegacyOption, Option_};
 
     // TODO: Constructor
-    
 
     #[storage]
     struct Storage {
@@ -243,13 +242,15 @@ type Strike = Fixed;
         new_pool_volatility_adjustment_speed: LegacyMap<LPTAddress, Fixed>,
 
         pool_volatility_separate: LegacyMap::<(LPTAddress, Maturity, LegacyStrike), LegacyVolatility>,
-        option_volatility: LegacyMap::<(LPTAddress, Maturity, Strike), Volatility>, // This is actually options vol, not pools
+        option_volatility: LegacyMap::<(ContractAddress, u64, u128), Volatility>, // This is actually options vol, not pools // TODO: last key value should be Fixed, not u128(or it's mag)
 
         option_position_: LegacyMap<(LPTAddress, OptionSide, Maturity, LegacyStrike), felt252>,
-        new_option_position: LegacyMap<(LPTAddress, OptionSide, Timestamp, Strike), Int>,
+        new_option_position: LegacyMap<(LPTAddress, OptionSide, Timestamp, u128), Int>, // TODO: last key value should be Fixed, not u128(or it's mag)
+
         
         option_token_address: LegacyMap::<(LPTAddress, OptionSide, Maturity, LegacyStrike), ContractAddress>,
-        new_option_token_address: LegacyMap::<(LPTAddress, OptionSide, Timestamp, Strike), ContractAddress>,
+        new_option_token_address: LegacyMap::<(LPTAddress, OptionSide, Timestamp, u128), ContractAddress>, // TODO: last key value should be Fixed, not u128(or it's mag)
+
         
         available_options: LegacyMap::<(LPTAddress, felt252), LegacyOption>,
         new_available_options: LegacyMap::<(LPTAddress, u32), Option_>,
@@ -342,10 +343,10 @@ type Strike = Fixed;
     use carmine_protocol::liquidity_pool::LiquidityPool;
     use carmine_protocol::options::Options;
     use carmine_protocol::view::View;
-    use carmine_protocol::option_pricing::OptionPricing;
+    use carmine_protocol::pricing::option_pricing::OptionPricing;
 
-    use carmine_protocol::option_::{OptionWithPremia, OptionWithUsersPosition};
-    use carmine_protocol::pool::{PoolInfo, UserPoolInfo};
+    use carmine_protocol::types::option_::{OptionWithPremia, OptionWithUsersPosition};
+    use carmine_protocol::types::pool::{PoolInfo, UserPoolInfo};
 
     #[external(v0)]
     impl Amm of super::IAMM<ContractState> {

@@ -11,7 +11,7 @@ use integer::U128DivRem;
 
 use cubit::f128::types::fixed::{Fixed, FixedTrait, MAX_u128, FixedInto};
 
-use carmine_protocol::agg::OracleAgg::{get_terminal_price, get_current_price};
+use carmine_protocol::oracles::agg::OracleAgg::{get_terminal_price, get_current_price};
 
 // use carmine_protocol::basic::{Math64x61_, OptionSide, OptionType, Int, Timestamp};
 
@@ -31,11 +31,11 @@ type Maturity = felt252;
 type Volatility = Fixed;
 type Strike = Fixed;
 
-use carmine_protocol::option_::{Option_};
+use carmine_protocol::types::option_::{Option_};
 
-use carmine_protocol::option_pricing::OptionPricing::black_scholes;
-use carmine_protocol::fees::get_fees;
-use carmine_protocol::option_pricing_helpers::{
+use carmine_protocol::pricing::option_pricing::OptionPricing::black_scholes;
+use carmine_protocol::pricing::fees::get_fees;
+use carmine_protocol::pricing::option_pricing_helpers::{
     get_new_volatility, get_time_till_maturity, select_and_adjust_premia, add_premia_fees,
 };
 

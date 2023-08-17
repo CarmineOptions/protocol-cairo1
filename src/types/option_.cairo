@@ -31,15 +31,15 @@ use carmine_protocol::constants::{
     OPTION_CALL,
 };
 
-use carmine_protocol::option_pricing_helpers::{
+use carmine_protocol::pricing::option_pricing_helpers::{
     get_new_volatility, get_time_till_maturity, select_and_adjust_premia, add_premia_fees
 };
 
-use carmine_protocol::fees::{get_fees};
+use carmine_protocol::pricing::fees::{get_fees};
 
-use carmine_protocol::option_pricing::OptionPricing::black_scholes;
+use carmine_protocol::pricing::option_pricing::OptionPricing::black_scholes;
 
-use carmine_protocol::agg::OracleAgg::{get_current_price, get_terminal_price};
+use carmine_protocol::oracles::agg::OracleAgg::{get_current_price, get_terminal_price};
 
 use carmine_protocol::traits::{
     IOptionTokenDispatcher, IOptionTokenDispatcherTrait, IERC20Dispatcher, IERC20DispatcherTrait
