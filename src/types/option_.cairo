@@ -82,22 +82,7 @@ struct Option_ {
     option_type: OptionType
 }
 
-trait Option_Trait {
-    fn sum(self: Option_) -> u128;
-    fn is_ripe(self: Option_) -> bool;
-    fn correct_side(self: Option_, closing: bool) -> Option_;
-    fn opt_address(self: Option_) -> ContractAddress;
-    fn lpt_addr(self: Option_) -> ContractAddress;
-    fn volatility(self: Option_) -> Fixed;
-    fn premia_before_fees(self: Option_, position_size: Int) -> Fixed;
-    fn premia_with_fees(self: Option_, position_size: Int) -> Fixed;
-    fn value_of_position(self: Option_, position_size: Int) -> Fixed;
-    fn pools_position(self: Option_) -> Int;
-    fn value_of_user_position(self: Option_, position_size: Int) -> Fixed;
-    fn get_dispatcher(self: Option_) -> IOptionTokenDispatcher;
-}
-
-
+#[generate_trait]
 impl Option_Impl of Option_Trait {
     fn sum(self: Option_) -> u128 {
         self.strike_price.mag + self.maturity.into()

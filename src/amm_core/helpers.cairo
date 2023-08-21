@@ -31,13 +31,7 @@ use carmine_protocol::amm_core::constants::{
 use carmine_protocol::traits::IERC20Dispatcher;
 use carmine_protocol::traits::IERC20DispatcherTrait;
 
-trait FixedHelpersTrait {
-    fn assert_nn_not_zero(self: Fixed, msg: felt252);
-    fn assert_nn(self: Fixed, errmsg: felt252);
-    fn to_legacyMath(self: Fixed) -> Math64x61_;
-    fn from_legacyMath(num: Math64x61_) -> Fixed;
-}
-
+#[generate_trait]
 impl FixedHelpersImpl of FixedHelpersTrait {
     fn assert_nn_not_zero(self: Fixed, msg: felt252) {
         assert(self > FixedTrait::ZERO(), msg);

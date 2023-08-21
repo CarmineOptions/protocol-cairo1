@@ -16,14 +16,7 @@ struct FixedBalance {
     address: ContractAddress
 }
 
-trait FixedBalanceTrait {
-    fn new(num: Fixed, token_address: ContractAddress) -> FixedBalance;
-
-    fn from_u256_balance(num: u256, token_address: ContractAddress) -> FixedBalance;
-    fn from_int_balance(num: u128, token_address: ContractAddress) -> FixedBalance;
-}
-
-
+#[generate_trait]
 impl FixedBalanceImpl of FixedBalanceTrait {
     fn new(num: Fixed, token_address: ContractAddress) -> FixedBalance {
         let decimals = get_decimal(token_address).expect('FixBal - decimals 0');

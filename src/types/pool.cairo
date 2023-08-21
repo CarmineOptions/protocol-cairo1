@@ -21,15 +21,7 @@ struct Pool {
     option_type: OptionType,
 }
 
-trait PoolTrait {
-    fn from_lpt_address(lpt_addr: ContractAddress) -> Pool;
-    fn lpt_addr(self: Pool) -> ContractAddress;
-    fn lpool_balance(self: Pool) -> u256;
-    fn unlocked_capital(self: Pool) -> u256;
-    fn value_of_position(self: Pool) -> Fixed;
-    fn to_PoolInfo(self: Pool) -> PoolInfo;
-}
-
+#[generate_trait]
 impl PoolImpl of PoolTrait {
     fn from_lpt_address(lpt_addr: ContractAddress) -> Pool {
         get_pool_definition_from_lptoken_address(lpt_addr)
@@ -74,10 +66,7 @@ struct PoolInfo {
     value_of_pool_position: Fixed
 }
 
-trait PoolInfoTrait {
-    fn to_UserPoolInfo(self: PoolInfo, user_address: ContractAddress) -> UserPoolInfo;
-}
-
+#[generate_trait]
 impl PoolInfoImpl of PoolInfoTrait {
     fn to_UserPoolInfo(self: PoolInfo, user_address: ContractAddress) -> UserPoolInfo {
         let lptoken_balance = IERC20Dispatcher {
