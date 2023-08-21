@@ -13,9 +13,7 @@ mod State {
         FixedHelpersTrait
     };
 
-    use carmine_protocol::amm_core::constants::{
-        OPTION_CALL, OPTION_PUT
-    };
+    use carmine_protocol::amm_core::constants::{OPTION_CALL, OPTION_PUT};
     use carmine_protocol::amm_core::amm::AMM::{
         pool_volatility_separate, option_volatility, pool_volatility_adjustment_speed,
         new_pool_volatility_adjustment_speed, option_position_, new_option_position,
