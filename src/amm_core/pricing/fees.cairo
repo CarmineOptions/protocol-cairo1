@@ -15,3 +15,10 @@ fn get_fees(value: Fixed) -> Fixed {
     let fee_percent = FixedTrait::new_unscaled(FEE_PROPORTION_PERCENT, false);
     return fee_percent / hundred * value;
 }
+
+#[test]
+#[available_gas(2000000)]
+#[should_panic(expected: ('', ))]
+fn test_() {
+    assert(1 == 0, '');
+}
