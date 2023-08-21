@@ -14,7 +14,6 @@ mod State {
     };
 
     use carmine_protocol::amm_core::constants::{
-        SEPARATE_VOLATILITIES_FOR_DIFFERENT_STRIKES, VOLATILITY_LOWER_BOUND, VOLATILITY_UPPER_BOUND,
         OPTION_CALL, OPTION_PUT
     };
     use carmine_protocol::amm_core::amm::AMM::{
