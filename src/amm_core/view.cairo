@@ -17,10 +17,10 @@ mod View {
         get_available_lptoken_addresses
     };
 
+    use carmine_protocol::types::pool::{UserPoolInfo, PoolInfo, PoolInfoTrait, PoolTrait, Pool};
     use carmine_protocol::types::option_::{
         Option_, Option_Trait, OptionWithPremia, OptionWithUsersPosition
     };
-    use carmine_protocol::types::pool::{UserPoolInfo, PoolInfo, PoolInfoTrait, PoolTrait, Pool};
 
     use carmine_protocol::types::basic::{LPTAddress, Int};
 

@@ -15,6 +15,7 @@ mod LiquidityPool {
     use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
 
     use carmine_protocol::types::basic::{LPTAddress, OptionType, OptionSide, Int, Timestamp};
+
     use carmine_protocol::types::option_::{Option_, Option_Trait};
     use carmine_protocol::types::pool::{Pool};
 
@@ -46,9 +47,7 @@ mod LiquidityPool {
         OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT
     };
 
-    fn get_value_of_position(
-        option: Option_, position_size: Int
-    ) -> Fixed {
+    fn get_value_of_position(option: Option_, position_size: Int) -> Fixed {
         option.value_of_position(position_size)
     }
 

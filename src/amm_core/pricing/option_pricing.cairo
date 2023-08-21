@@ -1,6 +1,4 @@
-
 mod OptionPricing {
-
     // Module that calculates Black-Scholes with Choudhury's approximation to std normal CDF
     // https://www.hrpub.org/download/20140305/MS7-13401470.pdf.
 
@@ -56,7 +54,7 @@ mod OptionPricing {
         };
 
         assert(x <= (TWO.pow(THREE)), 'STD_NC - x > 8');
-        
+
         let x_squared = x * x;
         let x_sq_half = x_squared / TWO;
         let numerator = inv_exp_big_x(x_sq_half);
@@ -258,7 +256,8 @@ mod OptionPricing {
             - normal_d_2_strike_e_neg_risk_time_till_maturity;
 
         let neg_underlying_price_call_value = call_option_value - underlying_price;
-        let put_option_value = strike_e_neg_risk_time_till_maturity + neg_underlying_price_call_value;
+        let put_option_value = strike_e_neg_risk_time_till_maturity
+            + neg_underlying_price_call_value;
 
         return (call_option_value, put_option_value, true);
     }
@@ -282,5 +281,4 @@ mod OptionPricing {
 
         return (call_option_value, put_option_value, false);
     }
-
 }

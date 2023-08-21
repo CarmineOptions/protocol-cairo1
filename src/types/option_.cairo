@@ -8,7 +8,18 @@ use carmine_protocol::amm_core::helpers::{
 };
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
-use carmine_protocol::types::basic::{OptionSide, OptionType, Timestamp, LegacyStrike, Int};
+// use carmine_protocol::basic::{OptionSide, OptionType, Timestamp, LegacyStrike, Int};
+
+type OptionSide = u8; // TODO: Make this an enum
+type OptionType = u8; // TODO: Make this an enum
+type Timestamp = u64; // In seconds, Block timestamps are also u64
+
+type Int = u128;
+
+type Math64x61_ = felt252; // legacy, for AMM trait definition
+type LegacyStrike = Math64x61_;
+
+
 use carmine_protocol::amm_core::state::State::{
     get_lptoken_address_for_given_option, get_option_volatility,
     get_pool_volatility_adjustment_speed, get_option_position, get_option_token_address
@@ -23,8 +34,8 @@ use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
     get_new_volatility, get_time_till_maturity, select_and_adjust_premia, add_premia_fees
 };
 
-use carmine_protocol::amm_core::pricing::fees::{get_fees};
 
+use carmine_protocol::amm_core::pricing::fees::{get_fees};
 use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing::black_scholes;
 
 use carmine_protocol::amm_core::oracles::agg::OracleAgg::{get_current_price, get_terminal_price};
@@ -35,7 +46,7 @@ use carmine_protocol::traits::{
 
 
 // Option used in c0 AMM
-#[derive(Copy, Drop, Serde, Store)]
+#[derive(Copy, Drop, Serde, starknet::Store)]
 struct LegacyOption {
     option_side: OptionSide,
     maturity: felt252,
@@ -45,8 +56,23 @@ struct LegacyOption {
     option_type: OptionType
 }
 
+// impl PackFixed of StorePacking<LegacyOption, felt252> {
+//     fn pack(value: Fixed) -> felt252 {
+//         let MAX_MAG_PLUS_ONE = 0x100000000000000000000000000000000; // 2**128
+//         let packed_sign = MAX_MAG_PLUS_ONE * value.sign.into();
+//         value.mag.into() + packed_sign
+//     }
+
+//     fn unpack(value: felt252) -> Fixed {
+//         let (q, r) = U256DivRem::div_rem(value.into(), u256_as_non_zero(0x100000000000000000000000000000000));
+//         let mag: u128 = q.try_into().unwrap();
+//         let sign: bool = r.into() == 1;
+//         Fixed {mag: mag, sign: sign}
+//     }
+// }
+
 // New option
-#[derive(Copy, Drop, Serde, Store)]
+#[derive(Copy, Drop, Serde, starknet::Store)]
 struct Option_ {
     option_side: OptionSide,
     maturity: Timestamp,
@@ -167,7 +193,6 @@ impl Option_Impl of Option_Trait {
         premia.assert_nn('GPBF - premia < 0');
         total_premia_before_fees.assert_nn('GPBF - premia_before_fees < 0');
 
-
         total_premia_before_fees
     }
 
@@ -189,7 +214,6 @@ impl Option_Impl of Option_Trait {
 
 
     fn value_of_position(self: Option_, position_size: Int) -> Fixed {
-
         let current_block_time = get_block_timestamp();
         let is_ripe = self.maturity <= current_block_time;
 
@@ -229,7 +253,6 @@ impl Option_Impl of Option_Trait {
 
         let premia_with_fees = add_premia_fees(opposite_side, total_premia_before_fees, total_fees);
         premia_with_fees.assert_nn('GVoP - premia w fees < 0');
-
 
         if self.option_side == TRADE_SIDE_LONG {
             return premia_with_fees;

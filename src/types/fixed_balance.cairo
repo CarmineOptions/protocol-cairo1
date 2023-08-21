@@ -5,10 +5,7 @@ use traits::{Into, TryInto};
 
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
-use carmine_protocol::amm_core::helpers::{
-    fromU256_balance, 
-    _toU256_balance
-};
+use carmine_protocol::amm_core::helpers::{fromU256_balance, _toU256_balance};
 
 use carmine_protocol::amm_core::constants::get_decimal;
 
@@ -31,25 +28,20 @@ impl FixedBalanceImpl of FixedBalanceTrait {
     fn new(num: Fixed, token_address: ContractAddress) -> FixedBalance {
         let decimals = get_decimal(token_address).expect('FixBal - decimals 0');
 
-        FixedBalance {
-            balance: num,
-            decimals: decimals,
-            address: token_address
-        }
+        FixedBalance { balance: num, decimals: decimals, address: token_address }
     }
 
     fn from_u256_balance(num: u256, token_address: ContractAddress) -> FixedBalance {
         let res = fromU256_balance(num, token_address);
-        
+
         FixedBalanceTrait::new(res, token_address)
     }
 
-    fn from_int_balance(num: u128, token_address: ContractAddress) -> FixedBalance { 
+    fn from_int_balance(num: u128, token_address: ContractAddress) -> FixedBalance {
         let res = fromU256_balance(num.into(), token_address);
-        
+
         FixedBalanceTrait::new(res, token_address)
     }
-    
 }
 
 
@@ -82,9 +74,7 @@ impl FixedBalanceAdd of Add<FixedBalance> {
         assert(lhs.decimals == rhs.decimals, 'FixedBalanceAdd - diff dec');
 
         FixedBalance {
-            balance: lhs.balance + rhs.balance,
-            decimals: lhs.decimals,
-            address: lhs.address
+            balance: lhs.balance + rhs.balance, decimals: lhs.decimals, address: lhs.address
         }
     }
 }
@@ -96,9 +86,7 @@ impl FixedBalanceAddEq of AddEq<FixedBalance> {
         assert(self.decimals == other.decimals, 'FixedBalanceAddEq - diff dec');
 
         self = FixedBalance {
-            balance: self.balance + other.balance,
-            decimals: self.decimals,
-            address: self.address
+            balance: self.balance + other.balance, decimals: self.decimals, address: self.address
         }
     }
 }
@@ -109,9 +97,7 @@ impl FixedBalanceSub of Sub<FixedBalance> {
         assert(lhs.decimals == rhs.decimals, 'FixedBalanceSub- diff dec');
 
         FixedBalance {
-            balance: lhs.balance - rhs.balance,
-            decimals: lhs.decimals,
-            address: lhs.address
+            balance: lhs.balance - rhs.balance, decimals: lhs.decimals, address: lhs.address
         }
     }
 }
@@ -123,9 +109,7 @@ impl FixedBalanceSubEq of SubEq<FixedBalance> {
         assert(self.decimals == other.decimals, 'FixedBalanceSubEq - diff dec');
 
         self = FixedBalance {
-            balance: self.balance - other.balance,
-            decimals: self.decimals,
-            address: self.address
+            balance: self.balance - other.balance, decimals: self.decimals, address: self.address
         }
     }
 }
@@ -135,7 +119,7 @@ impl FixedBalancePartialEq of PartialEq<FixedBalance> {
     fn eq(lhs: @FixedBalance, rhs: @FixedBalance) -> bool {
         assert(lhs.address == rhs.address, 'FixedBalanceParEq - diff addr');
         assert(lhs.decimals == rhs.decimals, 'FixedBalanceParEq - diff dec');
-        
+
         lhs.balance == rhs.balance
     }
 
@@ -143,10 +127,9 @@ impl FixedBalancePartialEq of PartialEq<FixedBalance> {
     fn ne(lhs: @FixedBalance, rhs: @FixedBalance) -> bool {
         assert(lhs.address == rhs.address, 'FixedBalanceParNe - diff addr');
         assert(lhs.decimals == rhs.decimals, 'FixedBalanceParNe - diff dec');
-        
+
         lhs.balance != rhs.balance
     }
-
 }
 
 impl FixedBalancePartialOrd of PartialOrd<FixedBalance> {

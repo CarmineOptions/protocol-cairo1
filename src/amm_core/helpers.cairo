@@ -14,6 +14,7 @@ use cubit::f128::types::fixed::{Fixed, FixedTrait, MAX_u128, FixedInto};
 use carmine_protocol::amm_core::oracles::agg::OracleAgg::{get_terminal_price, get_current_price};
 
 use carmine_protocol::types::basic::{Math64x61_, OptionSide, OptionType, Int, Timestamp};
+
 use carmine_protocol::types::option_::{Option_};
 
 use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing::black_scholes;
@@ -23,8 +24,8 @@ use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
 };
 
 use carmine_protocol::amm_core::constants::{
-    OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side,
-    get_decimal, STOP_TRADING_BEFORE_MATURITY_SECONDS, RISK_FREE_RATE
+    OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side, get_decimal,
+    STOP_TRADING_BEFORE_MATURITY_SECONDS, RISK_FREE_RATE
 };
 
 trait FixedHelpersTrait {
@@ -32,7 +33,6 @@ trait FixedHelpersTrait {
     fn assert_nn(self: Fixed, errmsg: felt252);
     fn to_legacyMath(self: Fixed) -> Math64x61_;
     fn from_legacyMath(num: Math64x61_) -> Fixed;
-
 }
 
 impl FixedHelpersImpl of FixedHelpersTrait {
@@ -78,8 +78,7 @@ fn check_deadline(deadline: Timestamp) {
 // fn pow<S, impl Mult: Mul<S>>(x: S, y: S) -> S {
 // Only helper function, not to be used anywhere else
 fn _pow(a: u128, b: u128) -> u128 {
-
-    let mut x: u128 = 1; 
+    let mut x: u128 = 1;
     let mut n = b;
 
     if n == 0 {
@@ -94,9 +93,7 @@ fn _pow(a: u128, b: u128) -> u128 {
             break;
         }
 
-        let (div, rem) = integer::u128_safe_divmod(
-            n, two
-        );
+        let (div, rem) = integer::u128_safe_divmod(n, two);
 
         if rem == 1 {
             y = x * y;
@@ -133,13 +130,13 @@ fn toU256_balance(x: Fixed, currency_address: ContractAddress) -> u256 {
     x.assert_nn('toU256 - x is zero'); //  Now we can just use the mag in Fixed
 
     let decimals: u128 = get_decimal(currency_address)
-        .expect('toU256 - Unable to get decimals').into();
+        .expect('toU256 - Unable to get decimals')
+        .into();
 
     _toU256_balance(x, decimals)
 }
 
 fn _toU256_balance(x: Fixed, decimals: u128) -> u256 {
-
     let five_to_dec = _pow(5, decimals);
 
     let x_5 = x.mag * five_to_dec;
@@ -165,7 +162,6 @@ fn _toU256_balance(x: Fixed, decimals: u128) -> u256 {
 // @param currency_address: Address of the currency - used to get decimals
 // @return Input converted to Math64_61
 fn fromU256_balance(x: u256, currency_address: ContractAddress) -> Fixed {
-
     // We will guide you through with an example
     // x = 1.2*10**18 (example input... 10**18 since it is ETH)
     // We want to divide the number by 10**18 and multiply by 2**64 to get Math64x61 number
@@ -174,14 +170,12 @@ fn fromU256_balance(x: u256, currency_address: ContractAddress) -> Fixed {
     // We can split the 10*18 to (2**18 * 5**18)
     // (1.2 * 10**18) * 2**64 / (5**18 * 2**18)
 
-    let decimals: u128 = get_decimal(currency_address)
-        .expect('fromU256 - decimals zero').into();
+    let decimals: u128 = get_decimal(currency_address).expect('fromU256 - decimals zero').into();
 
     _fromU256_balance(x, decimals)
 }
 
 fn _fromU256_balance(x: u256, decimals: u128) -> Fixed {
-
     let five_to_dec = _pow(5, decimals);
 
     // (1.2 * 10**18) * 2**64 / (5**18 * 2**18)
@@ -199,10 +193,8 @@ fn _fromU256_balance(x: u256, decimals: u128) -> Fixed {
 
     // x_ / five_to_dec
     let (q, rem) = U128DivRem::div_rem(x_, five_to_dec.try_into().expect('fromU256 - ftd zero'));
-    Fixed {
-        mag: q, // TODO: Add rem
-        sign: false
-    }
+    Fixed { mag: q, // TODO: Add rem
+     sign: false }
 }
 
 fn split_option_locked_capital(
