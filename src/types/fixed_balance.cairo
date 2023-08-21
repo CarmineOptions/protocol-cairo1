@@ -7,7 +7,7 @@ use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
 use carmine_protocol::amm_core::helpers::{fromU256_balance, _toU256_balance};
 
-use carmine_protocol::amm_core::constants::get_decimal;
+use carmine_protocol::amm_core::helpers::get_decimal;
 
 #[derive(Drop)]
 struct FixedBalance {

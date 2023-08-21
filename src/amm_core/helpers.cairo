@@ -24,9 +24,12 @@ use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
 };
 
 use carmine_protocol::amm_core::constants::{
-    OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side, get_decimal,
-    STOP_TRADING_BEFORE_MATURITY_SECONDS, RISK_FREE_RATE
+    OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side,
+    STOP_TRADING_BEFORE_MATURITY_SECONDS, RISK_FREE_RATE, TOKEN_ETH_ADDRESS, TOKEN_USDC_ADDRESS
 };
+
+use carmine_protocol::traits::IERC20Dispatcher;
+use carmine_protocol::traits::IERC20DispatcherTrait;
 
 trait FixedHelpersTrait {
     fn assert_nn_not_zero(self: Fixed, msg: felt252);
@@ -252,5 +255,31 @@ fn get_underlying_from_option_data(
         base_token_address
     } else {
         quote_token_address
+    }
+}
+
+// @notice Get decimal count for the given token
+// @dev 18 for ETH, 6 for USDC
+// @param token_address: Address of the token for which decimals are being retrieved
+// @return dec: Decimal count
+fn get_decimal(token_address: ContractAddress) -> Option<u8> {
+    if token_address == TOKEN_ETH_ADDRESS.try_into()? {
+        return Option::Some(18);
+    }
+
+    if token_address == TOKEN_USDC_ADDRESS.try_into()? {
+        return Option::Some(6);
+    }
+
+    assert_address_not_zero(token_address, 'Token address is zero');
+
+    let decimals = IERC20Dispatcher { contract_address: token_address }.decimals();
+    assert(decimals != 0, 'Token has decimals = 0');
+
+    if decimals == 0 {
+        return Option::None(());
+    } else {
+        let decimals_felt: felt252 = decimals.into();
+        return Option::Some(decimals_felt.try_into()?);
     }
 }
