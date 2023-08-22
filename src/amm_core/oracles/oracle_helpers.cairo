@@ -7,7 +7,19 @@ use cubit::f128::types::fixed::{Fixed, FixedTrait};
 // FIXME use a canonical implementation
 // https://github.com/influenceth/cubit/blob/main/src/f128/math/core.cairo
 fn pow(base: u128, pow: u8) -> u128 {
-    1
+    if (pow == 0) {
+        1_u128
+    } else {
+        let mut res: u128 = base;
+        let mut power = pow;
+        loop {
+            if power == 1 {
+                break res;
+            }
+            res = res * base;
+            power = power - 1;
+        }
+    }
 }
 
 fn convert_from_int_to_Fixed(value: u128, decimals: u8) -> Fixed {
