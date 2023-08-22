@@ -148,7 +148,7 @@ impl Option_Impl of Option_Trait {
         );
 
         // 3) Get TTM
-        let time_till_maturity = FixedTrait::from_felt(0);//get_time_till_maturity(self.maturity);
+        let time_till_maturity = FixedTrait::from_felt(0); //get_time_till_maturity(self.maturity);
 
         // 4) Get Risk free rate
         let risk_free_rate_annualized = FixedTrait::from_felt(RISK_FREE_RATE);
@@ -157,7 +157,9 @@ impl Option_Impl of Option_Trait {
         let hundred = FixedTrait::from_unscaled_felt(100);
         let sigma = trade_volatility / hundred;
 
-        let (call_premia, put_premia, is_usable) = (FixedTrait::from_felt(0), FixedTrait::from_felt(0), true);//black_scholes(
+        let (call_premia, put_premia, is_usable) = (
+            FixedTrait::from_felt(0), FixedTrait::from_felt(0), true
+        ); //black_scholes(
         //     sigma,
         //     time_till_maturity,
         //     self.strike_price,
@@ -231,12 +233,14 @@ impl Option_Impl of Option_Trait {
         let total_premia_before_fees = self.premia_before_fees(position_size, );
 
         // Get fees and total premia
-        let total_fees = FixedTrait::from_felt(0);//get_fees(total_premia_before_fees);
+        let total_fees = FixedTrait::from_felt(0); //get_fees(total_premia_before_fees);
         total_fees.assert_nn('GVoP - total fees < 0');
 
         let opposite_side = get_opposite_side(self.option_side);
 
-        let premia_with_fees = FixedTrait::from_felt(0); //add_premia_fees(opposite_side, total_premia_before_fees, total_fees);
+        let premia_with_fees = FixedTrait::from_felt(
+            0
+        ); //add_premia_fees(opposite_side, total_premia_before_fees, total_fees);
         premia_with_fees.assert_nn('GVoP - premia w fees < 0');
 
         if self.option_side == TRADE_SIDE_LONG {

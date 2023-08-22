@@ -89,7 +89,7 @@ mod Pragma {
         let key = _get_ticker_key(quote_token_addr, base_token_addr)
             .expect('Pragma/GPMP - Cant get spot key');
         let res = _get_pragma_median_price(key);
-        res//account_for_stablecoin_divergence(res, quote_token_addr, 0)
+        res //account_for_stablecoin_divergence(res, quote_token_addr, 0)
     }
 
     fn _get_pragma_terminal_price(key: felt252, maturity: Timestamp) -> Fixed {

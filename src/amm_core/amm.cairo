@@ -15,7 +15,7 @@ trait IAMM<TContractState> {
         option_type: OptionType,
         amount: u256,
     );
-    // fn get_option_type(self: @TContractState, lptoken_address: ContractAddress) -> OptionType; // Deleting this one - get_pool_def_from_lptoken_addr can be used
+// fn get_option_type(self: @TContractState, lptoken_address: ContractAddress) -> OptionType; // Deleting this one - get_pool_def_from_lptoken_addr can be used
 // fn empiric_median_price(self: @TContractState, key: felt252) -> Fixed;
 // TODO: Functions below
 // fn initializer(ref self: TContractState, proxy_admin: ContractAddress);
