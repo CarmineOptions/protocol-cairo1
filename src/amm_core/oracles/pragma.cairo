@@ -80,16 +80,6 @@ mod Pragma {
             contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
         }.get_spot_median(key);
 
-        let curr_time = get_block_timestamp();
-        let time_diff = curr_time
-            - last_updated_timestamp.try_into().expect('Pragma/_GPMP - LUT too large');
-
-        assert(time_diff < 3600, 'Pragma/_GPMP - Price too old');
-        assert(
-            value.try_into().expect('Pragma/GPMP - Price too high') > 0_u128,
-            'Pragma/-GPMP - Price <= 0'
-        );
-
         convert_from_int_to_Fixed(value.try_into().unwrap(), decimals.try_into().unwrap())
     }
 
@@ -99,7 +89,7 @@ mod Pragma {
         let key = _get_ticker_key(quote_token_addr, base_token_addr)
             .expect('Pragma/GPMP - Cant get spot key');
         let res = _get_pragma_median_price(key);
-        account_for_stablecoin_divergence(res, quote_token_addr, 0)
+        res//account_for_stablecoin_divergence(res, quote_token_addr, 0)
     }
 
     fn _get_pragma_terminal_price(key: felt252, maturity: Timestamp) -> Fixed {

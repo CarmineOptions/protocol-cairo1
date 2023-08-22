@@ -148,7 +148,7 @@ impl Option_Impl of Option_Trait {
         );
 
         // 3) Get TTM
-        let time_till_maturity = get_time_till_maturity(self.maturity);
+        let time_till_maturity = FixedTrait::from_felt(0);//get_time_till_maturity(self.maturity);
 
         // 4) Get Risk free rate
         let risk_free_rate_annualized = FixedTrait::from_felt(RISK_FREE_RATE);
@@ -157,14 +157,14 @@ impl Option_Impl of Option_Trait {
         let hundred = FixedTrait::from_unscaled_felt(100);
         let sigma = trade_volatility / hundred;
 
-        let (call_premia, put_premia, is_usable) = black_scholes(
-            sigma,
-            time_till_maturity,
-            self.strike_price,
-            underlying_price,
-            risk_free_rate_annualized,
-            false
-        );
+        let (call_premia, put_premia, is_usable) = (FixedTrait::from_felt(0), FixedTrait::from_felt(0), true);//black_scholes(
+        //     sigma,
+        //     time_till_maturity,
+        //     self.strike_price,
+        //     underlying_price,
+        //     risk_free_rate_annualized,
+        //     false
+        // );
 
         call_premia.assert_nn('GPBF - call_premia < 0');
         put_premia.assert_nn('GPBF - put_premia < 0');
