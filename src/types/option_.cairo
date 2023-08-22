@@ -137,48 +137,53 @@ impl Option_Impl of Option_Trait {
         // 1) Get current underlying price
         let underlying_price = get_current_price(self.quote_token_address, self.base_token_address);
 
-        // 2) Get trade vol
-        let (_, trade_volatility) = get_new_volatility(
-            self.volatility(),
-            option_size_cubit,
-            self.option_type,
-            self.option_side,
-            self.strike_price,
-            pool_volatility_adjustment_speed
-        );
+        // For Oriz - If you uncomment the line below then the contract won't build 
+        // however if you uncomment it and then comment out lines 132-135 above then it again build just fine
+        // let time_till_maturity = get_time_till_maturity(self.maturity);
 
-        // 3) Get TTM
-        let time_till_maturity = get_time_till_maturity(self.maturity);
+        underlying_price
+        // // 2) Get trade vol
+        // let (_, trade_volatility) = get_new_volatility(
+        //     self.volatility(),
+        //     option_size_cubit,
+        //     self.option_type,
+        //     self.option_side,
+        //     self.strike_price,
+        //     pool_volatility_adjustment_speed
+        // );
 
-        // 4) Get Risk free rate
-        let risk_free_rate_annualized = FixedTrait::from_felt(RISK_FREE_RATE);
+        // // 3) Get TTM
+        // let time_till_maturity = get_time_till_maturity(self.maturity);
 
-        // 5) Get premia
-        let hundred = FixedTrait::from_unscaled_felt(100);
-        let sigma = trade_volatility / hundred;
+        // // 4) Get Risk free rate
+        // let risk_free_rate_annualized = FixedTrait::from_felt(RISK_FREE_RATE);
 
-        let (call_premia, put_premia, is_usable) = black_scholes(
-            sigma,
-            time_till_maturity,
-            self.strike_price,
-            underlying_price,
-            risk_free_rate_annualized,
-            false
-        );
+        // // 5) Get premia
+        // let hundred = FixedTrait::from_unscaled_felt(100);
+        // let sigma = trade_volatility / hundred;
 
-        call_premia.assert_nn('GPBF - call_premia < 0');
-        put_premia.assert_nn('GPBF - put_premia < 0');
+        // let (call_premia, put_premia, is_usable) = black_scholes(
+        //     sigma,
+        //     time_till_maturity,
+        //     self.strike_price,
+        //     underlying_price,
+        //     risk_free_rate_annualized,
+        //     false
+        // );
 
-        let premia = select_and_adjust_premia(
-            call_premia, put_premia, self.option_type, underlying_price
-        );
+        // call_premia.assert_nn('GPBF - call_premia < 0');
+        // put_premia.assert_nn('GPBF - put_premia < 0');
 
-        let total_premia_before_fees = premia * option_size_cubit;
+        // let premia = select_and_adjust_premia(
+        //     call_premia, put_premia, self.option_type, underlying_price
+        // );
 
-        premia.assert_nn('GPBF - premia < 0');
-        total_premia_before_fees.assert_nn('GPBF - premia_before_fees < 0');
+        // let total_premia_before_fees = premia * option_size_cubit;
 
-        total_premia_before_fees
+        // premia.assert_nn('GPBF - premia < 0');
+        // total_premia_before_fees.assert_nn('GPBF - premia_before_fees < 0');
+
+        // total_premia_before_fees
     }
 
 
