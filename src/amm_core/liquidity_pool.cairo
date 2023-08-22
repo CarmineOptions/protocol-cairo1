@@ -79,11 +79,53 @@ mod LiquidityPool {
     // Provide/remove liquidity
     // # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     fn get_lptokens_for_underlying(lptoken_address: LPTAddress, underlying_amt: u256) -> u256 {
-        42
+        let free_capital = get_unlocked_capital(lptoken_address);
+        let currency_address = get_underlying_token_address(lptoken_address);
+        let value_of_position_cubit = get_value_of_pool_position(lptoken_address);
+        let value_of_position_u256 = toU256_balance(value_of_position_cubit, currency_address);
+
+        let value_of_pool = free_capital + value_of_position_u256;
+
+        if value_of_pool == 0 {
+            return underlying_amt;
+        }
+
+        let lpt_supply = IERC20Dispatcher { contract_address: lptoken_address }.totalSupply();
+        let (q, r) = U256DivRem::div_rem(
+            lpt_supply, value_of_pool.try_into().expect('Div by zero in GLfU')
+        );
+        let to_mint = q * underlying_amt;
+
+        let to_div = r * underlying_amt;
+
+        let (to_mint_additional_q, _) = U256DivRem::div_rem(
+            to_div, value_of_pool.try_into().expect('Div by zero in GLfU')
+        );
+
+        to_mint_additional_q + to_mint
     }
 
     fn get_underlying_for_lptokens(lptoken_address: LPTAddress, lpt_amt: u256) -> u256 {
-        420
+        let lpt_supply = IERC20Dispatcher { contract_address: lptoken_address }.totalSupply();
+        let free_capital = get_unlocked_capital(lptoken_address);
+
+        let value_of_position_cubit = get_value_of_pool_position(lptoken_address);
+        let currency_address = get_underlying_token_address(lptoken_address);
+        let value_of_position = toU256_balance(value_of_position_cubit, currency_address);
+
+        let total_underlying_amt = free_capital + value_of_position;
+
+        let (aq, ar) = U256DivRem::div_rem(
+            total_underlying_amt, lpt_supply.try_into().expect('Div by zero in GUfL')
+        );
+        let b = aq * lpt_amt;
+        let tmp = ar * lpt_amt;
+
+        let (to_burn_addition_q, _) = U256DivRem::div_rem(
+            tmp, lpt_supply.try_into().expect('Div by zero in GUfL')
+        );
+
+        to_burn_addition_q + b
     }
 
     fn add_lptoken(

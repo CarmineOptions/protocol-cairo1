@@ -231,12 +231,12 @@ impl Option_Impl of Option_Trait {
         let total_premia_before_fees = self.premia_before_fees(position_size, );
 
         // Get fees and total premia
-        let total_fees = get_fees(total_premia_before_fees);
+        let total_fees = FixedTrait::from_felt(0);//get_fees(total_premia_before_fees);
         total_fees.assert_nn('GVoP - total fees < 0');
 
         let opposite_side = get_opposite_side(self.option_side);
 
-        let premia_with_fees = add_premia_fees(opposite_side, total_premia_before_fees, total_fees);
+        let premia_with_fees = FixedTrait::from_felt(0); //add_premia_fees(opposite_side, total_premia_before_fees, total_fees);
         premia_with_fees.assert_nn('GVoP - premia w fees < 0');
 
         if self.option_side == TRADE_SIDE_LONG {
