@@ -28,38 +28,6 @@ trait IAMM<TContractState> {
         option_type: OptionType,
         lp_token_amount: u256,
     );
-    fn get_unlocked_capital(self: @TContractState, lptoken_address: ContractAddress) -> u256;
-    fn expire_option_token_for_pool(
-        ref self: TContractState,
-        lptoken_address: ContractAddress,
-        option_side: OptionSide,
-        strike_price: Fixed,
-        maturity: u64,
-    );
-    // fn getAdmin(self: @TContractState); // TODO
-    fn set_max_option_size_percent_of_voladjspd(
-        ref self: TContractState, max_opt_size_as_perc_of_vol_adjspd: u128
-    );
-    fn get_max_option_size_percent_of_voladjspd(self: @TContractState) -> u128;
-    fn get_lpool_balance(self: @TContractState, lptoken_address: ContractAddress) -> u256;
-    fn get_max_lpool_balance(self: @TContractState, lpt_addr: ContractAddress) -> u256;
-    fn set_max_lpool_balance(
-        ref self: TContractState, lpt_addr: ContractAddress, max_lpool_bal: u256
-    );
-    fn get_pool_locked_capital(self: @TContractState, lptoken_address: ContractAddress) -> u256;
-    fn get_available_options(
-        self: @TContractState, lptoken_address: ContractAddress, order_i: u32
-    ) -> Option_;
-
-    fn get_lptoken_address_for_given_option(
-        self: @TContractState,
-        quote_token_address: ContractAddress,
-        base_token_address: ContractAddress,
-        option_type: OptionType,
-    ) -> ContractAddress;
-    fn get_pool_definition_from_lptoken_address(
-        self: @TContractState, lptoken_addres: ContractAddress
-    ) -> Pool;
     // fn get_option_type(self: @TContractState, lptoken_address: ContractAddress) -> OptionType; // Deleting this one - get_pool_def_from_lptoken_addr can be used
 // fn empiric_median_price(self: @TContractState, key: felt252) -> Fixed;
 // TODO: Functions below
@@ -240,73 +208,6 @@ mod AMM {
                 option_type,
                 lp_token_amount,
             )
-        }
-
-        fn get_unlocked_capital(self: @ContractState, lptoken_address: ContractAddress) -> u256 {
-            State::get_unlocked_capital(lptoken_address)
-        }
-
-        fn expire_option_token_for_pool(
-            ref self: ContractState,
-            lptoken_address: ContractAddress,
-            option_side: OptionSide,
-            strike_price: Fixed,
-            maturity: u64,
-        ) {
-            LiquidityPool::expire_option_token_for_pool(
-                lptoken_address, option_side, strike_price, maturity, 
-            )
-        }
-
-        fn set_max_option_size_percent_of_voladjspd(
-            ref self: ContractState, max_opt_size_as_perc_of_vol_adjspd: u128
-        ) {
-            State::set_max_option_size_percent_of_voladjspd(max_opt_size_as_perc_of_vol_adjspd)
-        }
-
-        fn get_max_option_size_percent_of_voladjspd(self: @ContractState) -> u128 {
-            State::get_max_option_size_percent_of_voladjspd()
-        }
-
-        fn get_lpool_balance(self: @ContractState, lptoken_address: ContractAddress) -> u256 {
-            State::get_lpool_balance(lptoken_address)
-        }
-
-        fn get_max_lpool_balance(self: @ContractState, lpt_addr: ContractAddress) -> u256 {
-            State::get_max_lpool_balance(lpt_addr)
-        }
-
-        fn set_max_lpool_balance(
-            ref self: ContractState, lpt_addr: ContractAddress, max_lpool_bal: u256
-        ) {
-            State::set_max_lpool_balance(lpt_addr, max_lpool_bal)
-        }
-
-        fn get_pool_locked_capital(self: @ContractState, lptoken_address: ContractAddress) -> u256 {
-            State::get_pool_locked_capital(lptoken_address)
-        }
-
-        fn get_available_options(
-            self: @ContractState, lptoken_address: ContractAddress, order_i: u32
-        ) -> Option_ {
-            State::get_available_options(lptoken_address, order_i)
-        }
-
-        fn get_lptoken_address_for_given_option(
-            self: @ContractState,
-            quote_token_address: ContractAddress,
-            base_token_address: ContractAddress,
-            option_type: OptionType,
-        ) -> ContractAddress {
-            State::get_lptoken_address_for_given_option(
-                quote_token_address, base_token_address, option_type, 
-            )
-        }
-
-        fn get_pool_definition_from_lptoken_address(
-            self: @ContractState, lptoken_addres: ContractAddress
-        ) -> Pool {
-            State::get_pool_definition_from_lptoken_address(lptoken_addres)
         }
     }
 }
