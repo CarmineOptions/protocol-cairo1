@@ -7,23 +7,6 @@ use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
 #[starknet::interface]
 trait IAMM<TContractState> {
-    fn get_available_lptoken_addresses(self: @TContractState, order_i: felt252) -> ContractAddress;
-    fn get_all_options(self: @TContractState, lptoken_address: ContractAddress) -> Array<Option_>;
-    fn get_all_non_expired_options_with_premia(
-        self: @TContractState, lptoken_address: ContractAddress
-    ) -> Array<OptionWithPremia>;
-    fn get_option_with_position_of_user(
-        self: @TContractState, user_address: ContractAddress
-    ) -> Array<OptionWithUsersPosition>;
-    fn get_all_lptoken_addresses(self: @TContractState, ) -> Array<ContractAddress>;
-    fn get_value_of_pool_position(self: @TContractState, lptoken_address: ContractAddress) -> Fixed;
-    fn get_value_of_position(
-        self: @TContractState,
-        option: Option_,
-        position_size: u128,
-        option_type: OptionType,
-        current_volatility: Fixed,
-    ) -> Fixed;
     fn get_all_poolinfo(self: @TContractState) -> Array<PoolInfo>;
     // fn get_option_info_from_addresses( // TODO: Do we need this?
     //     self: @TContractState, lptoken_address: ContractAddress, option_token_address: ContractAddress, 
@@ -220,50 +203,6 @@ mod AMM {
 
     #[external(v0)]
     impl Amm of super::IAMM<ContractState> {
-        fn get_available_lptoken_addresses(
-            self: @ContractState, order_i: felt252
-        ) -> ContractAddress {
-            State::get_available_lptoken_addresses(order_i)
-        }
-
-        fn get_all_options(
-            self: @ContractState, lptoken_address: ContractAddress
-        ) -> Array<Option_> {
-            View::get_all_options(lptoken_address)
-        }
-
-
-        fn get_all_non_expired_options_with_premia(
-            self: @ContractState, lptoken_address: ContractAddress
-        ) -> Array<OptionWithPremia> {
-            View::get_all_non_expired_options_with_premia(lptoken_address)
-        }
-
-        fn get_option_with_position_of_user(
-            self: @ContractState, user_address: ContractAddress
-        ) -> Array<OptionWithUsersPosition> {
-            View::get_option_with_position_of_user(user_address)
-        }
-
-        fn get_all_lptoken_addresses(self: @ContractState, ) -> Array<ContractAddress> {
-            View::get_all_lptoken_addresses()
-        }
-
-        fn get_value_of_pool_position(
-            self: @ContractState, lptoken_address: ContractAddress
-        ) -> Fixed {
-            LiquidityPool::get_value_of_pool_position(lptoken_address)
-        }
-
-        fn get_value_of_position(
-            self: @ContractState,
-            option: Option_,
-            position_size: u128,
-            option_type: OptionType,
-            current_volatility: Fixed,
-        ) -> Fixed {
-            LiquidityPool::get_value_of_position(option, position_size, )
-        }
 
         fn get_all_poolinfo(self: @ContractState) -> Array<PoolInfo> {
             View::get_all_poolinfo()
