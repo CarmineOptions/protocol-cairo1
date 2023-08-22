@@ -6,7 +6,7 @@ use cubit::f128::types::fixed::{Fixed, FixedTrait};
 // This could be generic for generic types but I'm not wasting more time with half-assed Cairo
 // FIXME use a canonical implementation
 // https://github.com/influenceth/cubit/blob/main/src/f128/math/core.cairo
-fn pow(base: u128, pow: u8) -> u128 {
+fn pow_onda(base: u128, pow: u8) -> u128 {
     if (pow == 0) {
         1_u128
     } else {
@@ -20,6 +20,35 @@ fn pow(base: u128, pow: u8) -> u128 {
             power = power - 1;
         }
     }
+}
+
+fn pow(a: u128, b_u: u8) -> u128 {
+    let b: u128 = b_u.into();
+    let mut x: u128 = 1;
+    let mut n = b;
+
+    if n == 0 {
+        return 1;
+    }
+
+    let mut y = 1;
+    let two = integer::u128_as_non_zero(2);
+
+    loop {
+        if n <= 1 {
+            break;
+        }
+
+        let (div, rem) = integer::u128_safe_divmod(n, two);
+
+        if rem == 1 {
+            y = x * y;
+        }
+
+        x = x * x;
+        n = div;
+    };
+    x * y
 }
 
 fn convert_from_int_to_Fixed(value: u128, decimals: u8) -> Fixed {
