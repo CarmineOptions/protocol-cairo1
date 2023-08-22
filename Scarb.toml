@@ -2,14 +2,14 @@
 name = "carmine_protocol"
 version = "0.1.0"
 description = "Code for Carmine Option AMM"
-cairo-version = "2.1.0"
+cairo-version = "2.1.1"
 homepage = "https://github.com/CarmineOptions/protocol-cairo1"
 
 
 [dependencies]
 cubit = { git = "https://github.com/influenceth/cubit.git", branch = "main" }
 # cubit = {path = '../cubit'}
-starknet = ">=2.1.0"
+starknet = ">=2.1.1"
 
 [[target.starknet-contract]]
 sierra = true
