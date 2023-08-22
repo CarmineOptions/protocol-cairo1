@@ -6,11 +6,12 @@ use cubit::f128::types::fixed::{Fixed, FixedTrait};
 // This could be generic for generic types but I'm not wasting more time with half-assed Cairo
 // FIXME use a canonical implementation
 // https://github.com/influenceth/cubit/blob/main/src/f128/math/core.cairo
-fn pow(base: u128, mut power: u8) -> u128 {
-    if (power == 0) {
+fn pow(base: u128, pow: u8) -> u128 {
+    if (pow == 0) {
         1_u128
     } else {
         let mut res: u128 = base;
+        let mut power = pow;
         loop {
             if power == 1 {
                 break res;
