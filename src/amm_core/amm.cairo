@@ -7,11 +7,6 @@ use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
 #[starknet::interface]
 trait IAMM<TContractState> {
-    fn get_all_poolinfo(self: @TContractState) -> Array<PoolInfo>;
-    // fn get_option_info_from_addresses( // TODO: Do we need this?
-    //     self: @TContractState, lptoken_address: ContractAddress, option_token_address: ContractAddress, 
-    // ) -> Option_;
-    fn get_user_pool_infos(self: @TContractState, user: ContractAddress) -> Array<UserPoolInfo>;
     fn deposit_liquidity(
         ref self: TContractState,
         pooled_token_addr: ContractAddress,
@@ -19,14 +14,6 @@ trait IAMM<TContractState> {
         base_token_address: ContractAddress,
         option_type: OptionType,
         amount: u256,
-    );
-    fn withdraw_liquidity(
-        ref self: TContractState,
-        pooled_token_addr: ContractAddress,
-        quote_token_address: ContractAddress,
-        base_token_address: ContractAddress,
-        option_type: OptionType,
-        lp_token_amount: u256,
     );
     // fn get_option_type(self: @TContractState, lptoken_address: ContractAddress) -> OptionType; // Deleting this one - get_pool_def_from_lptoken_addr can be used
 // fn empiric_median_price(self: @TContractState, key: felt252) -> Fixed;
@@ -171,15 +158,6 @@ mod AMM {
 
     #[external(v0)]
     impl Amm of super::IAMM<ContractState> {
-
-        fn get_all_poolinfo(self: @ContractState) -> Array<PoolInfo> {
-            View::get_all_poolinfo()
-        }
-
-        fn get_user_pool_infos(self: @ContractState, user: ContractAddress) -> Array<UserPoolInfo> {
-            View::get_user_pool_infos(user)
-        }
-
         fn deposit_liquidity(
             ref self: ContractState,
             pooled_token_addr: ContractAddress,
@@ -190,23 +168,6 @@ mod AMM {
         ) {
             LiquidityPool::deposit_liquidity(
                 pooled_token_addr, quote_token_address, base_token_address, option_type, amount, 
-            )
-        }
-
-        fn withdraw_liquidity(
-            ref self: ContractState,
-            pooled_token_addr: ContractAddress,
-            quote_token_address: ContractAddress,
-            base_token_address: ContractAddress,
-            option_type: OptionType,
-            lp_token_amount: u256,
-        ) {
-            LiquidityPool::withdraw_liquidity(
-                pooled_token_addr,
-                quote_token_address,
-                base_token_address,
-                option_type,
-                lp_token_amount,
             )
         }
     }
