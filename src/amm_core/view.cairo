@@ -180,8 +180,7 @@ mod View {
 
         (
             correct_option.premia_before_fees(pos_size_int),
-            correct_option.premia_with_fees(pos_size_int)
+            FixedTrait::ONE()//correct_option.premia_with_fees(pos_size_int)
         )
     }
 }
-
