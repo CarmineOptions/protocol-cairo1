@@ -55,12 +55,14 @@ impl FixedHelpersImpl of FixedHelpersTrait {
     }
 }
 
-fn assert_option_side_exists(option_side: u8, msg: felt252) {
-    assert((option_side - TRADE_SIDE_LONG) * (option_side - TRADE_SIDE_SHORT) == 0, msg);
+// This takes in felt252 since uints might overflow if option_side is negative
+fn assert_option_side_exists(option_side: felt252, msg: felt252) {
+    assert((option_side - TRADE_SIDE_LONG.into()) * (option_side - TRADE_SIDE_SHORT.into()) == 0, msg);
 }
 
-fn assert_option_type_exists(option_type: u8, msg: felt252) {
-    assert((option_type - OPTION_CALL) * (option_type - OPTION_PUT) == 0, msg);
+// This takes in felt252 since uints might overflow if option_side is negative
+fn assert_option_type_exists(option_type: felt252, msg: felt252) {
+    assert((option_type - OPTION_CALL.into()) * (option_type - OPTION_PUT.into()) == 0, msg);
 }
 
 fn assert_address_not_zero(addr: ContractAddress, msg: felt252) {
@@ -201,7 +203,7 @@ fn split_option_locked_capital(
     strike_price: Fixed,
     terminal_price: Fixed,
 ) -> (Fixed, Fixed) {
-    assert_option_type_exists(option_type, 'SOLC - unknown option type');
+    assert_option_type_exists(option_type.into(), 'SOLC - unknown option type');
 
     if option_type == OPTION_CALL {
         // User receives option_size * max(0,  (terminal_price - strike_price) / terminal_price) in base token for long

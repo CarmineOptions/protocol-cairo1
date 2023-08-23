@@ -139,7 +139,7 @@ mod LiquidityPool {
     ) {
         // TODO: Proxy.assrt_only_admin()
 
-        assert_option_type_exists(option_type, 'Unknown option type');
+        assert_option_type_exists(option_type.into(), 'Unknown option type');
 
         fail_if_existing_pool_definition_from_lptoken_address(lptoken_address);
 

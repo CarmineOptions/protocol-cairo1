@@ -244,8 +244,8 @@ mod Trading {
         assert(halt_status, 'Trading halted');
 
         assert(option_size > 0_u128, 'VTI - opt size <= 0');
-        assert_option_type_exists(option_type, 'VTI - invalid option type');
-        assert_option_side_exists(option_side, 'VTI - invalid option side');
+        assert_option_type_exists(option_type.into(), 'VTI - invalid option type');
+        assert_option_side_exists(option_side.into(), 'VTI - invalid option side');
 
         let is_opt_available = is_option_available(
             lptoken_address, option_side, strike_price, maturity

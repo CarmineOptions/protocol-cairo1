@@ -59,8 +59,8 @@ mod Options {
         option_token_address_: ContractAddress,
         initial_volatility: Volatility,
     ) {
-        assert_option_type_exists(option_type, 'Undefined option type');
-        assert_option_side_exists(option_side, 'Undefined option side');
+        assert_option_type_exists(option_type.into(), 'Undefined option type');
+        assert_option_side_exists(option_side.into(), 'Undefined option side');
 
         let opt_address = get_option_token_address(
             lptoken_address, option_side, maturity, strike_price

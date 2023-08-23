@@ -45,7 +45,7 @@ mod State {
     ) {
         let mut state = AMM::unsafe_new_contract_state();
 
-        assert_option_side_exists(option_side, 'SOTA - opt side 0');
+        assert_option_side_exists(option_side.into(), 'SOTA - opt side 0');
         assert(contract_address_to_felt252(lptoken_address) != 0, 'SOTE - lpt addr 0');
         assert(maturity > 0, 'SOTA - maturity <= 0');
         strike_price.assert_nn_not_zero('sota - maturity <= 0');
@@ -326,7 +326,7 @@ mod State {
             contract_address_to_felt252(pool.quote_token_address) != 0, 'Quote addr doesnt exist'
         );
         assert(contract_address_to_felt252(pool.base_token_address) != 0, 'Base addr doesnt exist');
-        assert_option_type_exists(pool.option_type, 'Unknown option type');
+        assert_option_type_exists(pool.option_type.into(), 'Unknown option type');
 
         return pool;
     }
@@ -483,7 +483,7 @@ mod State {
         assert_address_not_zero(quote_token_address, 'SLAFGO - Quote addr zero');
         assert_address_not_zero(base_token_address, 'SLAFGO - Base addr zero');
         assert_address_not_zero(lpt_address, 'SLAFGO - LPT addr zero');
-        assert_option_type_exists(option_type, 'SLAFGO - Unknown opt type');
+        assert_option_type_exists(option_type.into(), 'SLAFGO - Unknown opt type');
 
         let mut state = AMM::unsafe_new_contract_state();
 

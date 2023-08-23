@@ -15,7 +15,7 @@ const TRADE_SIDE_LONG: u8 = 0;
 const TRADE_SIDE_SHORT: u8 = 1;
 
 fn get_opposite_side(trade_side: u8) -> u8 {
-    assert_option_side_exists(trade_side, 'GES - invalid option side');
+    assert_option_side_exists(trade_side.into(), 'GES - invalid option side');
 
     if trade_side == TRADE_SIDE_LONG {
         TRADE_SIDE_SHORT
