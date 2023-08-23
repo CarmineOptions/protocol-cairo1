@@ -1,4 +1,3 @@
-
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
 // Helper function for relative comparison of two numbers

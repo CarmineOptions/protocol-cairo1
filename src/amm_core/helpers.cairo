@@ -57,7 +57,9 @@ impl FixedHelpersImpl of FixedHelpersTrait {
 
 // This takes in felt252 since uints might overflow if option_side is negative
 fn assert_option_side_exists(option_side: felt252, msg: felt252) {
-    assert((option_side - TRADE_SIDE_LONG.into()) * (option_side - TRADE_SIDE_SHORT.into()) == 0, msg);
+    assert(
+        (option_side - TRADE_SIDE_LONG.into()) * (option_side - TRADE_SIDE_SHORT.into()) == 0, msg
+    );
 }
 
 // This takes in felt252 since uints might overflow if option_side is negative

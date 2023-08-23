@@ -31,7 +31,9 @@ fn test_get_fees() {
     let res4 = get_fees(FixedTrait::from_unscaled_felt(10));
     let res5 = get_fees(FixedTrait::from_unscaled_felt(523));
 
-    assert(res1 == FixedTrait::from_felt(55340232221128654800), 'Should be 3'); // Result is basically three, like 8e-19 error
+    assert(
+        res1 == FixedTrait::from_felt(55340232221128654800), 'Should be 3'
+    ); // Result is basically three, like 8e-19 error
     assert(res2 == FixedTrait::from_felt(110680464442257309600), 'Should be 6');
     assert(res3 == FixedTrait::from_felt(1660206966633859644), 'Should be ~0.09');
     assert(res4 == FixedTrait::from_felt(5534023222112865480), 'Should be ~0.03');

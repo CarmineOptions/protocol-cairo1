@@ -144,7 +144,7 @@ fn test_add_premia_fees() {
     let total_premia_before_fees_1 = FixedTrait::from_unscaled_felt(100);
     let total_premia_before_fees_2 = FixedTrait::from_unscaled_felt(69);
     let total_premia_before_fees_3 = FixedTrait::from_unscaled_felt(420);
-    
+
     let total_fees = FixedTrait::from_unscaled_felt(3);
 
     let res_1 = add_premia_fees(side_long, total_premia_before_fees_1, total_fees);
@@ -230,10 +230,12 @@ use result::ResultTrait;
 fn test_get_time_till_maturity() {
     // Deploy contract
     let class_hash = declare('TestCon');
-    let prepared = PreparedContract {class_hash: class_hash, constructor_calldata: @ArrayTrait::new() };
+    let prepared = PreparedContract {
+        class_hash: class_hash, constructor_calldata: @ArrayTrait::new()
+    };
     let contract_address = deploy(prepared).unwrap();
 
-    let dispatcher = ITestConDispatcher { contract_address };   
+    let dispatcher = ITestConDispatcher { contract_address };
 
     start_warp(contract_address, 0);
     let res1 = dispatcher.get_ttm(31536000); // 1 year ttm -> 365 * 24 * 3600

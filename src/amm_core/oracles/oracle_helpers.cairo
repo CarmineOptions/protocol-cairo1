@@ -31,8 +31,6 @@ fn convert_from_int_to_Fixed(value: u128, decimals: u8) -> Fixed {
 
     FixedTrait::from_felt(res.into())
 }
-
-
 // // Tests --------------------------------------------------------------------------------------------------------------
 // // use 
 // use debug::PrintTrait;
@@ -43,3 +41,4 @@ fn convert_from_int_to_Fixed(value: u128, decimals: u8) -> Fixed {
 //     res.print();
 //     assert(res == 72057594037927936, 'Should not fail')
 // }
+

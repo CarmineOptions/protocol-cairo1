@@ -137,48 +137,48 @@ impl Option_Impl of Option_Trait {
         // 1) Get current underlying price
         let underlying_price = get_current_price(self.quote_token_address, self.base_token_address);
         underlying_price // TODO: Uncomment code below once the bug is resolved
-        // // 2) Get trade vol
-        // let (_, trade_volatility) = get_new_volatility(
-        //     self.volatility(),
-        //     option_size_cubit,
-        //     self.option_type,
-        //     self.option_side,
-        //     self.strike_price,
-        //     pool_volatility_adjustment_speed
-        // );
+    // // 2) Get trade vol
+    // let (_, trade_volatility) = get_new_volatility(
+    //     self.volatility(),
+    //     option_size_cubit,
+    //     self.option_type,
+    //     self.option_side,
+    //     self.strike_price,
+    //     pool_volatility_adjustment_speed
+    // );
 
-        // // 3) Get TTM
-        // let time_till_maturity = get_time_till_maturity(self.maturity);
+    // // 3) Get TTM
+    // let time_till_maturity = get_time_till_maturity(self.maturity);
 
-        // // 4) Get Risk free rate
-        // let risk_free_rate_annualized = FixedTrait::from_felt(RISK_FREE_RATE);
+    // // 4) Get Risk free rate
+    // let risk_free_rate_annualized = FixedTrait::from_felt(RISK_FREE_RATE);
 
-        // // 5) Get premia
-        // let hundred = FixedTrait::from_unscaled_felt(100);
-        // let sigma = trade_volatility / hundred;
+    // // 5) Get premia
+    // let hundred = FixedTrait::from_unscaled_felt(100);
+    // let sigma = trade_volatility / hundred;
 
-        // let (call_premia, put_premia, is_usable) = black_scholes(
-        //     sigma,
-        //     time_till_maturity,
-        //     self.strike_price,
-        //     underlying_price,
-        //     risk_free_rate_annualized,
-        //     false
-        // );
+    // let (call_premia, put_premia, is_usable) = black_scholes(
+    //     sigma,
+    //     time_till_maturity,
+    //     self.strike_price,
+    //     underlying_price,
+    //     risk_free_rate_annualized,
+    //     false
+    // );
 
-        // call_premia.assert_nn('GPBF - call_premia < 0');
-        // put_premia.assert_nn('GPBF - put_premia < 0');
+    // call_premia.assert_nn('GPBF - call_premia < 0');
+    // put_premia.assert_nn('GPBF - put_premia < 0');
 
-        // let premia = select_and_adjust_premia(
-        //     call_premia, put_premia, self.option_type, underlying_price
-        // );
+    // let premia = select_and_adjust_premia(
+    //     call_premia, put_premia, self.option_type, underlying_price
+    // );
 
-        // let total_premia_before_fees = premia * option_size_cubit;
+    // let total_premia_before_fees = premia * option_size_cubit;
 
-        // premia.assert_nn('GPBF - premia < 0');
-        // total_premia_before_fees.assert_nn('GPBF - premia_before_fees < 0');
+    // premia.assert_nn('GPBF - premia < 0');
+    // total_premia_before_fees.assert_nn('GPBF - premia_before_fees < 0');
 
-        // total_premia_before_fees
+    // total_premia_before_fees
     }
 
 
