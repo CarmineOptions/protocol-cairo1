@@ -8,4 +8,4 @@ fmt:
 	scarb fmt
 
 test: 
-	protostar test ./tests
+	snforge
