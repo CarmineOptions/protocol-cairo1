@@ -738,7 +738,6 @@ mod Options {
         let option_size_cubit = fromU256_balance(option_size.into(), base_token_address);
         let (long_value, short_value) = split_option_locked_capital(
             option_type,
-            option_side,
             option_size_cubit, // TODO: This is wrong, it should stay in Int
             strike_price,
             terminal_price

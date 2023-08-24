@@ -196,7 +196,6 @@ fn test_get_option_size_in_pool_currency() {
     assert(res2 == option_size * strike_price, 'res2');
 }
 
-// TODO: Below
 #[test]
 fn test_get_new_volatility() {
     let rel_tol = FixedTrait::from_felt(184467440737095520); // 0.01

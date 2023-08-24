@@ -384,7 +384,7 @@ mod LiquidityPool {
         let option_size_cubit = fromU256_balance(option_size.into(), option.base_token_address);
 
         let (long_value, short_value) = split_option_locked_capital(
-            option.option_type, option_side, option_size_cubit, strike_price, terminal_price
+            option.option_type, option_size_cubit, strike_price, terminal_price
         );
 
         let lpool_underlying_token = get_underlying_token_address(lptoken_address);

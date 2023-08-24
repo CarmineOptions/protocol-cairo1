@@ -210,11 +210,7 @@ impl Option_Impl of Option_Trait {
             );
 
             let (long_value, short_value) = split_option_locked_capital(
-                self.option_type,
-                self.option_side,
-                position_size_cubit,
-                self.strike_price,
-                terminal_price
+                self.option_type, position_size_cubit, self.strike_price, terminal_price
             );
 
             if self.option_side == TRADE_SIDE_LONG {
@@ -270,7 +266,6 @@ impl Option_Impl of Option_Trait {
 
             let (long_value, short_value) = split_option_locked_capital(
                 self.option_type,
-                self.option_side,
                 fromU256_balance(position_size.into(), self.base_token_address),
                 self.strike_price,
                 terminal_price
