@@ -33,3 +33,14 @@ const TOKEN_ETH_ADDRESS: felt252 =
     0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7; // mainnet
 const TOKEN_USDC_ADDRESS: felt252 =
     0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8; // mainnet
+
+// Tests --------------------------------------------------------------------------------------------------------------
+#[test]
+fn test_get_opposite_side() {
+    let res_1 = get_opposite_side(TRADE_SIDE_LONG);
+    let res_2 = get_opposite_side(TRADE_SIDE_SHORT);
+
+    assert(res_1 == TRADE_SIDE_SHORT, 'res1');
+    assert(res_2 == TRADE_SIDE_LONG, 'res1');
+
+}
