@@ -136,7 +136,7 @@ fn add_premia_fees(side: OptionSide, total_premia_before_fees: Fixed, total_fees
 // Tests --------------------------------------------------------------------------------------------------------------
 
 use debug::PrintTrait;
-use carmine_protocol::test_utils::is_close;
+use carmine_protocol::testing::test_utils::is_close;
 use array::ArrayTrait;
 
 #[test]
