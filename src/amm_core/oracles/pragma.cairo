@@ -13,7 +13,7 @@ mod Pragma {
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
 
-    use carmine_protocol::amm_core::constants::{TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS,};
+    use carmine_protocol::amm_core::constants::{TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, };
 
     const PRAGMA_ORACLE_ADDRESS: felt252 =
         0x0346c57f094d641ad94e43468628d8e9c574dcb2803ec372576ccc60a40be2c4;
@@ -78,8 +78,7 @@ mod Pragma {
         let (value, decimals, last_updated_timestamp, num_sources_aggregated) =
             IPragmaOracleDispatcher {
             contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
-        }
-            .get_spot_median(key);
+        }.get_spot_median(key);
 
         let curr_time = get_block_timestamp();
         let time_diff = curr_time
@@ -95,7 +94,7 @@ mod Pragma {
     }
 
     fn get_pragma_median_price(
-        quote_token_addr: ContractAddress, base_token_addr: ContractAddress,
+        quote_token_addr: ContractAddress, base_token_addr: ContractAddress, 
     ) -> Fixed {
         let key = _get_ticker_key(quote_token_addr, base_token_addr)
             .expect('Pragma/GPMP - Cant get spot key');
@@ -110,8 +109,7 @@ mod Pragma {
             contract_address: PRAGMA_ORACLE_ADDRESS
                 .try_into()
                 .expect('Pragma/GTMP - Unable to convert')
-        }
-            .get_last_spot_checkpoint_before(key, maturity);
+        }.get_last_spot_checkpoint_before(key, maturity);
 
         let time_diff = maturity - last_checkpoint.timestamp;
 

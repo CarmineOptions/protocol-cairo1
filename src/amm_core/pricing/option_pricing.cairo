@@ -333,7 +333,7 @@ fn test_black_scholes() {
 
 #[test]
 fn test_std_normal_cdf() {
-    let rel_tol = FixedTrait::from_felt(184467440737095520); // 0.001
+    let rel_tol = FixedTrait::from_felt(184467440737095520); // 0.01
     let mut test_cases = get_test_std_normal_cdf_cases();
 
     loop {

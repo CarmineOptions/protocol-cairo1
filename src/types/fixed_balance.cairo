@@ -78,12 +78,9 @@ impl FixedBalanceAddEq of AddEq<FixedBalance> {
         assert(self.address == other.address, 'FixedBalanceAddEq - diff addr');
         assert(self.decimals == other.decimals, 'FixedBalanceAddEq - diff dec');
 
-        self =
-            FixedBalance {
-                balance: self.balance + other.balance,
-                decimals: self.decimals,
-                address: self.address
-            }
+        self = FixedBalance {
+            balance: self.balance + other.balance, decimals: self.decimals, address: self.address
+        }
     }
 }
 
@@ -104,12 +101,9 @@ impl FixedBalanceSubEq of SubEq<FixedBalance> {
         assert(self.address == other.address, 'FixedBalanceSubEq - diff addr');
         assert(self.decimals == other.decimals, 'FixedBalanceSubEq - diff dec');
 
-        self =
-            FixedBalance {
-                balance: self.balance - other.balance,
-                decimals: self.decimals,
-                address: self.address
-            }
+        self = FixedBalance {
+            balance: self.balance - other.balance, decimals: self.decimals, address: self.address
+        }
     }
 }
 

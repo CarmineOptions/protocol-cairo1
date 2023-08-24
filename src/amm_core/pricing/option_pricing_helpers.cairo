@@ -136,6 +136,8 @@ fn add_premia_fees(side: OptionSide, total_premia_before_fees: Fixed, total_fees
 // Tests --------------------------------------------------------------------------------------------------------------
 
 use debug::PrintTrait;
+use carmine_protocol::test_utils::is_close;
+use array::ArrayTrait;
 
 #[test]
 fn test_add_premia_fees() {
@@ -195,9 +197,51 @@ fn test_get_option_size_in_pool_currency() {
 }
 
 // TODO: Below
-// #[test]
-// fn test_get_new_volatility() {
-// }
+#[test]
+fn test_get_new_volatility() {
+    let rel_tol = FixedTrait::from_felt(184467440737095520); // 0.01
+    let mut test_cases = get_test_get_new_volatility_cases();
+
+    let strike_price = FixedTrait::from_unscaled_felt(1_000);
+
+    loop {
+        match test_cases.pop_front() {
+            Option::Some((
+                option_type, option_side, option_size, volatility
+            )) => {
+                let vol_adj_spd = if option_type == 0 {
+                    FixedTrait::from_unscaled_felt(10_000)
+                } else {
+                    FixedTrait::from_unscaled_felt(10_000_000)
+                };
+                let two = FixedTrait::from_unscaled_felt(2);
+                let half_opt_size = option_size / two;
+
+                let (desired_vol, _) = get_new_volatility(
+                    volatility, option_size, option_type, option_side, strike_price, vol_adj_spd
+                );
+
+                let (vol1, _) = get_new_volatility(
+                    volatility, half_opt_size, option_type, option_side, strike_price, vol_adj_spd
+                );
+
+                let (vol2, _) = get_new_volatility(
+                    vol1, // Use previous vol
+                    half_opt_size,
+                    option_type,
+                    option_side,
+                    strike_price,
+                    vol_adj_spd
+                );
+
+                assert(is_close(desired_vol, vol2, rel_tol), 'Fail');
+            },
+            Option::None(()) => {
+                break;
+            }
+        };
+    }
+}
 
 // Test contract
 #[starknet::interface]
@@ -249,4 +293,460 @@ fn test_get_time_till_maturity() {
     assert(res3 == FixedTrait::ONE() / FixedTrait::from_unscaled_felt(12), 'res3');
     assert(res4 == FixedTrait::from_felt(354744763371574339), 'res4'); // Very small rounding here
     assert(res5 == FixedTrait::ONE() / FixedTrait::from_unscaled_felt(365), 'res5');
+}
+
+fn get_test_get_new_volatility_cases() -> Array<(u8, u8, Fixed, Fixed)> {
+    let mut arr = ArrayTrait::<(u8, u8, Fixed, Fixed)>::new();
+
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(800000000000000000),
+                FixedTrait::from_felt(1844674407370955264)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                0,
+                FixedTrait::from_felt(800000000000000000),
+                FixedTrait::from_felt(1844674407370955264)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                1,
+                FixedTrait::from_felt(34400000000000000000),
+                FixedTrait::from_felt(22136092888451461120)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                0,
+                FixedTrait::from_felt(800000000000000000),
+                FixedTrait::from_felt(1844674407370955264)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                1,
+                FixedTrait::from_felt(800000000000000000),
+                FixedTrait::from_felt(1844674407370955264)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                1,
+                FixedTrait::from_felt(31200000000000000000),
+                FixedTrait::from_felt(143884603774934499328)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                0,
+                FixedTrait::from_felt(800000000000000000),
+                FixedTrait::from_felt(1844674407370955264)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(31200000000000000000),
+                FixedTrait::from_felt(1844674407370955264)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(31200000000000000000),
+                FixedTrait::from_felt(35048813740048146432)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(62400000000000000000),
+                FixedTrait::from_felt(1844674407370955264)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(62400000000000000000),
+                FixedTrait::from_felt(175244068700240740352)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(76000000000000000000),
+                FixedTrait::from_felt(175244068700240740352)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                0,
+                FixedTrait::from_felt(68800000000000000000),
+                FixedTrait::from_felt(105146441220144447488)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                0,
+                FixedTrait::from_felt(45600000000000000000),
+                FixedTrait::from_felt(105146441220144447488)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(45600000000000000000),
+                FixedTrait::from_felt(105146441220144447488)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(72000000000000000000),
+                FixedTrait::from_felt(38738162554790060032)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(16800000000000000000),
+                FixedTrait::from_felt(38738162554790060032)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                0,
+                FixedTrait::from_felt(60000000000000000000),
+                FixedTrait::from_felt(1844674407370955264)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                0,
+                FixedTrait::from_felt(60000000000000000000),
+                FixedTrait::from_felt(138350580552821637120)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(60000000000000000000),
+                FixedTrait::from_felt(138350580552821637120)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                0,
+                FixedTrait::from_felt(44000000000000000000),
+                FixedTrait::from_felt(97767743590660620288)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                0,
+                FixedTrait::from_felt(44000000000000000000),
+                FixedTrait::from_felt(101457092405402533888)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(44000000000000000000),
+                FixedTrait::from_felt(101457092405402533888)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(51200000000000000000),
+                FixedTrait::from_felt(16602069666338596864)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(51200000000000000000),
+                FixedTrait::from_felt(118059162071741136896)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                1,
+                FixedTrait::from_felt(16000000000000000000),
+                FixedTrait::from_felt(31359464925306236928)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(16000000000000000000),
+                FixedTrait::from_felt(31359464925306236928)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(16000000000000000000),
+                FixedTrait::from_felt(36893488147419103232)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                1,
+                FixedTrait::from_felt(28800000000000000000),
+                FixedTrait::from_felt(29514790517935284224)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                1,
+                FixedTrait::from_felt(28800000000000000000),
+                FixedTrait::from_felt(29514790517935284224)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                1,
+                FixedTrait::from_felt(12800000000000000000),
+                FixedTrait::from_felt(29514790517935284224)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                0,
+                FixedTrait::from_felt(37600000000000000000),
+                FixedTrait::from_felt(47961534591644835840)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                0,
+                FixedTrait::from_felt(20800000000000000000),
+                FixedTrait::from_felt(47961534591644835840)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                1,
+                FixedTrait::from_felt(20800000000000000000),
+                FixedTrait::from_felt(47961534591644835840)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(4000000000000000000),
+                FixedTrait::from_felt(18446744073709551616)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(8000000000000000000),
+                FixedTrait::from_felt(18446744073709551616)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                1,
+                FixedTrait::from_felt(9600000000000000000),
+                FixedTrait::from_felt(71942301887467249664)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                1,
+                FixedTrait::from_felt(9600000000000000000),
+                FixedTrait::from_felt(22136092888451461120)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(22400000000000000000),
+                FixedTrait::from_felt(177088743107611688960)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(22400000000000000000),
+                FixedTrait::from_felt(51650883406386741248)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                0,
+                FixedTrait::from_felt(65599999999999991808),
+                FixedTrait::from_felt(77476325109580120064)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                0,
+                FixedTrait::from_felt(65599999999999991808),
+                FixedTrait::from_felt(77476325109580120064)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                1,
+                FixedTrait::from_felt(65599999999999991808),
+                FixedTrait::from_felt(77476325109580120064)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                1,
+                FixedTrait::from_felt(33600000000000000000),
+                FixedTrait::from_felt(77476325109580120064)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                1,
+                FixedTrait::from_felt(48000000000000000000),
+                FixedTrait::from_felt(162331347848644067328)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                1,
+                FixedTrait::from_felt(48000000000000000000),
+                FixedTrait::from_felt(110680464442257309696)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                0,
+                FixedTrait::from_felt(48000000000000000000),
+                FixedTrait::from_felt(110680464442257309696)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                1,
+                FixedTrait::from_felt(40000000000000000000),
+                FixedTrait::from_felt(154952650219160240128)
+            )
+        );
+    arr
+        .append(
+            (
+                0,
+                1,
+                FixedTrait::from_felt(40000000000000000000),
+                FixedTrait::from_felt(92233720368547758080)
+            )
+        );
+    arr
+        .append(
+            (
+                1,
+                1,
+                FixedTrait::from_felt(40000000000000000000),
+                FixedTrait::from_felt(92233720368547758080)
+            )
+        );
+    arr
 }
