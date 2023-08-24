@@ -80,7 +80,7 @@ trait IAMM<TContractState> {
         strike_price: Fixed,
     ) -> ContractAddress;
     fn get_lptokens_for_underlying(
-        ref self: TContractState, pooled_token_addr: ContractAddress, underlying_amt: u256, 
+        ref self: TContractState, pooled_token_addr: ContractAddress, underlying_amt: u256,
     ) -> u256;
     fn get_underlying_for_lptokens(
         self: @TContractState, pooled_token_addr: ContractAddress, lpt_amt: u256
@@ -93,7 +93,7 @@ trait IAMM<TContractState> {
     fn get_option_with_position_of_user(
         self: @TContractState, user_address: ContractAddress
     ) -> Array<OptionWithUsersPosition>;
-    fn get_all_lptoken_addresses(self: @TContractState, ) -> Array<ContractAddress>;
+    fn get_all_lptoken_addresses(self: @TContractState,) -> Array<ContractAddress>;
     fn get_value_of_pool_position(self: @TContractState, lptoken_address: ContractAddress) -> Fixed;
     fn get_value_of_position(
         self: @TContractState,
@@ -157,7 +157,7 @@ trait IAMM<TContractState> {
     ) -> Pool;
     // fn get_option_type(self: @TContractState, lptoken_address: ContractAddress) -> OptionType; // Deleting this one - get_pool_def_from_lptoken_addr can be used
     fn get_option_volatility(
-        self: @TContractState, lptoken_address: ContractAddress, maturity: u64, strike_price: Fixed, 
+        self: @TContractState, lptoken_address: ContractAddress, maturity: u64, strike_price: Fixed,
     ) -> Fixed;
     fn get_underlying_token_address(
         self: @TContractState, lptoken_address: ContractAddress
@@ -411,7 +411,7 @@ mod AMM {
             strike_price: Fixed,
             maturity: u64,
         ) -> bool {
-            State::is_option_available(lptoken_address, option_side, strike_price, maturity, )
+            State::is_option_available(lptoken_address, option_side, strike_price, maturity,)
         }
 
         fn set_trading_halt(ref self: ContractState, new_status: bool) {
@@ -476,11 +476,11 @@ mod AMM {
             maturity: u64,
             strike_price: Fixed,
         ) -> ContractAddress {
-            State::get_option_token_address(lptoken_address, option_side, maturity, strike_price, )
+            State::get_option_token_address(lptoken_address, option_side, maturity, strike_price,)
         }
 
         fn get_lptokens_for_underlying(
-            ref self: ContractState, pooled_token_addr: ContractAddress, underlying_amt: u256, 
+            ref self: ContractState, pooled_token_addr: ContractAddress, underlying_amt: u256,
         ) -> u256 {
             LiquidityPool::get_lptokens_for_underlying(pooled_token_addr, underlying_amt)
         }
@@ -517,7 +517,7 @@ mod AMM {
             View::get_option_with_position_of_user(user_address)
         }
 
-        fn get_all_lptoken_addresses(self: @ContractState, ) -> Array<ContractAddress> {
+        fn get_all_lptoken_addresses(self: @ContractState,) -> Array<ContractAddress> {
             View::get_all_lptoken_addresses()
         }
 
@@ -534,7 +534,7 @@ mod AMM {
             option_type: OptionType,
             current_volatility: Fixed,
         ) -> Fixed {
-            LiquidityPool::get_value_of_position(option, position_size, )
+            LiquidityPool::get_value_of_position(option, position_size,)
         }
 
         fn get_all_poolinfo(self: @ContractState) -> Array<PoolInfo> {
@@ -554,7 +554,7 @@ mod AMM {
             amount: u256,
         ) {
             LiquidityPool::deposit_liquidity(
-                pooled_token_addr, quote_token_address, base_token_address, option_type, amount, 
+                pooled_token_addr, quote_token_address, base_token_address, option_type, amount,
             )
         }
 
@@ -587,7 +587,7 @@ mod AMM {
             maturity: u64,
         ) {
             LiquidityPool::expire_option_token_for_pool(
-                lptoken_address, option_side, strike_price, maturity, 
+                lptoken_address, option_side, strike_price, maturity,
             )
         }
 
@@ -632,7 +632,7 @@ mod AMM {
             option_type: OptionType,
         ) -> ContractAddress {
             State::get_lptoken_address_for_given_option(
-                quote_token_address, base_token_address, option_type, 
+                quote_token_address, base_token_address, option_type,
             )
         }
 
@@ -649,7 +649,7 @@ mod AMM {
             maturity: u64,
             strike_price: Fixed,
         ) -> Fixed {
-            State::get_option_volatility(lptoken_address, maturity, strike_price, )
+            State::get_option_volatility(lptoken_address, maturity, strike_price,)
         }
 
         fn get_underlying_token_address(

@@ -183,7 +183,7 @@ impl Option_Impl of Option_Trait {
 
 
     fn premia_with_fees(self: Option_, position_size: Int) -> Fixed {
-        let total_premia_before_fees = self.premia_before_fees(position_size, );
+        let total_premia_before_fees = self.premia_before_fees(position_size,);
         total_premia_before_fees.assert_nn('GPWF - total premia < 0');
 
         let total_fees = get_fees(total_premia_before_fees);
@@ -228,7 +228,7 @@ impl Option_Impl of Option_Trait {
         let stop_trading_by = self.maturity - STOP_TRADING_BEFORE_MATURITY_SECONDS;
         assert(current_block_time <= stop_trading_by, 'GVoP - Wait till maturity');
 
-        let total_premia_before_fees = self.premia_before_fees(position_size, );
+        let total_premia_before_fees = self.premia_before_fees(position_size,);
 
         // Get fees and total premia
         let total_fees = get_fees(total_premia_before_fees);
