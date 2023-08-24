@@ -42,5 +42,4 @@ fn test_get_opposite_side() {
 
     assert(res_1 == TRADE_SIDE_SHORT, 'res1');
     assert(res_2 == TRADE_SIDE_LONG, 'res1');
-
 }
