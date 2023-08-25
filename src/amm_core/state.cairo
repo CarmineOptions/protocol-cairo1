@@ -1,4 +1,5 @@
 mod State {
+    use starknet::get_caller_address;
     use starknet::ContractAddress;
     use traits::{Into, TryInto};
     use starknet::contract_address::{
@@ -13,7 +14,9 @@ mod State {
         FixedHelpersTrait
     };
 
-    use carmine_protocol::amm_core::constants::{OPTION_CALL, OPTION_PUT};
+    use carmine_protocol::amm_core::constants::{
+        OPTION_CALL, OPTION_PUT, VOLATILITY_LOWER_BOUND, VOLATILITY_UPPER_BOUND
+    };
     use carmine_protocol::amm_core::amm::AMM::{
         pool_volatility_separate, option_volatility, pool_volatility_adjustment_speed,
         new_pool_volatility_adjustment_speed, option_position_, new_option_position,
@@ -105,9 +108,6 @@ mod State {
         return res;
     }
 
-    // TODO: Maybe setters/getters could return true/false instead of failing?
-    // so that we can raise the error in function that actually calls the setters/getters
-
     fn set_option_volatility(
         lptoken_address: LPTAddress,
         maturity: Timestamp,
@@ -116,17 +116,14 @@ mod State {
     ) {
         let mut state = AMM::unsafe_new_contract_state();
 
-        // let volatility = cubit_to_legacyMath(volatility);
-        // let strike_price = cubit_to_legacyMath(strike_price);
-
-        // let vol_u: u256 = volatility.into();
-        // let vol_upper: u256 = (VOLATILITY_UPPER_BOUND - 1).into();
-        // let vol_lower: u256 = VOLATILITY_LOWER_BOUND.into();
-
-        // TODO: Use checks below       
-        // assert(SEPARATE_VOLATILITIES_FOR_DIFFERENT_STRIKES == 1, 'Unable to use separate vols');
-        // assert(vol_u < vol_upper, 'Volatility exceeds upper bound');
-        // assert(vol_u > vol_lower, 'Volatility below lower bound');
+        assert(
+            volatility < FixedTrait::from_felt(VOLATILITY_UPPER_BOUND),
+            'Volatility exceeds upper bound'
+        );
+        assert(
+            volatility > FixedTrait::from_felt(VOLATILITY_LOWER_BOUND),
+            'Volatility below lower bound'
+        );
 
         // Set old storage var to zero in case this function get called before the getter
         pool_volatility_separate::InternalContractStateTrait::write(
@@ -184,7 +181,6 @@ mod State {
         return res;
     }
 
-    // TODO: finish function below
     fn get_available_options(lptoken_address: LPTAddress, idx: u32) -> Option_ {
         let state = AMM::unsafe_new_contract_state();
 
@@ -193,11 +189,11 @@ mod State {
             @state.new_available_options_usable_index
         );
         if usable_index == 0 {
-            let idx = migrate_old_options(lptoken_address, 0);
+            let usable_index = migrate_old_options(lptoken_address, 0);
         }
 
         new_available_options::InternalContractStateTrait::read(
-            @state.new_available_options, (lptoken_address, idx)
+            @state.new_available_options, (lptoken_address, usable_index)
         )
     }
 
@@ -245,8 +241,6 @@ mod State {
         new_available_options::InternalContractStateTrait::write(
             ref state.new_available_options, (lptoken_address, idx), new_option
         );
-
-        // TODO: Should we alse set old option at current index to zero to "delete" it? 
 
         // Continue to the next index
         migrate_old_options(lptoken_address, idx + 1)
@@ -451,15 +445,13 @@ mod State {
         let mut state = AMM::unsafe_new_contract_state();
         // TODO: Assert admin only!!!!!!!!!!!
 
-        // TODO: Can uint be even negative lol
-        assert(max_bal >= 0, 'Max lpool bal < 0');
+        assert(max_bal >= 0, 'Max lpool bal < 0'); // Kinda useless
 
         max_lpool_balance::InternalContractStateTrait::write(
             ref state.max_lpool_balance, lpt_addr, max_bal
         );
     }
 
-    // TODO: Rename, there is no option here
     fn get_lptoken_address_for_given_option(
         quote_token_address: ContractAddress,
         base_token_address: ContractAddress,
@@ -502,15 +494,34 @@ mod State {
     }
 
     fn set_trading_halt(new_status: bool) {
-        // TODO: implement check below
-        // let caller_addr = get_caller_address();
-        // let can_halt = can_halt_trading(caller_addr);
-        // assert(can_halt, 'Noperrino')
+        assert_trading_halt_allowed();
 
-        // assert_option_type_exists(new_status, 'This is unacceptableeeeeeeeeeee'); TODO: this check
+        assert_option_type_exists(new_status.into(), 'Unknown halt status');
         let mut state = AMM::unsafe_new_contract_state();
 
         trading_halted::InternalContractStateTrait::write(ref state.trading_halted, new_status)
+    }
+
+    fn assert_trading_halt_allowed() {
+        let caller_addr = get_caller_address();
+
+        if caller_addr == 0x0583a9d956d65628f806386ab5b12dccd74236a3c6b930ded9cf3c54efc722a1
+            .try_into()
+            .unwrap() {
+            return; // Ondra
+        }
+        if caller_addr == 0x06717eaf502baac2b6b2c6ee3ac39b34a52e726a73905ed586e757158270a0af
+            .try_into()
+            .unwrap() {
+            return; // Andrej
+        }
+        if caller_addr == 0x0011d341c6e841426448ff39aa443a6dbb428914e05ba2259463c18308b86233
+            .try_into()
+            .unwrap() {
+            return; // Marek
+        }
+        // TODO: Add david
+        assert(1 == 0, 'Caller cant halt trading');
     }
 
     // @notice Returns the token that's underlying the given liquidity pool.

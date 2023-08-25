@@ -395,7 +395,6 @@ fn test_std_normal_cdf() {
 fn test_d1_d2() {
     let rel_tol = FixedTrait::from_felt(18446744073709552); // 0.01
     let (cases, results) = get_test_d1_d2_cases();
-    // let i = 25;
     let mut i = 0;
 
     assert(cases.len() == results.len(), 'Cases != results');
