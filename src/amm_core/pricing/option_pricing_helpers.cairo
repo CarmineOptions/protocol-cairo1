@@ -5,7 +5,7 @@ use starknet::get_block_timestamp;
 
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 use carmine_protocol::amm_core::helpers::{
-    get_decimal, assert_option_type_exists, assert_option_side_exists, _pow
+    get_decimal, assert_option_type_exists, assert_option_side_exists, pow
 };
 use carmine_protocol::amm_core::constants::{TRADE_SIDE_LONG, TRADE_SIDE_SHORT};
 
@@ -38,7 +38,7 @@ fn convert_amount_to_option_currency_from_base_uint256(
         let base_token_decimals: u128 = get_decimal(base_token_address)
             .expect('CATOCFBU - Cant get decimals')
             .into();
-        let dec: u256 = _pow(10, base_token_decimals).into();
+        let dec: u256 = pow(10, base_token_decimals).into();
 
         let adj_amount = amount * strike_price;
 

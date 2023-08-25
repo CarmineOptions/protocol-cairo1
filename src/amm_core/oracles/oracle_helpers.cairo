@@ -1,24 +1,9 @@
 use traits::Into;
 
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
-// yes I didn't find something equivalent elsewhere.
-// This could be generic for generic types but I'm not wasting more time with half-assed Cairo
-// FIXME use a canonical implementation
-// https://github.com/influenceth/cubit/blob/main/src/f128/math/core.cairo
-fn pow(base: u128, mut power: u8) -> u128 {
-    if (power == 0) {
-        1_u128
-    } else {
-        let mut res: u128 = base;
-        loop {
-            if power == 1 {
-                break res;
-            }
-            res = res * base;
-            power = power - 1;
-        }
-    }
-}
+
+use carmine_protocol::amm_core::helpers::pow;
+
 
 fn convert_from_int_to_Fixed(value: u128, decimals: u8) -> Fixed {
     // Overflows (fails) when converting approx 1 million ETH, would need to use u256 for that, different code path needed.

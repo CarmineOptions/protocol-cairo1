@@ -76,9 +76,8 @@ fn check_deadline(deadline: Timestamp) {
     assert(current_block_time <= deadline, 'TX is too old');
 }
 
-// fn pow<S, impl Mult: Mul<S>>(x: S, y: S) -> S {
-// Only helper function, not to be used anywhere else
-fn _pow(a: u128, b: u128) -> u128 {
+
+fn pow(a: u128, b: u128) -> u128 {
     let mut x: u128 = a;
     let mut n = b;
 
@@ -138,7 +137,7 @@ fn toU256_balance(x: Fixed, currency_address: ContractAddress) -> u256 {
 }
 
 fn _toU256_balance(x: Fixed, decimals: u128) -> u256 {
-    let five_to_dec = _pow(5, decimals);
+    let five_to_dec = pow(5, decimals);
 
     let x_5 = x.mag * five_to_dec;
 
@@ -147,7 +146,7 @@ fn _toU256_balance(x: Fixed, decimals: u128) -> u256 {
     // // (1.2 * 2**61 * 5**18) / 2**(61 - 18)
     let _64_minus_dec = 64 - decimals;
 
-    let decreased_part = _pow(2, _64_minus_dec);
+    let decreased_part = pow(2, _64_minus_dec);
 
     let (q, r) = integer::u128_safe_divmod(
         x_5, decreased_part.try_into().expect('toU256 - dp zero')
@@ -177,7 +176,7 @@ fn fromU256_balance(x: u256, currency_address: ContractAddress) -> Fixed {
 }
 
 fn _fromU256_balance(x: u256, decimals: u128) -> Fixed {
-    let five_to_dec = _pow(5, decimals);
+    let five_to_dec = pow(5, decimals);
 
     // (1.2 * 10**18) * 2**64 / (5**18 * 2**18)
     // so we have
@@ -187,7 +186,7 @@ fn _fromU256_balance(x: u256, decimals: u128) -> Fixed {
     // (1.2 * 10**18) / 5**18 * 2**(64-18)
     // x / five_to_dec * 2**(sixty_one_minus_dec)
     let sixty_four_minus_dec = 64 - decimals;
-    let decreased_FRACT_PART = _pow(2, sixty_four_minus_dec);
+    let decreased_FRACT_PART = pow(2, sixty_four_minus_dec);
     let x_ = x.low * decreased_FRACT_PART;
     // x / five_to_dec * decreased_FRACT_PART
     // x * decreased_FRACT_PART / five_t_dec
@@ -362,24 +361,24 @@ fn test_split_option_locked_capital() {
 
 #[test]
 fn test__pow() {
-    assert(_pow(10, 10) == 10000000000, '1');
-    assert(_pow(10, 5) == 100000, '2');
-    assert(_pow(10, 2) == 100, '3');
+    assert(pow(10, 10) == 10000000000, '1');
+    assert(pow(10, 5) == 100000, '2');
+    assert(pow(10, 2) == 100, '3');
+            
+    assert(pow(2, 8) == 256, '4');
+    assert(pow(2, 16) == 65536, '5');
+    assert(pow(2, 32) == 4294967296, '6');
+    assert(pow(2, 56) == 72057594037927936, '7');
+    assert(pow(2, 64) == 18446744073709551616, '8');
 
-    assert(_pow(2, 8) == 256, '4');
-    assert(_pow(2, 16) == 65536, '5');
-    assert(_pow(2, 32) == 4294967296, '6');
-    assert(_pow(2, 56) == 72057594037927936, '7');
-    assert(_pow(2, 64) == 18446744073709551616, '8');
-
-    assert(_pow(17, 21) == 69091933913008732880827217, '9');
-    assert(_pow(34, 13) == 81138303245565435904, '10');
+    assert(pow(17, 21) == 69091933913008732880827217, '9');
+    assert(pow(34, 13) == 81138303245565435904, '10');
 }
 
 #[test]
 #[should_panic]
 fn test__pow_failing() {
-    _pow(69, 69); // Should overflow
+    pow(69, 69); // Should overflow
 }
 
 #[test]
