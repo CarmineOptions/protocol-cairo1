@@ -22,7 +22,7 @@
 // }
 
 // fn deploy_setup() -> Setup {
-    
+
 //     // Deploy AMM
 //     let amm_hash = declare('AMM');
 //     let amm_prepared = PreparedContract {
@@ -42,7 +42,7 @@
 //         class_hash: erc20_hash, constructor_calldata: @call_lpt_data
 //     };
 //     let call_lpt_address = deploy(call_lpt_prepared).unwrap();
-    
+
 //     // Deploy Put ILPT
 //     let mut put_lpt_data = ArrayTrait::new();
 //     put_lpt_data.append('lorem');
@@ -54,7 +54,6 @@
 //         class_hash: erc20_hash, constructor_calldata: @put_lpt_data
 //     };
 //     let put_lpt_address = deploy(put_lpt_prepared).unwrap();
-
 
 //     // Deploy ETH
 //     let sth: ContractAddress = 0.try_into().unwrap();
@@ -90,3 +89,4 @@
 //     halt.print();
 //     decs.print();
 // }
+
