@@ -35,7 +35,7 @@ mod LiquidityPool {
         set_pool_definition_from_lptoken_address, set_underlying_token_address,
         set_pool_volatility_adjustment_speed, set_max_lpool_balance, get_lpool_balance,
         set_lpool_balance, get_max_lpool_balance, get_pool_locked_capital, set_pool_locked_capital,
-        get_option_info, set_option_position
+        get_option_info, set_option_position, get_available_options_usable_index
     };
 
     use carmine_protocol::amm_core::helpers::{
@@ -72,6 +72,44 @@ mod LiquidityPool {
         };
 
         return pool_pos;
+    }
+
+    // Since we store usable index of available options, we can start with it and then
+    // walk the index backwards like two weeks, instead of iterating over all options
+    // from the begining
+    // TODO: use this func
+    fn get_value_of_pool_expired_position(lptoken_address: LPTAddress) -> Fixed {
+        let LOOKBACK = 24 * 3600 * 14; // Only look back 2 weeks, all options should be long expired by then
+        let now = get_block_timestamp();
+        let mut ix = get_available_options_usable_index() - 1; // Usable index should be empty, so start before
+        let mut pool_pos: Fixed = FixedTrait::from_felt(0);
+
+        loop {
+            let option = get_available_options(lptoken_address, ix);
+            assert(option.sum() != 0, 'GVoEO - opt sum zero');
+
+            if ix == 0 {
+                break;
+            }
+            ix -= 1; // Do this before 'continue' 
+            
+            if (option.maturity >= now) {
+                break; // Option is not yet expired
+            };
+
+            if (now - option.maturity) > LOOKBACK {
+                break; // We're over lookback window
+            };
+
+            let option_position = option.pools_position();
+            if option_position == 0 {
+                continue; // Don't care if there is no position - or the option is already expired
+            }
+
+            pool_pos += option.value_of_position(option_position);
+        };
+
+        pool_pos
     }
 
 
