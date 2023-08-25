@@ -8,17 +8,7 @@ use carmine_protocol::amm_core::helpers::{
 };
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
-// use carmine_protocol::basic::{OptionSide, OptionType, Timestamp, LegacyStrike, Int};
-
-type OptionSide = u8; // TODO: Make this an enum
-type OptionType = u8; // TODO: Make this an enum
-type Timestamp = u64; // In seconds, Block timestamps are also u64
-
-type Int = u128;
-
-type Math64x61_ = felt252; // legacy, for AMM trait definition
-type LegacyStrike = Math64x61_;
-
+use carmine_protocol::types::basic::{OptionSide, OptionType, Timestamp, LegacyStrike, Int};
 
 use carmine_protocol::amm_core::state::State::{
     get_lptoken_address_for_given_option, get_option_volatility,

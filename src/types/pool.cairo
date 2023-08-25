@@ -1,9 +1,7 @@
 use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 use starknet::ContractAddress;
-// use carmine_protocol::basic::OptionType;
-
-type OptionType = u8; // TODO: Make this an enum
+use carmine_protocol::types::basic::OptionType;
 
 use carmine_protocol::amm_core::state::State::{
     get_lptoken_address_for_given_option, get_lpool_balance, get_unlocked_capital,
