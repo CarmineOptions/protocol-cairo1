@@ -240,7 +240,7 @@ mod OptionPricing {
         let abs_d = d_1.abs();
         let is_d_extreme = EIGHT <= abs_d;
         // If the pricing is for trade, let it fail in case of extreme ds
-        if is_for_trade != true { 
+        if is_for_trade != true {
             if is_d_extreme == true {
                 return _premia_extreme_d(strike_price, underlying_price);
             }
@@ -270,7 +270,6 @@ mod OptionPricing {
     // @param underlying_price: Current price of the underlying
     // @returns Call and Put premia, plus variable indicating whether it was calculated by BS or not
     fn _premia_extreme_d(strike_price: Fixed, underlying_price: Fixed) -> (Fixed, Fixed, bool) {
-
         let price_diff_call = underlying_price - strike_price;
         let price_diff_put = strike_price - underlying_price;
 
@@ -330,44 +329,46 @@ fn test_black_scholes() {
 
 // TODO: Below
 #[test]
-#[should_panic(expected: ('STD_NC - x > 8',))]
-fn test_black_scholes_extreme() { 
-
+#[should_panic(expected: ('STD_NC - x > 8', ))]
+fn test_black_scholes_extreme() {
     let (call_premia_1, put_premia_1, is_usable_1) = OptionPricing::black_scholes(
         FixedTrait::from_felt(184467440737095520), // 0.01
-        FixedTrait::from_felt(1844674407370955264), 
+        FixedTrait::from_felt(1844674407370955264),
         FixedTrait::from_unscaled_felt(1500),
         FixedTrait::from_unscaled_felt(1000),
         FixedTrait::from_felt(553402322211286528),
         false
-    );  
-    
-    assert(call_premia_1 == FixedTrait::from_felt(184467440737095520), 'Should be a cent'); // cent
-    assert(put_premia_1 == FixedTrait::from_felt(9223556504295512903520), 'Should be 500 + cent'); // 500 + cent
-    assert(!is_usable_1, 'Should not be usable');
+    );
 
+    assert(call_premia_1 == FixedTrait::from_felt(184467440737095520), 'Should be a cent'); // cent
+    assert(
+        put_premia_1 == FixedTrait::from_felt(9223556504295512903520), 'Should be 500 + cent'
+    ); // 500 + cent
+    assert(!is_usable_1, 'Should not be usable');
 
     let (call_premia_2, put_premia_2, is_usable_2) = OptionPricing::black_scholes(
         FixedTrait::from_felt(184467440737095520), // 0.01
-        FixedTrait::from_felt(1844674407370955264), 
+        FixedTrait::from_felt(1844674407370955264),
         FixedTrait::from_unscaled_felt(1000),
         FixedTrait::from_unscaled_felt(1500),
         FixedTrait::from_felt(553402322211286528),
         false
-    );  
+    );
 
-    assert(call_premia_2 == FixedTrait::from_felt(9223556504295512903520), 'Should be 500 + cent'); // 500 + cent
+    assert(
+        call_premia_2 == FixedTrait::from_felt(9223556504295512903520), 'Should be 500 + cent'
+    ); // 500 + cent
     assert(put_premia_2 == FixedTrait::from_felt(184467440737095520), 'Should be a cent'); // cent
     assert(!is_usable_2, 'Should not be usable');
 
     let (call_premia, put_premia, _) = OptionPricing::black_scholes(
         FixedTrait::from_felt(184467440737095520), // 0.01
-        FixedTrait::from_felt(1844674407370955264), 
+        FixedTrait::from_felt(1844674407370955264),
         FixedTrait::from_unscaled_felt(1500),
         FixedTrait::from_unscaled_felt(1000),
         FixedTrait::from_felt(553402322211286528),
         true
-    );  
+    );
 }
 
 #[test]
