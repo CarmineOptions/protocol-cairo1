@@ -140,12 +140,11 @@ mod Options {
             );
         }
 
-        // TODO: This is just wrong - check pls
         let hundred = FixedTrait::from_unscaled_felt(100);
         let adjspd_cubit = get_pool_volatility_adjustment_speed(lptoken_address);
 
         let max_opt_perc = get_max_option_size_percent_of_voladjspd();
-        let max_opt_perc_cubit = FixedTrait::new(max_opt_perc, false);
+        let max_opt_perc_cubit = FixedTrait::new_unscaled(max_opt_perc, false);
         let ratio = max_opt_perc_cubit / hundred;
 
         let max_optsize_cubit = ratio * adjspd_cubit;
@@ -403,7 +402,6 @@ mod Options {
             );
         }
 
-        // TODO: This is just wrong - check pls
         let hundred = FixedTrait::from_unscaled_felt(100);
         let adjspd_cubit = get_pool_volatility_adjustment_speed(lptoken_address);
 

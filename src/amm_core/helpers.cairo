@@ -42,7 +42,6 @@ impl FixedHelpersImpl of FixedHelpersTrait {
     }
 
     fn to_legacyMath(self: Fixed) -> Math64x61_ {
-        // TODO: Find better way to do this, this is just wrong
         // Fixed is 8 times the old math
         let new: felt252 = (self / FixedTrait::from_unscaled_felt(8)).into();
         new
@@ -114,8 +113,6 @@ fn pow(a: u128, b: u128) -> u128 {
 // @param x: Value to be converted
 // @param currency_address: Address of the currency - used to get decimals
 // @return Input converted to Uint256
-// TODO: Check this function, wasn't checked for correct math
-// TODO: This function is 100% wrong
 fn toU256_balance(x: Fixed, currency_address: ContractAddress) -> u256 {
     // converts for example 1.2 ETH (as Math64_61 float) to int(1.2*10**18)
 

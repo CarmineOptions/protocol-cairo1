@@ -23,8 +23,6 @@ fn get_fees(value: Fixed) -> Fixed {
 use debug::PrintTrait;
 #[test]
 fn test_get_fees() {
-    // TODO: These tests will fail if we change FEE_PROPORTION_PERCENT
-    // TODO: Make this a fuzzy test once they are available
     let res1 = get_fees(FixedTrait::from_unscaled_felt(100));
     let res2 = get_fees(FixedTrait::from_unscaled_felt(200));
     let res3 = get_fees(FixedTrait::from_unscaled_felt(3));

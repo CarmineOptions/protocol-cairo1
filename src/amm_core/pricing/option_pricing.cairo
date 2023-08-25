@@ -246,7 +246,6 @@ mod OptionPricing {
             }
         }
 
-        // TODO: Err messages
         let normal_d_1 = adjusted_std_normal_cdf(d_1, is_pos_d_1);
         let normal_d_2 = adjusted_std_normal_cdf(d_2, is_pos_d_2);
 
@@ -327,7 +326,6 @@ fn test_black_scholes() {
     assert(put_premia == FixedTrait::new(5882635375527910186234, false), 'Put Premia 2 wrong');
 }
 
-// TODO: Below
 #[test]
 #[should_panic(expected: ('STD_NC - x > 8', ))]
 fn test_black_scholes_extreme() {
