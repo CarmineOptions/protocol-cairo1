@@ -46,21 +46,6 @@ struct LegacyOption {
     option_type: OptionType
 }
 
-// impl PackFixed of StorePacking<LegacyOption, felt252> {
-//     fn pack(value: Fixed) -> felt252 {
-//         let MAX_MAG_PLUS_ONE = 0x100000000000000000000000000000000; // 2**128
-//         let packed_sign = MAX_MAG_PLUS_ONE * value.sign.into();
-//         value.mag.into() + packed_sign
-//     }
-
-//     fn unpack(value: felt252) -> Fixed {
-//         let (q, r) = U256DivRem::div_rem(value.into(), u256_as_non_zero(0x100000000000000000000000000000000));
-//         let mag: u128 = q.try_into().unwrap();
-//         let sign: bool = r.into() == 1;
-//         Fixed {mag: mag, sign: sign}
-//     }
-// }
-
 // New option
 #[derive(Copy, Drop, Serde, starknet::Store)]
 struct Option_ {

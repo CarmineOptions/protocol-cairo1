@@ -40,6 +40,7 @@ mod View {
             }
 
             arr.append(opt);
+            i += 1;
         };
 
         arr

@@ -82,7 +82,7 @@ mod LiquidityPool {
         let LOOKBACK = 24 * 3600 * 14;
         // ^ Only look back 2 weeks, all options should be long expired by then
         let now = get_block_timestamp();
-        let mut ix = get_available_options_usable_index()
+        let mut ix = get_available_options_usable_index(lptoken_address)
             - 1; // Usable index should be empty, so start before
         let mut pool_pos: Fixed = FixedTrait::from_felt(0);
 

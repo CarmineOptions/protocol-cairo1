@@ -234,7 +234,7 @@ mod AMM {
         ContractAddress>, // TODO: last key value should be Fixed, not u128(or it's mag)
         available_options: LegacyMap::<(LPTAddress, felt252), LegacyOption>,
         new_available_options: LegacyMap::<(LPTAddress, u32), Option_>,
-        new_available_options_usable_index: u32,
+        new_available_options_usable_index: LegacyMap::<LPTAddress, u32>,
         // Storage vars that are basically the same
 
         underlying_token_address: LegacyMap<LPTAddress, ContractAddress>,

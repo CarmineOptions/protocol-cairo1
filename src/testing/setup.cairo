@@ -49,8 +49,33 @@ struct Dispatchers {
     sp: IOptionTokenDispatcher,
 }
 
+fn get_dispatchers(ctx: Ctx) -> Dispatchers {
+    Dispatchers {
+        amm: IAMMDispatcher {
+            contract_address: ctx.amm_address
+            }, eth: IMyTokenDispatcher {
+            contract_address: ctx.eth_address
+            }, usdc: IMyTokenDispatcher {
+            contract_address: ctx.usdc_address
+            }, lptc: ILPTokenDispatcher {
+            contract_address: ctx.call_lpt_address
+            }, lptp: ILPTokenDispatcher {
+            contract_address: ctx.put_lpt_address
+            }, lc: IOptionTokenDispatcher {
+            contract_address: ctx.long_call_address
+            }, sc: IOptionTokenDispatcher {
+            contract_address: ctx.short_call_address
+            }, lp: IOptionTokenDispatcher {
+            contract_address: ctx.long_put_address
+            }, sp: IOptionTokenDispatcher {
+            contract_address: ctx.short_put_address
+        },
+    }
+}
+
+
 // fn deploy_setup() {
-fn deploy_setup() -> Ctx {
+fn deploy_setup() -> (Ctx, Dispatchers) {
     let admin_address = 123456;
 
     let mytoken_hash = declare('MyToken');
@@ -329,31 +354,7 @@ fn deploy_setup() -> Ctx {
             hundred
         );
 
-    ctx
-}
-
-fn get_dispatchers(ctx: Ctx) -> Dispatchers {
-    Dispatchers {
-        amm: IAMMDispatcher {
-            contract_address: ctx.amm_address
-            }, eth: IMyTokenDispatcher {
-            contract_address: ctx.eth_address
-            }, usdc: IMyTokenDispatcher {
-            contract_address: ctx.usdc_address
-            }, lptc: ILPTokenDispatcher {
-            contract_address: ctx.call_lpt_address
-            }, lptp: ILPTokenDispatcher {
-            contract_address: ctx.put_lpt_address
-            }, lc: IOptionTokenDispatcher {
-            contract_address: ctx.long_call_address
-            }, sc: IOptionTokenDispatcher {
-            contract_address: ctx.short_call_address
-            }, lp: IOptionTokenDispatcher {
-            contract_address: ctx.long_put_address
-            }, sp: IOptionTokenDispatcher {
-            contract_address: ctx.short_put_address
-        },
-    }
+    (ctx, disp)
 }
 // #[test]
 // fn test_deploy_setup() {

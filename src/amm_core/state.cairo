@@ -181,9 +181,9 @@ mod State {
         return res;
     }
 
-    fn get_available_options_usable_index() -> u32 {
+    fn get_available_options_usable_index(lptoken_address: ContractAddress) -> u32 {
         new_available_options_usable_index::InternalContractStateTrait::read(
-            @AMM::unsafe_new_contract_state().new_available_options_usable_index
+            @AMM::unsafe_new_contract_state().new_available_options_usable_index, lptoken_address
         )
     }
 
@@ -191,7 +191,7 @@ mod State {
         let state = AMM::unsafe_new_contract_state();
 
         // In case this function is called before append_to_available_options
-        let usable_index = get_available_options_usable_index();
+        let usable_index = get_available_options_usable_index(lptoken_address);
         if usable_index == 0 {
             let _ = migrate_old_options(lptoken_address, 0);
         }
@@ -205,7 +205,7 @@ mod State {
         let mut state = AMM::unsafe_new_contract_state();
 
         // Read storage var containg the usable index
-        let usable_index = get_available_options_usable_index();
+        let usable_index = get_available_options_usable_index(lptoken_address);
 
         // In this case we need to migrate the old options to the new storage var
         // since this storage var was introduced and is used only in c1 version
@@ -219,7 +219,7 @@ mod State {
 
         // Increase the usable index in available options
         new_available_options_usable_index::InternalContractStateTrait::write(
-            ref state.new_available_options_usable_index, usable_index + 1
+            ref state.new_available_options_usable_index, lptoken_address, usable_index + 1
         );
     }
 
