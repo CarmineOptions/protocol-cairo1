@@ -42,10 +42,10 @@ mod Options {
         set_pool_locked_capital, get_unlocked_capital,
     };
 
-    use carmine_protocol::traits::{
-        IOptionTokenDispatcher, IOptionTokenDispatcherTrait, IERC20Dispatcher, IERC20DispatcherTrait
-    };
+    use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use carmine_protocol::tokens::option_token::{IOptionTokenDispatcher, IOptionTokenDispatcherTrait};
 
+    use debug::PrintTrait;
     // TODO: Add annotations
     // TODO: What about new options that are written in c2?
     fn add_option(
@@ -67,13 +67,13 @@ mod Options {
         );
         assert(contract_address_to_felt252(opt_address) == 0, 'OPT has already been added');
 
-        let contr_opt_type = IOptionTokenDispatcher { contract_address: opt_address }.option_type();
-        let contr_strike = IOptionTokenDispatcher { contract_address: opt_address }.strike_price();
-        let contr_maturity = IOptionTokenDispatcher { contract_address: opt_address }.maturity();
-        let contr_side = IOptionTokenDispatcher { contract_address: opt_address }.side();
+        let contr_opt_type = IOptionTokenDispatcher { contract_address: option_token_address_ }.option_type();
+        let contr_strike = IOptionTokenDispatcher { contract_address: option_token_address_ }.strike_price();
+        let contr_maturity = IOptionTokenDispatcher { contract_address: option_token_address_ }.maturity();
+        let contr_side = IOptionTokenDispatcher { contract_address: option_token_address_ }.side();
 
         assert(contr_opt_type == option_type, 'Option type input doesnt match');
-        assert(contr_strike == strike_price.to_legacyMath(), 'Strike price input doesnt match');
+        assert(contr_strike == strike_price, 'Strike price input doesnt match');
         assert(contr_maturity == maturity.into(), 'Maturity input doesnt match');
         assert(contr_side == option_side, 'Option side input doesnt match');
 
@@ -112,8 +112,8 @@ mod Options {
         let contr_side = IOptionTokenDispatcher { contract_address: opt_address }.side();
 
         assert(contr_opt_type == option_type, 'Option type input doesnt match');
-        assert(contr_strike == strike_price.to_legacyMath(), 'Strike price input doesnt match');
-        assert(contr_maturity == maturity.into(), 'Maturity input doesnt match');
+        assert(contr_strike == strike_price, 'Strike price input doesnt match');
+        assert(contr_maturity == maturity, 'Maturity input doesnt match');
         assert(contr_side == option_side, 'Option side input doesnt match');
 
         if option_side == TRADE_SIDE_LONG {
@@ -372,7 +372,7 @@ mod Options {
         let contr_side = IOptionTokenDispatcher { contract_address: opt_address }.side();
 
         assert(contr_opt_type == option_type, 'Option type input doesnt match');
-        assert(contr_strike == strike_price.to_legacyMath(), 'Strike price input doesnt match');
+        assert(contr_strike == strike_price, 'Strike price input doesnt match');
         assert(contr_maturity == maturity.into(), 'Maturity input doesnt match');
         assert(contr_side == option_side, 'Option side input doesnt match');
 
@@ -726,7 +726,7 @@ mod Options {
         let user_address = get_caller_address();
         let user_tokens_owned = IOptionTokenDispatcher {
             contract_address: option_token_address
-        }.balanceOf(user_address);
+        }.balance_of(user_address);
         assert(user_tokens_owned > 0, 'EOT - User has no tokens');
 
         let current_block_time = get_block_timestamp();

@@ -206,6 +206,8 @@ mod LiquidityPool {
             set_underlying_token_address(lptoken_address, quote_token_address);
         }
 
+        // TODO: This doesnt check if the provided lptoken address even is a lptoken address lol pls fix
+
         set_pool_volatility_adjustment_speed(lptoken_address, volatility_adjustment_speed);
         set_max_lpool_balance(lptoken_address, max_lpool_bal);
     }
