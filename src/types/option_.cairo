@@ -56,21 +56,6 @@ struct LegacyOption {
     option_type: OptionType
 }
 
-// impl PackFixed of StorePacking<LegacyOption, felt252> {
-//     fn pack(value: Fixed) -> felt252 {
-//         let MAX_MAG_PLUS_ONE = 0x100000000000000000000000000000000; // 2**128
-//         let packed_sign = MAX_MAG_PLUS_ONE * value.sign.into();
-//         value.mag.into() + packed_sign
-//     }
-
-//     fn unpack(value: felt252) -> Fixed {
-//         let (q, r) = U256DivRem::div_rem(value.into(), u256_as_non_zero(0x100000000000000000000000000000000));
-//         let mag: u128 = q.try_into().unwrap();
-//         let sign: bool = r.into() == 1;
-//         Fixed {mag: mag, sign: sign}
-//     }
-// }
-
 // New option
 #[derive(Copy, Drop, Serde, starknet::Store)]
 struct Option_ {
@@ -141,49 +126,48 @@ impl Option_Impl of Option_Trait {
         // however if you uncomment it and then comment out lines 132-135 above then it again build just fine
         // let time_till_maturity = get_time_till_maturity(self.maturity);
 
-        underlying_price
-    // // 2) Get trade vol
-    // let (_, trade_volatility) = get_new_volatility(
-    //     self.volatility(),
-    //     option_size_cubit,
-    //     self.option_type,
-    //     self.option_side,
-    //     self.strike_price,
-    //     pool_volatility_adjustment_speed
-    // );
+        // 2) Get trade vol
+        let (_, trade_volatility) = get_new_volatility(
+            self.volatility(),
+            option_size_cubit,
+            self.option_type,
+            self.option_side,
+            self.strike_price,
+            pool_volatility_adjustment_speed
+        );
 
-    // // 3) Get TTM
-    // let time_till_maturity = get_time_till_maturity(self.maturity);
+        // 3) Get TTM
+        let time_till_maturity = get_time_till_maturity(self.maturity);
 
-    // // 4) Get Risk free rate
-    // let risk_free_rate_annualized = FixedTrait::from_felt(RISK_FREE_RATE);
+        // 4) Get Risk free rate
+        let risk_free_rate_annualized = FixedTrait::from_felt(RISK_FREE_RATE);
 
-    // // 5) Get premia
-    // let hundred = FixedTrait::from_unscaled_felt(100);
-    // let sigma = trade_volatility / hundred;
+        // 5) Get premia
+        let hundred = FixedTrait::from_unscaled_felt(100);
+        let sigma = trade_volatility / hundred;
 
-    // let (call_premia, put_premia, is_usable) = black_scholes(
-    //     sigma,
-    //     time_till_maturity,
-    //     self.strike_price,
-    //     underlying_price,
-    //     risk_free_rate_annualized,
-    //     false
-    // );
+        let (call_premia, put_premia, is_usable) = black_scholes(
+            sigma,
+            time_till_maturity,
+            self.strike_price,
+            underlying_price,
+            risk_free_rate_annualized,
+            false
+        );
 
-    // call_premia.assert_nn('GPBF - call_premia < 0');
-    // put_premia.assert_nn('GPBF - put_premia < 0');
+        call_premia.assert_nn('GPBF - call_premia < 0');
+        put_premia.assert_nn('GPBF - put_premia < 0');
 
-    // let premia = select_and_adjust_premia(
-    //     call_premia, put_premia, self.option_type, underlying_price
-    // );
+        let premia = select_and_adjust_premia(
+            call_premia, put_premia, self.option_type, underlying_price
+        );
 
-    // let total_premia_before_fees = premia * option_size_cubit;
+        let total_premia_before_fees = premia * option_size_cubit;
 
-    // premia.assert_nn('GPBF - premia < 0');
-    // total_premia_before_fees.assert_nn('GPBF - premia_before_fees < 0');
+        premia.assert_nn('GPBF - premia < 0');
+        total_premia_before_fees.assert_nn('GPBF - premia_before_fees < 0');
 
-    // total_premia_before_fees
+        total_premia_before_fees
     }
 
 
