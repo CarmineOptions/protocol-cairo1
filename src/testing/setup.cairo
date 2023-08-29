@@ -7,11 +7,13 @@ use option::OptionTrait;
 use debug::PrintTrait;
 use traits::{Into, TryInto};
 
-use carmine_protocol::amm_core::amm::{AMM, IAMMDispatcher, IAMMDispatcherTrait };
+use carmine_protocol::amm_core::amm::{AMM, IAMMDispatcher, IAMMDispatcherTrait};
 use snforge_std::{declare, PreparedContract, deploy, start_prank, stop_prank};
 
 use carmine_protocol::tokens::my_token::{MyToken, IMyTokenDispatcher, IMyTokenDispatcherTrait};
-use carmine_protocol::tokens::option_token::{OptionToken, IOptionTokenDispatcher, IOptionTokenDispatcherTrait};
+use carmine_protocol::tokens::option_token::{
+    OptionToken, IOptionTokenDispatcher, IOptionTokenDispatcherTrait
+};
 use carmine_protocol::tokens::lptoken::{LPToken, ILPTokenDispatcher, ILPTokenDispatcherTrait};
 
 use openzeppelin::token::erc20::ERC20;
@@ -19,20 +21,17 @@ use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTr
 use cubit::f128::types::{Fixed, FixedTrait};
 
 #[derive(Drop, Copy)]
-struct Ctx { 
+struct Ctx {
     admin_address: ContractAddress,
-    amm_address : ContractAddress,
-    eth_address : ContractAddress,
+    amm_address: ContractAddress,
+    eth_address: ContractAddress,
     usdc_address: ContractAddress,
     call_lpt_address: ContractAddress,
     put_lpt_address: ContractAddress,
-    
     strike_price: Fixed,
     expiry: u64,
-
     long_call_address: ContractAddress,
     short_call_address: ContractAddress,
-
     long_put_address: ContractAddress,
     short_put_address: ContractAddress,
 }
@@ -44,8 +43,7 @@ struct Dispatchers {
     usdc: IMyTokenDispatcher,
     lptc: ILPTokenDispatcher,
     lptp: ILPTokenDispatcher,
-
-    lc: IOptionTokenDispatcher, 
+    lc: IOptionTokenDispatcher,
     sc: IOptionTokenDispatcher,
     lp: IOptionTokenDispatcher,
     sp: IOptionTokenDispatcher,
@@ -114,13 +112,13 @@ fn deploy_setup() -> Ctx {
     // // Deploy Option Tokens
 
     let strike_price = 27670116110564327424000; // 1500 * 2**64
-    let expiry = 1000000000 + 60*60*24; // current time plus 24 hours
+    let expiry = 1000000000 + 60 * 60 * 24; // current time plus 24 hours
     let LONG = 0;
     let SHORT = 1;
 
     let CALL = 0;
     let PUT = 1;
-    
+
     // Long Call
     let mut long_call_data = ArrayTrait::new();
     long_call_data.append('OptLongCall');
@@ -207,26 +205,30 @@ fn deploy_setup() -> Ctx {
 
     // ADD lptokens
     // Call
-    disp.amm.add_lptoken(
-        ctx.usdc_address,
-        ctx.eth_address,
-        CALL.try_into().unwrap(),
-        ctx.call_lpt_address,
-        ctx.eth_address,
-        call_vol_adjspd,
-        10000000000000000000 // 10eth
-    );
+    disp
+        .amm
+        .add_lptoken(
+            ctx.usdc_address,
+            ctx.eth_address,
+            CALL.try_into().unwrap(),
+            ctx.call_lpt_address,
+            ctx.eth_address,
+            call_vol_adjspd,
+            10000000000000000000 // 10eth
+        );
 
     // PUT
-    disp.amm.add_lptoken(
-        ctx.usdc_address,
-        ctx.eth_address,
-        PUT.try_into().unwrap(),
-        ctx.put_lpt_address,
-        ctx.usdc_address,
-        put_vol_adjspd,
-        10000000000 // 10k usdc
-    );
+    disp
+        .amm
+        .add_lptoken(
+            ctx.usdc_address,
+            ctx.eth_address,
+            PUT.try_into().unwrap(),
+            ctx.put_lpt_address,
+            ctx.usdc_address,
+            put_vol_adjspd,
+            10000000000 // 10k usdc
+        );
 
     // Approve bajilion for use by amm
     let bajillion = 0x80000000000000000000000000000000;
@@ -238,7 +240,7 @@ fn deploy_setup() -> Ctx {
     start_prank(ctx.usdc_address, ctx.admin_address);
     disp.usdc.approve(ctx.amm_address, bajillion);
     stop_prank(ctx.usdc_address);
-    
+
     // Deposit 5eth and 5k usdc liquidity
     start_prank(ctx.amm_address, ctx.admin_address);
     disp.amm.set_max_option_size_percent_of_voladjspd(1_000); // Basically turn this off
@@ -247,22 +249,22 @@ fn deploy_setup() -> Ctx {
     let five_k_usdc = 5000000000;
 
     // ETH
-    disp.amm.deposit_liquidity(
-        ctx.eth_address,
-        ctx.usdc_address,
-        ctx.eth_address,
-        CALL.try_into().unwrap(),
-        five_eth
-    );
+    disp
+        .amm
+        .deposit_liquidity(
+            ctx.eth_address, ctx.usdc_address, ctx.eth_address, CALL.try_into().unwrap(), five_eth
+        );
 
     // Put
-    disp.amm.deposit_liquidity(
-        ctx.usdc_address,
-        ctx.usdc_address,
-        ctx.eth_address,
-        PUT.try_into().unwrap(),
-        five_k_usdc,
-    );
+    disp
+        .amm
+        .deposit_liquidity(
+            ctx.usdc_address,
+            ctx.usdc_address,
+            ctx.eth_address,
+            PUT.try_into().unwrap(),
+            five_k_usdc,
+        );
 
     assert(disp.lptc.balance_of(ctx.admin_address) == five_eth, 'Wher call lpt');
     assert(disp.lptp.balance_of(ctx.admin_address) == five_k_usdc, 'Wher put lpt');
@@ -271,75 +273,92 @@ fn deploy_setup() -> Ctx {
     let hundred = FixedTrait::from_unscaled_felt(100);
 
     // Long call
-    disp.amm.add_option(
-        LONG.try_into().unwrap(),
-        ctx.expiry,
-        ctx.strike_price,
-        ctx.usdc_address,
-        ctx.eth_address,
-        CALL.try_into().unwrap(),
-        ctx.call_lpt_address,
-        ctx.long_call_address,
-        hundred
-    );
+    disp
+        .amm
+        .add_option(
+            LONG.try_into().unwrap(),
+            ctx.expiry,
+            ctx.strike_price,
+            ctx.usdc_address,
+            ctx.eth_address,
+            CALL.try_into().unwrap(),
+            ctx.call_lpt_address,
+            ctx.long_call_address,
+            hundred
+        );
     // Short call
-    disp.amm.add_option(
-        SHORT.try_into().unwrap(),
-        ctx.expiry,
-        ctx.strike_price,
-        ctx.usdc_address,
-        ctx.eth_address,
-        CALL.try_into().unwrap(),
-        ctx.call_lpt_address,
-        ctx.short_call_address,
-        hundred
-    );
+    disp
+        .amm
+        .add_option(
+            SHORT.try_into().unwrap(),
+            ctx.expiry,
+            ctx.strike_price,
+            ctx.usdc_address,
+            ctx.eth_address,
+            CALL.try_into().unwrap(),
+            ctx.call_lpt_address,
+            ctx.short_call_address,
+            hundred
+        );
     // Long put
-    disp.amm.add_option(
-        LONG.try_into().unwrap(),
-        ctx.expiry,
-        ctx.strike_price,
-        ctx.usdc_address,
-        ctx.eth_address,
-        PUT.try_into().unwrap(),
-        ctx.put_lpt_address,
-        ctx.long_put_address,
-        hundred
-    );
+    disp
+        .amm
+        .add_option(
+            LONG.try_into().unwrap(),
+            ctx.expiry,
+            ctx.strike_price,
+            ctx.usdc_address,
+            ctx.eth_address,
+            PUT.try_into().unwrap(),
+            ctx.put_lpt_address,
+            ctx.long_put_address,
+            hundred
+        );
     // Short call
-    disp.amm.add_option(
-        SHORT.try_into().unwrap(),
-        ctx.expiry,
-        ctx.strike_price,
-        ctx.usdc_address,
-        ctx.eth_address,
-        PUT.try_into().unwrap(),
-        ctx.put_lpt_address,
-        ctx.short_put_address,
-        hundred
-    );
-    
+    disp
+        .amm
+        .add_option(
+            SHORT.try_into().unwrap(),
+            ctx.expiry,
+            ctx.strike_price,
+            ctx.usdc_address,
+            ctx.eth_address,
+            PUT.try_into().unwrap(),
+            ctx.put_lpt_address,
+            ctx.short_put_address,
+            hundred
+        );
+
     ctx
 }
 
 fn get_dispatchers(ctx: Ctx) -> Dispatchers {
     Dispatchers {
-        amm: IAMMDispatcher{contract_address: ctx.amm_address},
-        eth: IMyTokenDispatcher{contract_address: ctx.eth_address},
-        usdc: IMyTokenDispatcher{contract_address: ctx.usdc_address},
-        lptc: ILPTokenDispatcher{contract_address: ctx.call_lpt_address},
-        lptp: ILPTokenDispatcher{contract_address: ctx.put_lpt_address},
-
-        lc: IOptionTokenDispatcher{contract_address: ctx.long_call_address},
-        sc: IOptionTokenDispatcher{contract_address: ctx.short_call_address},
-
-        lp: IOptionTokenDispatcher{contract_address: ctx.long_put_address},
-        sp: IOptionTokenDispatcher{contract_address: ctx.short_put_address},
+        amm: IAMMDispatcher {
+            contract_address: ctx.amm_address
+            }, eth: IMyTokenDispatcher {
+            contract_address: ctx.eth_address
+            }, usdc: IMyTokenDispatcher {
+            contract_address: ctx.usdc_address
+            }, lptc: ILPTokenDispatcher {
+            contract_address: ctx.call_lpt_address
+            }, lptp: ILPTokenDispatcher {
+            contract_address: ctx.put_lpt_address
+            }, lc: IOptionTokenDispatcher {
+            contract_address: ctx.long_call_address
+            }, sc: IOptionTokenDispatcher {
+            contract_address: ctx.short_call_address
+            }, lp: IOptionTokenDispatcher {
+            contract_address: ctx.long_put_address
+            }, sp: IOptionTokenDispatcher {
+            contract_address: ctx.short_put_address
+        },
     }
 }
-
 // #[test]
 // fn test_deploy_setup() {
 //     let ctx = deploy_setup();
 //     let disp = get_dispatchers(ctx);
 // }
+
+

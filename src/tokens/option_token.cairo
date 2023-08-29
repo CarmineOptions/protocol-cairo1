@@ -28,7 +28,6 @@ trait IOptionToken<TState> {
 }
 
 
-
 #[starknet::contract]
 mod OptionToken {
     use integer::BoundedInt;
@@ -48,11 +47,11 @@ mod OptionToken {
         _balances: LegacyMap<ContractAddress, u256>,
         _allowances: LegacyMap<(ContractAddress, ContractAddress), u256>,
         _option_token_quote_token_address: ContractAddress,
-        _option_token_base_token_address: ContractAddress, 
+        _option_token_base_token_address: ContractAddress,
         _option_token_option_type: u8,
         _option_token_side: u8,
         _option_token_maturity: u64,
-        _option_token_strike_price: Fixed, 
+        _option_token_strike_price: Fixed,
     }
 
     #[event]
@@ -185,13 +184,12 @@ mod OptionToken {
 
             self._mint(recipient, amount)
         }
-        
+
         fn burn(ref self: ContractState, account: ContractAddress, amount: u256) {
             // TODO: Assert ownable only owner
-            
+
             self._burn(account, amount)
         }
-
     }
 
     #[external(v0)]

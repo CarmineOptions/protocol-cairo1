@@ -43,7 +43,9 @@ mod Options {
     };
 
     use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
-    use carmine_protocol::tokens::option_token::{IOptionTokenDispatcher, IOptionTokenDispatcherTrait};
+    use carmine_protocol::tokens::option_token::{
+        IOptionTokenDispatcher, IOptionTokenDispatcherTrait
+    };
 
     use debug::PrintTrait;
     // TODO: Add annotations
@@ -67,9 +69,15 @@ mod Options {
         );
         assert(contract_address_to_felt252(opt_address) == 0, 'OPT has already been added');
 
-        let contr_opt_type = IOptionTokenDispatcher { contract_address: option_token_address_ }.option_type();
-        let contr_strike = IOptionTokenDispatcher { contract_address: option_token_address_ }.strike_price();
-        let contr_maturity = IOptionTokenDispatcher { contract_address: option_token_address_ }.maturity();
+        let contr_opt_type = IOptionTokenDispatcher {
+            contract_address: option_token_address_
+        }.option_type();
+        let contr_strike = IOptionTokenDispatcher {
+            contract_address: option_token_address_
+        }.strike_price();
+        let contr_maturity = IOptionTokenDispatcher {
+            contract_address: option_token_address_
+        }.maturity();
         let contr_side = IOptionTokenDispatcher { contract_address: option_token_address_ }.side();
 
         assert(contr_opt_type == option_type, 'Option type input doesnt match');

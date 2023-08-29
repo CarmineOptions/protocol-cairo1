@@ -1,4 +1,3 @@
-
 use starknet::ContractAddress;
 use cubit::f128::types::Fixed;
 
@@ -19,7 +18,6 @@ trait ILPToken<TState> {
     fn mint(ref self: TState, recipient: ContractAddress, amount: u256);
     fn burn(ref self: TState, account: ContractAddress, amount: u256);
 }
-
 
 
 #[starknet::contract]
@@ -64,13 +62,9 @@ mod LPToken {
     }
 
     #[constructor]
-    fn constructor(
-        ref self: ContractState,
-        name: felt252,
-        symbol: felt252,
-    ) {
+    fn constructor(ref self: ContractState, name: felt252, symbol: felt252, ) {
         self.initializer(name, symbol);
-        // Todo: add proxy, ownable, add upgrades
+    // Todo: add proxy, ownable, add upgrades
     }
 
     //
@@ -133,12 +127,11 @@ mod LPToken {
             // TODO: Assert ownable only owner
             self._mint(recipient, amount)
         }
-        
+
         fn burn(ref self: ContractState, account: ContractAddress, amount: u256) {
             // TODO: Assert ownable only owner
             self._burn(account, amount)
         }
-
     }
 
     // #[external(v0)]
