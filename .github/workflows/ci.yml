@@ -3,7 +3,7 @@ name: CI
 on: push
 
 env:
-  SCARB_VERSION: 0.6.2
+  SCARB_VERSION: 0.7.0
   FOUNDRY_VERSION: 0.4.1
 
 jobs:
