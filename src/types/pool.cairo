@@ -67,9 +67,8 @@ struct PoolInfo {
 #[generate_trait]
 impl PoolInfoImpl of PoolInfoTrait {
     fn to_UserPoolInfo(self: PoolInfo, user_address: ContractAddress) -> UserPoolInfo {
-        let lptoken_balance = IERC20Dispatcher {
-            contract_address: self.lptoken_address
-        }.balanceOf(user_address);
+        let lptoken_balance = IERC20Dispatcher { contract_address: self.lptoken_address }
+            .balanceOf(user_address);
 
         let stake_value = get_underlying_for_lptokens(self.lptoken_address, lptoken_balance);
 

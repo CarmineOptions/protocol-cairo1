@@ -10,7 +10,7 @@ mod Trading {
         Math64x61_, OptionType, OptionSide, LPTAddress, Int, Timestamp
     };
 
-    use carmine_protocol::amm_core::helpers::{fromU256_balance, };
+    use carmine_protocol::amm_core::helpers::{fromU256_balance,};
     use carmine_protocol::amm_core::helpers::{toU256_balance, check_deadline};
 
     use carmine_protocol::amm_core::state::State::{
@@ -27,7 +27,7 @@ mod Trading {
         STOP_TRADING_BEFORE_MATURITY_SECONDS,
     };
 
-    use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing::{black_scholes, };
+    use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing::{black_scholes,};
     use carmine_protocol::amm_core::pricing::fees::get_fees;
     use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
         convert_amount_to_option_currency_from_base_uint256, get_new_volatility,

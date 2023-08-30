@@ -102,63 +102,85 @@ impl Option_Impl of Option_Trait {
     }
 
     fn premia_before_fees(self: Option_, position_size: Int) -> Fixed {
+        let Option_{option_side,
+        maturity,
+        strike_price,
+        quote_token_address,
+        base_token_address,
+        option_type } =
+            self;
         // For clarity
-        let option_size = position_size;
-        let option_size_cubit = fromU256_balance(position_size.into(), self.base_token_address);
+        let option_size_cubit = fromU256_balance(position_size.into(), base_token_address);
         let pool_volatility_adjustment_speed = get_pool_volatility_adjustment_speed(
-            self.lpt_addr()
+            Option_ {
+                option_side,
+                maturity,
+                strike_price,
+                quote_token_address,
+                base_token_address,
+                option_type
+            }
+                .lpt_addr()
         );
 
         // 1) Get current underlying price
-        let underlying_price = get_current_price(self.quote_token_address, self.base_token_address);
-        underlying_price // TODO: Uncomment code below once the bug is resolved
-    // // 2) Get trade vol
-    // let (_, trade_volatility) = get_new_volatility(
-    //     self.volatility(),
-    //     option_size_cubit,
-    //     self.option_type,
-    //     self.option_side,
-    //     self.strike_price,
-    //     pool_volatility_adjustment_speed
-    // );
+        let underlying_price = get_current_price(quote_token_address, base_token_address);
 
-    // // 3) Get TTM
-    // let time_till_maturity = get_time_till_maturity(self.maturity);
+        // 2) Get trade vol
+        let (_, trade_volatility) = get_new_volatility(
+            Option_ {
+                option_side,
+                maturity,
+                strike_price,
+                quote_token_address,
+                base_token_address,
+                option_type
+            }
+                .volatility(),
+            option_size_cubit,
+            option_type,
+            option_side,
+            strike_price,
+            pool_volatility_adjustment_speed
+        );
 
-    // // 4) Get Risk free rate
-    // let risk_free_rate_annualized = FixedTrait::from_felt(RISK_FREE_RATE);
+        // 3) Get TTM
+        let time_till_maturity = get_time_till_maturity(maturity);
 
-    // // 5) Get premia
-    // let hundred = FixedTrait::from_unscaled_felt(100);
-    // let sigma = trade_volatility / hundred;
+        // 4) Get Risk free rate
+        let risk_free_rate_annualized = FixedTrait::from_felt(RISK_FREE_RATE);
 
-    // let (call_premia, put_premia, is_usable) = black_scholes(
-    //     sigma,
-    //     time_till_maturity,
-    //     self.strike_price,
-    //     underlying_price,
-    //     risk_free_rate_annualized,
-    //     false
-    // );
+        // 5) Get premia
+        let hundred = FixedTrait::from_unscaled_felt(100);
+        let sigma = trade_volatility / hundred;
 
-    // call_premia.assert_nn('GPBF - call_premia < 0');
-    // put_premia.assert_nn('GPBF - put_premia < 0');
+        let (call_premia, put_premia, is_usable) = black_scholes(
+            sigma,
+            time_till_maturity,
+            strike_price,
+            underlying_price,
+            risk_free_rate_annualized,
+            false
+        );
 
-    // let premia = select_and_adjust_premia(
-    //     call_premia, put_premia, self.option_type, underlying_price
-    // );
+        call_premia.assert_nn('GPBF - call_premia < 0');
+        put_premia.assert_nn('GPBF - put_premia < 0');
 
-    // let total_premia_before_fees = premia * option_size_cubit;
+        let premia = select_and_adjust_premia(
+            call_premia, put_premia, option_type, underlying_price
+        );
 
-    // premia.assert_nn('GPBF - premia < 0');
-    // total_premia_before_fees.assert_nn('GPBF - premia_before_fees < 0');
+        let total_premia_before_fees = premia * option_size_cubit;
 
-    // total_premia_before_fees
+        premia.assert_nn('GPBF - premia < 0');
+        total_premia_before_fees.assert_nn('GPBF - premia_before_fees < 0');
+
+        total_premia_before_fees
     }
 
 
     fn premia_with_fees(self: Option_, position_size: Int) -> Fixed {
-        let total_premia_before_fees = self.premia_before_fees(position_size, );
+        let total_premia_before_fees = self.premia_before_fees(position_size,);
         total_premia_before_fees.assert_nn('GPWF - total premia < 0');
 
         let total_fees = get_fees(total_premia_before_fees);
@@ -199,7 +221,7 @@ impl Option_Impl of Option_Trait {
         let stop_trading_by = self.maturity - STOP_TRADING_BEFORE_MATURITY_SECONDS;
         assert(current_block_time <= stop_trading_by, 'GVoP - Wait till maturity');
 
-        let total_premia_before_fees = self.premia_before_fees(position_size, );
+        let total_premia_before_fees = self.premia_before_fees(position_size,);
 
         // Get fees and total premia
         let total_fees = get_fees(total_premia_before_fees);

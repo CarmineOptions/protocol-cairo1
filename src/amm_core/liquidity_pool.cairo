@@ -178,11 +178,9 @@ mod LiquidityPool {
         max_lpool_bal: u256
     ) {
         // TODO: Proxy.assrt_only_admin()
-
         assert_option_type_exists(option_type.into(), 'Unknown option type');
 
         fail_if_existing_pool_definition_from_lptoken_address(lptoken_address);
-
         // Check that base/quote token even exists - use total supply for now I guess
 
         let supply_base = IERC20Dispatcher { contract_address: base_token_address }.totalSupply();
@@ -197,7 +195,7 @@ mod LiquidityPool {
             quote_token_address, base_token_address, option_type, lptoken_address
         );
 
-        let pool = Pool { quote_token_address, base_token_address, option_type,  };
+        let pool = Pool { quote_token_address, base_token_address, option_type, };
         set_pool_definition_from_lptoken_address(lptoken_address, pool);
 
         if option_type == OPTION_CALL {
@@ -264,9 +262,8 @@ mod LiquidityPool {
 
         IERC20Dispatcher { contract_address: lptoken_address }.mint(caller_addr, mint_amount);
 
-        IERC20Dispatcher {
-            contract_address: pooled_token_address
-        }.transferFrom(caller_addr, own_addr, amount);
+        IERC20Dispatcher { contract_address: pooled_token_address }
+            .transferFrom(caller_addr, own_addr, amount);
     // TODO: reentrancyGuard.end()
     }
 
@@ -315,9 +312,8 @@ mod LiquidityPool {
 
         set_lpool_balance(lptoken_address, new_balance);
 
-        IERC20Dispatcher {
-            contract_address: pooled_token_address
-        }.transfer(caller_addr, underlying_amount);
+        IERC20Dispatcher { contract_address: pooled_token_address }
+            .transfer(caller_addr, underlying_amount);
 
         IERC20Dispatcher { contract_address: lptoken_address }.burn(caller_addr, lp_token_amount);
     // TODO: ReentrancyGuard.end();
@@ -407,7 +403,7 @@ mod LiquidityPool {
             }
         );
 
-        let option = get_option_info(lptoken_address, option_side, strike_price, maturity, );
+        let option = get_option_info(lptoken_address, option_side, strike_price, maturity,);
         let option_size = get_option_position(lptoken_address, option_side, maturity, strike_price);
 
         if option_size == 0 {

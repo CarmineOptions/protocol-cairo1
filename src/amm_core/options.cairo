@@ -69,15 +69,12 @@ mod Options {
         );
         assert(contract_address_to_felt252(opt_address) == 0, 'OPT has already been added');
 
-        let contr_opt_type = IOptionTokenDispatcher {
-            contract_address: option_token_address_
-        }.option_type();
-        let contr_strike = IOptionTokenDispatcher {
-            contract_address: option_token_address_
-        }.strike_price();
-        let contr_maturity = IOptionTokenDispatcher {
-            contract_address: option_token_address_
-        }.maturity();
+        let contr_opt_type = IOptionTokenDispatcher { contract_address: option_token_address_ }
+            .option_type();
+        let contr_strike = IOptionTokenDispatcher { contract_address: option_token_address_ }
+            .strike_price();
+        let contr_maturity = IOptionTokenDispatcher { contract_address: option_token_address_ }
+            .maturity();
         let contr_side = IOptionTokenDispatcher { contract_address: option_token_address_ }.side();
 
         assert(contr_opt_type == option_type, 'Option type input doesnt match');
@@ -251,14 +248,12 @@ mod Options {
         set_pool_locked_capital(lptoken_address, new_locked_capital);
 
         // Mint tokens
-        IOptionTokenDispatcher {
-            contract_address: option_token_address
-        }.mint(user_address, option_size.into());
+        IOptionTokenDispatcher { contract_address: option_token_address }
+            .mint(user_address, option_size.into());
 
         // Transfer premia 
-        let transfer_res = IERC20Dispatcher {
-            contract_address: currency_address
-        }.transferFrom(user_address, curr_contract_address, premia_including_fees_u256);
+        let transfer_res = IERC20Dispatcher { contract_address: currency_address }
+            .transferFrom(user_address, curr_contract_address, premia_including_fees_u256);
 
         assert(transfer_res, 'MOTL: unable to transfer premia');
     }
@@ -346,14 +341,12 @@ mod Options {
         set_pool_locked_capital(lptoken_address, new_locked_balance);
 
         // Mint tokens
-        IOptionTokenDispatcher {
-            contract_address: option_token_address
-        }.mint(user_address, option_size.into());
+        IOptionTokenDispatcher { contract_address: option_token_address }
+            .mint(user_address, option_size.into());
 
         // Move (option_size minus (premia minus fees)) from user to the pool
-        let transfer_res = IERC20Dispatcher {
-            contract_address: currency_address
-        }.transferFrom(user_address, curr_contract_address, to_be_paid_by_user);
+        let transfer_res = IERC20Dispatcher { contract_address: currency_address }
+            .transferFrom(user_address, curr_contract_address, to_be_paid_by_user);
 
         assert(transfer_res, 'MOTS: unable to transfer premia');
     }
@@ -494,7 +487,7 @@ mod Options {
             let pool_short_pos_u256: u256 = pool_short_position.into();
             let option_size_u256: u256 = option_size.into();
 
-            let size_to_be_unlocked_in_base_u256 = min(pool_short_pos_u256, option_size_u256, );
+            let size_to_be_unlocked_in_base_u256 = min(pool_short_pos_u256, option_size_u256,);
 
             let strike_price_u256 = toU256_balance(strike_price, quote_address);
 
@@ -533,13 +526,11 @@ mod Options {
         }
 
         // Burn tokens
-        IOptionTokenDispatcher {
-            contract_address: option_token_address
-        }.burn(user_address, option_size_u256);
+        IOptionTokenDispatcher { contract_address: option_token_address }
+            .burn(user_address, option_size_u256);
 
-        let transfer_res = IERC20Dispatcher {
-            contract_address: currency_address
-        }.transfer(user_address, premia_including_fees_u256, );
+        let transfer_res = IERC20Dispatcher { contract_address: currency_address }
+            .transfer(user_address, premia_including_fees_u256,);
         assert(transfer_res, 'BOTL: unable to transfer premia');
     }
 
@@ -679,13 +670,11 @@ mod Options {
             );
 
             // Burn tokens
-            IOptionTokenDispatcher {
-                contract_address: option_token_address
-            }.burn(user_address, option_size_u256);
+            IOptionTokenDispatcher { contract_address: option_token_address }
+                .burn(user_address, option_size_u256);
 
-            let transfer_res = IERC20Dispatcher {
-                contract_address: currency_address
-            }.transfer(user_address, total_user_payment, );
+            let transfer_res = IERC20Dispatcher { contract_address: currency_address }
+                .transfer(user_address, total_user_payment,);
 
             assert(transfer_res, 'BOTL: unable to transfer premia');
         }
@@ -709,9 +698,8 @@ mod Options {
             lptoken_address, option_side, maturity, strike_price
         );
         let currency_address = get_underlying_token_address(lptoken_address);
-        let base_token_address = IOptionTokenDispatcher {
-            contract_address: option_token_address
-        }.base_token_address();
+        let base_token_address = IOptionTokenDispatcher { contract_address: option_token_address }
+            .base_token_address();
 
         // The option (underlying asset x maturity x option type x strike) has to be "expired"
         // (settled) on the pool's side in terms of locked capital. Ie check that SHORT position
@@ -721,7 +709,7 @@ mod Options {
         );
 
         if (current_pool_position != 0) {
-            expire_option_token_for_pool(lptoken_address, option_side, strike_price, maturity, );
+            expire_option_token_for_pool(lptoken_address, option_side, strike_price, maturity,);
         }
         // Check that the pool's position was expired correctly
         let current_pool_position_2 =
@@ -732,9 +720,8 @@ mod Options {
 
         // Make sure that user owns the option tokens
         let user_address = get_caller_address();
-        let user_tokens_owned = IOptionTokenDispatcher {
-            contract_address: option_token_address
-        }.balance_of(user_address);
+        let user_tokens_owned = IOptionTokenDispatcher { contract_address: option_token_address }
+            .balance_of(user_address);
         assert(user_tokens_owned > 0, 'EOT - User has no tokens');
 
         let current_block_time = get_block_timestamp();
@@ -756,9 +743,8 @@ mod Options {
 
         assert(option_size_u256 <= user_tokens_owned, 'EOT - opt size > owned');
 
-        IOptionTokenDispatcher {
-            contract_address: option_token_address
-        }.burn(user_address, option_size_u256);
+        IOptionTokenDispatcher { contract_address: option_token_address }
+            .burn(user_address, option_size_u256);
 
         if (option_side == TRADE_SIDE_LONG) {
             // User is long
@@ -767,9 +753,8 @@ mod Options {
             // We assume pool is able to "expire" it's functions pretty quickly so the updates
             // of storage_vars has already happened.
 
-            let transfer_res = IERC20Dispatcher {
-                contract_address: currency_address
-            }.transfer(user_address, long_value_u256, );
+            let transfer_res = IERC20Dispatcher { contract_address: currency_address }
+                .transfer(user_address, long_value_u256,);
 
             assert(transfer_res, 'EOT: unable to transfer funds');
             emit_event(
@@ -785,9 +770,8 @@ mod Options {
             // User locked in capital (no locking happened from pool - no locked capital and similar
             // storage vars were updated).
 
-            let transfer_res = IERC20Dispatcher {
-                contract_address: currency_address
-            }.transfer(user_address, short_value_u256, );
+            let transfer_res = IERC20Dispatcher { contract_address: currency_address }
+                .transfer(user_address, short_value_u256,);
 
             assert(transfer_res, 'EOT: unable to transfer funds');
 

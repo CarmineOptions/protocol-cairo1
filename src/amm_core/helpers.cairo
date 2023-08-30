@@ -195,7 +195,7 @@ fn _fromU256_balance(x: u256, decimals: u128) -> Fixed {
 }
 
 fn split_option_locked_capital(
-    option_type: OptionType, option_size: Fixed, strike_price: Fixed, terminal_price: Fixed, 
+    option_type: OptionType, option_size: Fixed, strike_price: Fixed, terminal_price: Fixed,
 ) -> (Fixed, Fixed) {
     assert_option_type_exists(option_type.into(), 'SOLC - unknown option type');
 

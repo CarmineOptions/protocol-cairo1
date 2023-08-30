@@ -11,6 +11,7 @@ trait IERC20<TContractState> {
     fn symbol(self: @TContractState) -> felt252;
     fn decimals(self: @TContractState) -> u8;
     fn totalSupply(self: @TContractState) -> u256;
+    fn total_supply(self: @TContractState) -> u256;
     fn mint(ref self: TContractState, to: ContractAddress, amount: u256);
     fn burn(ref self: TContractState, account: ContractAddress, amount: u256);
     fn balanceOf(self: @TContractState, account: ContractAddress) -> u256;

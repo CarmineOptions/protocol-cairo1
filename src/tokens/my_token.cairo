@@ -133,11 +133,9 @@ mod MyToken {
         fn totalSupply(self: @ContractState) -> u256 {
             MyTokenImpl::total_supply(self)
         }
-
         fn balanceOf(self: @ContractState, account: ContractAddress) -> u256 {
             MyTokenImpl::balance_of(self, account)
         }
-
         fn transferFrom(
             ref self: ContractState,
             sender: ContractAddress,

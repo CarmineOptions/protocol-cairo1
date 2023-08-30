@@ -327,7 +327,7 @@ fn test_black_scholes() {
 }
 
 #[test]
-#[should_panic(expected: ('STD_NC - x > 8', ))]
+#[should_panic(expected: ('STD_NC - x > 8',))]
 fn test_black_scholes_extreme() {
     let (call_premia_1, put_premia_1, is_usable_1) = OptionPricing::black_scholes(
         FixedTrait::from_felt(184467440737095520), // 0.01

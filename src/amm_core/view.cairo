@@ -64,7 +64,7 @@ mod View {
             }
 
             let total_premia = opt.premia_with_fees(1, // TODO: Resolve this type
-             );
+            );
 
             arr.append(OptionWithPremia { option: opt, premia: total_premia });
         };
@@ -93,9 +93,8 @@ mod View {
                     break;
                 }
 
-                let pos_size = IERC20Dispatcher {
-                    contract_address: option.opt_address()
-                }.balanceOf(user_address);
+                let pos_size = IERC20Dispatcher { contract_address: option.opt_address() }
+                    .balanceOf(user_address);
 
                 if pos_size == 0 {
                     opt_idx += 1;

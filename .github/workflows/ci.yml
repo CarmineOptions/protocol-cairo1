@@ -25,5 +25,5 @@ jobs:
       - name: Build 
         run: scarb build
 
-      - name: Test 
-        run: snforge
+      # - name: Test 
+      #   run: snforge

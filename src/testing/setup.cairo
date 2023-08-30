@@ -16,8 +16,8 @@ use carmine_protocol::tokens::option_token::{
 };
 use carmine_protocol::tokens::lptoken::{LPToken, ILPTokenDispatcher, ILPTokenDispatcherTrait};
 
-use openzeppelin::token::erc20::ERC20;
-use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
+// use openzeppelin::token::erc20::ERC20;
+// use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
 use cubit::f128::types::{Fixed, FixedTrait};
 
 #[derive(Drop, Copy)]
@@ -51,25 +51,15 @@ struct Dispatchers {
 
 fn get_dispatchers(ctx: Ctx) -> Dispatchers {
     Dispatchers {
-        amm: IAMMDispatcher {
-            contract_address: ctx.amm_address
-            }, eth: IMyTokenDispatcher {
-            contract_address: ctx.eth_address
-            }, usdc: IMyTokenDispatcher {
-            contract_address: ctx.usdc_address
-            }, lptc: ILPTokenDispatcher {
-            contract_address: ctx.call_lpt_address
-            }, lptp: ILPTokenDispatcher {
-            contract_address: ctx.put_lpt_address
-            }, lc: IOptionTokenDispatcher {
-            contract_address: ctx.long_call_address
-            }, sc: IOptionTokenDispatcher {
-            contract_address: ctx.short_call_address
-            }, lp: IOptionTokenDispatcher {
-            contract_address: ctx.long_put_address
-            }, sp: IOptionTokenDispatcher {
-            contract_address: ctx.short_put_address
-        },
+        amm: IAMMDispatcher { contract_address: ctx.amm_address },
+        eth: IMyTokenDispatcher { contract_address: ctx.eth_address },
+        usdc: IMyTokenDispatcher { contract_address: ctx.usdc_address },
+        lptc: ILPTokenDispatcher { contract_address: ctx.call_lpt_address },
+        lptp: ILPTokenDispatcher { contract_address: ctx.put_lpt_address },
+        lc: IOptionTokenDispatcher { contract_address: ctx.long_call_address },
+        sc: IOptionTokenDispatcher { contract_address: ctx.short_call_address },
+        lp: IOptionTokenDispatcher { contract_address: ctx.long_put_address },
+        sp: IOptionTokenDispatcher { contract_address: ctx.short_put_address },
     }
 }
 
@@ -222,7 +212,6 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
         long_put_address: long_put_address,
         short_put_address: short_put_address,
     };
-
     let disp = get_dispatchers(ctx);
 
     let call_vol_adjspd = FixedTrait::from_unscaled_felt(5);

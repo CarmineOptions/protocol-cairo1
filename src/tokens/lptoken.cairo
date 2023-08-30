@@ -62,7 +62,7 @@ mod LPToken {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, name: felt252, symbol: felt252, ) {
+    fn constructor(ref self: ContractState, name: felt252, symbol: felt252,) {
         self.initializer(name, symbol);
     // Todo: add proxy, ownable, add upgrades
     }
@@ -134,25 +134,23 @@ mod LPToken {
         }
     }
 
-    // #[external(v0)]
-    // impl ERC20CamelOnlyImpl of IERC20CamelOnly<ContractState> {
-    //     fn totalSupply(self: @ContractState) -> u256 {
-    //         ERC20Impl::total_supply(self)
-    //     }
-
-    //     fn balanceOf(self: @ContractState, account: ContractAddress) -> u256 {
-    //         ERC20Impl::balance_of(self, account)
-    //     }
-
-    //     fn transferFrom(
-    //         ref self: ContractState,
-    //         sender: ContractAddress,
-    //         recipient: ContractAddress,
-    //         amount: u256
-    //     ) -> bool {
-    //         ERC20Impl::transfer_from(ref self, sender, recipient, amount)
-    //     }
-    // }
+    #[external(v0)]
+    impl ERC20CamelOnlyImpl of IERC20CamelOnly<ContractState> {
+        fn totalSupply(self: @ContractState) -> u256 {
+            LPTokenImpl::total_supply(self)
+        }
+        fn balanceOf(self: @ContractState, account: ContractAddress) -> u256 {
+            LPTokenImpl::balance_of(self, account)
+        }
+        fn transferFrom(
+            ref self: ContractState,
+            sender: ContractAddress,
+            recipient: ContractAddress,
+            amount: u256
+        ) -> bool {
+            LPTokenImpl::transfer_from(ref self, sender, recipient, amount)
+        }
+    }
 
     #[external(v0)]
     fn increase_allowance(

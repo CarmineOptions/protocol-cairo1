@@ -31,9 +31,9 @@ trait IOptionToken<TState> {
 #[starknet::contract]
 mod OptionToken {
     use integer::BoundedInt;
-    use openzeppelin::token::erc20::interface::IERC20;
+    // use openzeppelin::token::erc20::interface::IERC20;
     use super::IOptionToken;
-    use openzeppelin::token::erc20::interface::IERC20CamelOnly;
+    // use openzeppelin::token::erc20::interface::IERC20CamelOnly;
     use starknet::ContractAddress;
     use starknet::get_caller_address;
     use zeroable::Zeroable;
@@ -192,25 +192,25 @@ mod OptionToken {
         }
     }
 
-    #[external(v0)]
-    impl ERC20CamelOnlyImpl of IERC20CamelOnly<ContractState> {
-        fn totalSupply(self: @ContractState) -> u256 {
-            OptionTokenImpl::total_supply(self)
-        }
+    // #[external(v0)]
+    // impl ERC20CamelOnlyImpl of IERC20CamelOnly<ContractState> {
+    //     fn totalSupply(self: @ContractState) -> u256 {
+    //         OptionTokenImpl::total_supply(self)
+    //     }
 
-        fn balanceOf(self: @ContractState, account: ContractAddress) -> u256 {
-            OptionTokenImpl::balance_of(self, account)
-        }
+    //     fn balanceOf(self: @ContractState, account: ContractAddress) -> u256 {
+    //         OptionTokenImpl::balance_of(self, account)
+    //     }
 
-        fn transferFrom(
-            ref self: ContractState,
-            sender: ContractAddress,
-            recipient: ContractAddress,
-            amount: u256
-        ) -> bool {
-            OptionTokenImpl::transfer_from(ref self, sender, recipient, amount)
-        }
-    }
+    //     fn transferFrom(
+    //         ref self: ContractState,
+    //         sender: ContractAddress,
+    //         recipient: ContractAddress,
+    //         amount: u256
+    //     ) -> bool {
+    //         OptionTokenImpl::transfer_from(ref self, sender, recipient, amount)
+    //     }
+    // }
 
     #[external(v0)]
     fn increase_allowance(
