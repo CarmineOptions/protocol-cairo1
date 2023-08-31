@@ -8,7 +8,8 @@ use debug::PrintTrait;
 use traits::{Into, TryInto};
 
 use carmine_protocol::amm_core::amm::{AMM, IAMMDispatcher, IAMMDispatcherTrait};
-use snforge_std::{declare, PreparedContract, deploy, start_prank, stop_prank};
+// use snforge_std::{declare, PreparedContract, deploy, start_prank, stop_prank};
+use snforge_std::{declare, ContractClassTrait, start_prank, stop_prank};
 
 use carmine_protocol::tokens::my_token::{MyToken, IMyTokenDispatcher, IMyTokenDispatcherTrait};
 use carmine_protocol::tokens::option_token::{
@@ -68,33 +69,25 @@ fn get_dispatchers(ctx: Ctx) -> Dispatchers {
 fn deploy_setup() -> (Ctx, Dispatchers) {
     let admin_address = 123456;
 
-    let mytoken_hash = declare('MyToken');
-    let lptoken_hash = declare('LPToken');
-    let amm_hash = declare('AMM');
-    let option_token_hash = declare('OptionToken');
+    let mytoken_contract = declare('MyToken');
+    let lptoken_contract = declare('LPToken');
+    let amm_contract = declare('AMM');
+    let option_token_contract = declare('OptionToken');
 
-    let amm_prepared = PreparedContract {
-        class_hash: amm_hash, constructor_calldata: @ArrayTrait::new()
-    };
-    let amm_address = deploy(amm_prepared).unwrap();
+    let amm_address = amm_contract.deploy(@ArrayTrait::new()).unwrap();
 
     // Deploy Call ILPT
     let mut call_lpt_data = ArrayTrait::new();
     call_lpt_data.append('CLPT'); // Name
     call_lpt_data.append('CallPool'); //Symbol
-    let call_lpt_prepared = PreparedContract {
-        class_hash: lptoken_hash, constructor_calldata: @call_lpt_data
-    };
-    let call_lpt_address = deploy(call_lpt_prepared).unwrap();
+
+    let call_lpt_address = lptoken_contract.deploy(@call_lpt_data).unwrap();
 
     // // Deploy Put ILPT
     let mut put_lpt_data = ArrayTrait::new();
     put_lpt_data.append('PLPT'); // Name
     put_lpt_data.append('PutPool'); // Symbol
-    let put_lpt_prepared = PreparedContract {
-        class_hash: lptoken_hash, constructor_calldata: @put_lpt_data
-    };
-    let put_lpt_address = deploy(put_lpt_prepared).unwrap();
+    let put_lpt_address = lptoken_contract.deploy(@put_lpt_data).unwrap();
 
     // // Deploy ETH
     let mut eth_constr_data = ArrayTrait::new();
@@ -105,10 +98,7 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     eth_constr_data.append(0); // Initial supply, high
     eth_constr_data.append(admin_address); // Recipient
 
-    let eth_prepared = PreparedContract {
-        class_hash: mytoken_hash, constructor_calldata: @eth_constr_data
-    };
-    let eth_address = deploy(eth_prepared).unwrap();
+    let eth_address = mytoken_contract.deploy(@eth_constr_data).unwrap();
 
     // // Deploy USDC
     let mut usdc_constr_data = ArrayTrait::new();
@@ -119,10 +109,7 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     usdc_constr_data.append(0); // Initial supply, high
     usdc_constr_data.append(admin_address); // Recipient
 
-    let usdc_prepared = PreparedContract {
-        class_hash: mytoken_hash, constructor_calldata: @usdc_constr_data
-    };
-    let usdc_address = deploy(usdc_prepared).unwrap();
+    let usdc_address = mytoken_contract.deploy(@usdc_constr_data).unwrap();
 
     // // Deploy Option Tokens
 
@@ -145,10 +132,7 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     long_call_data.append(expiry.into());
     long_call_data.append(LONG);
 
-    let long_call_prep = PreparedContract {
-        class_hash: option_token_hash, constructor_calldata: @long_call_data
-    };
-    let long_call_address = deploy(long_call_prep).unwrap();
+    let long_call_address = option_token_contract.deploy(@long_call_data).unwrap();
 
     // Short Call
     let mut short_call_data = ArrayTrait::new();
@@ -161,10 +145,7 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     short_call_data.append(expiry.into());
     short_call_data.append(SHORT);
 
-    let short_call_prep = PreparedContract {
-        class_hash: option_token_hash, constructor_calldata: @short_call_data
-    };
-    let short_call_address = deploy(short_call_prep).unwrap();
+    let short_call_address = option_token_contract.deploy(@short_call_data).unwrap();
 
     // Long put
     let mut long_put_data = ArrayTrait::new();
@@ -177,10 +158,7 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     long_put_data.append(expiry.into());
     long_put_data.append(LONG);
 
-    let long_put_prep = PreparedContract {
-        class_hash: option_token_hash, constructor_calldata: @long_put_data
-    };
-    let long_put_address = deploy(long_put_prep).unwrap();
+    let long_put_address = option_token_contract.deploy(@long_put_data).unwrap();
 
     // Short put
     let mut short_put_data = ArrayTrait::new();
@@ -193,10 +171,7 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     short_put_data.append(expiry.into());
     short_put_data.append(SHORT);
 
-    let short_put_prep = PreparedContract {
-        class_hash: option_token_hash, constructor_calldata: @short_put_data
-    };
-    let short_put_address = deploy(short_put_prep).unwrap();
+    let short_put_address = option_token_contract.deploy(@short_put_data).unwrap();
 
     let ctx = Ctx {
         admin_address: admin_address.try_into().unwrap(),

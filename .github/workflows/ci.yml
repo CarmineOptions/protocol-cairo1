@@ -4,7 +4,7 @@ on: push
 
 env:
   SCARB_VERSION: 0.7.0
-  FOUNDRY_VERSION: 0.4.1
+  FOUNDRY_VERSION: 0.5.0
 
 jobs:
   build:
@@ -25,5 +25,5 @@ jobs:
       - name: Build 
         run: scarb build
 
-      # - name: Test 
-      #   run: snforge
+      - name: Test 
+        run: snforge

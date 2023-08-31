@@ -1,2 +1,6 @@
 [crate_roots]
-carmine_protocol = "src"
+carmine_protocol = "/home/chepe/Desktop/carmine/protocol-cairo1/src"
+# openzeppelin = "/home/chepe/.cache/scarb/registry/git/checkouts/cairo-contracts-9cboa8jg3jldq/05429e4/src"
+# snforge_std = "/home/chepe/.cache/scarb/registry/git/checkouts/starknet-foundry-v6206fshfutuo/49ae9dc/snforge_std/src"
+# cubit = "/home/chepe/.cache/scarb/registry/git/checkouts/cubit-qrkns8ee8om50/50d6b10/src"
+

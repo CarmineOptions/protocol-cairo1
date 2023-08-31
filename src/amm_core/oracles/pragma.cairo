@@ -15,8 +15,6 @@ mod Pragma {
 
     use carmine_protocol::amm_core::constants::{TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS,};
 
-    const PRAGMA_ORACLE_ADDRESS: felt252 =
-        0x0346c57f094d641ad94e43468628d8e9c574dcb2803ec372576ccc60a40be2c4;
     const PRAGMA_AGGREGATION_MODE: felt252 = 0; // 0 is default for median
 
     const PRAGMA_BTC_USD_KEY: felt252 = 18669995996566340;
@@ -57,23 +55,26 @@ mod Pragma {
 
     fn _get_ticker_key(
         quote_token_addr: ContractAddress, base_token_addr: ContractAddress
-    ) -> Option<felt252> {
+    ) -> felt252 {
         if base_token_addr == TOKEN_ETH_ADDRESS
             .try_into()
             .expect('Pragma/GTK - Failed to convert') {
             if quote_token_addr == TOKEN_USDC_ADDRESS
                 .try_into()
                 .expect('Pragma/GTK - Failed to convert') {
-                Option::Some(PRAGMA_ETH_USD_KEY)
+                PRAGMA_ETH_USD_KEY
             } else {
-                Option::None(())
+                0
             }
         } else {
-            Option::None(())
+            0
         }
     }
 
+    use debug::PrintTrait;
 
+    const PRAGMA_ORACLE_ADDRESS: felt252 =
+        0x0346c57f094d641ad94e43468628d8e9c574dcb2803ec372576ccc60a40be2c4;
     fn _get_pragma_median_price(key: felt252) -> Fixed {
         let (value, decimals, last_updated_timestamp, num_sources_aggregated) =
             IPragmaOracleDispatcher {
@@ -97,8 +98,8 @@ mod Pragma {
     fn get_pragma_median_price(
         quote_token_addr: ContractAddress, base_token_addr: ContractAddress,
     ) -> Fixed {
-        let key = _get_ticker_key(quote_token_addr, base_token_addr)
-            .expect('Pragma/GPMP - Cant get spot key');
+        let key = _get_ticker_key(quote_token_addr, base_token_addr);
+        // .expect('Pragma/GPMP - Cant get spot key');
         let res = _get_pragma_median_price(key);
         account_for_stablecoin_divergence(res, quote_token_addr, 0)
     }
@@ -128,8 +129,8 @@ mod Pragma {
     fn get_pragma_terminal_price(
         quote_token_addr: ContractAddress, base_token_addr: ContractAddress, maturity: Timestamp
     ) -> Fixed {
-        let key = _get_ticker_key(quote_token_addr, base_token_addr)
-            .expect('Pragma/GPMP - Cant get spot key');
+        let key = _get_ticker_key(quote_token_addr, base_token_addr);
+        // .expect('Pragma/GPMP - Cant get spot key');
         let res = _get_pragma_terminal_price(key, maturity);
         account_for_stablecoin_divergence(res, quote_token_addr, maturity)
     }

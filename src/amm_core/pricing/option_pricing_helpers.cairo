@@ -135,6 +135,7 @@ fn add_premia_fees(side: OptionSide, total_premia_before_fees: Fixed, total_fees
 
 // Tests --------------------------------------------------------------------------------------------------------------
 
+// TODO: fix tests
 use debug::PrintTrait;
 use carmine_protocol::testing::test_utils::is_close;
 use array::ArrayTrait;
@@ -265,18 +266,15 @@ mod TestCon {
 }
 
 
-use snforge_std::{start_warp, stop_warp, declare, PreparedContract, deploy};
+use snforge_std::{start_warp, stop_warp, declare, ContractClassTrait};
 use result::Result;
 use result::ResultTrait;
 
 #[test]
 fn test_get_time_till_maturity() {
     // Deploy contract
-    let class_hash = declare('TestCon');
-    let prepared = PreparedContract {
-        class_hash: class_hash, constructor_calldata: @ArrayTrait::new()
-    };
-    let contract_address = deploy(prepared).unwrap();
+    let test_contract = declare('TestCon');
+    let contract_address = test_contract.deploy(@ArrayTrait::new()).unwrap();
 
     let dispatcher = ITestConDispatcher { contract_address };
 
