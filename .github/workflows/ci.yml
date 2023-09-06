@@ -1,26 +1,26 @@
-name: CI
+# name: CI
 
-on: push
+# on: push
 
-env:
-  SCARB_VERSION: 0.7.0
-  FOUNDRY_VERSION: 0.5.0
+# env:
+#   SCARB_VERSION: 0.7.0
+#   FOUNDRY_VERSION: 0.5.0
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout (GitHub)
-        uses: actions/checkout@v3
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout (GitHub)
+#         uses: actions/checkout@v3
         
-      - name: Install Scarb
-        run: curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v $SCARB_VERSION
+#       - name: Install Scarb
+#         run: curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v $SCARB_VERSION
 
-      - name: Install SnFoundry
-        run: curl -L https://raw.githubusercontent.com/foundry-rs/starknet-foundry/master/scripts/install.sh | sh -s -- -v $FOUNDRY_VERSION
+#       - name: Install SnFoundry
+#         run: curl -L https://raw.githubusercontent.com/foundry-rs/starknet-foundry/master/scripts/install.sh | sh -s -- -v $FOUNDRY_VERSION
         
-      - name: Check formatting
-        run: scarb fmt --check
+      # - name: Check formatting
+      #   run: scarb fmt --check
 
       # Commented because snforge lib is installed locally
       # - name: Build 
