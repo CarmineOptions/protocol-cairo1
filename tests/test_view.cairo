@@ -283,8 +283,46 @@ fn test_get_all_non_expired_options_with_premia() {
     assert(put_0.premia == FixedTrait::from_felt(1925988978824887131645), 'LP premia wrong');
     assert(put_1.premia == FixedTrait::from_felt(1793390599312856626529), 'SP premia wrong');
 }
+
+#[test]
+fn test_get_user_pool_infos() {
+    let (ctx, dsps) = deploy_setup();
+    
+    let mut pool_infos = dsps.amm.get_user_pool_infos(ctx.admin_address);
+
+    assert(pool_infos.len() == 2, 'too much pool info');
+
+    let cp = pool_infos.pop_front().unwrap(); // Call pool
+    let pp = pool_infos.pop_front().unwrap(); // Put pool
+
+    let five_tokens: u256 = 5000000000000000000; // with 18 decimals
+    let five_k_tokens: u256 = 5000000000; // with 6 decimals
+
+    // Call pool
+    assert(cp.pool_info.pool.option_type == 0, 'Call pool wrong type');
+    assert(cp.pool_info.pool.quote_token_address == ctx.usdc_address, 'Call pool wrong quote');
+    assert(cp.pool_info.pool.base_token_address == ctx.eth_address, 'Call pool wrong base');
+    assert(cp.pool_info.lptoken_address == ctx.call_lpt_address, 'Call pool wrong lpt addr');
+    assert(cp.pool_info.staked_capital == five_tokens, 'Call pool wrong staked');
+    assert(cp.pool_info.unlocked_capital == five_tokens, 'Call pool wrong unlo');
+    assert(cp.pool_info.value_of_pool_position == FixedTrait::ZERO(), 'Call pool wrong pool pos val');
+    assert(cp.value_of_user_stake == five_tokens, 'Call pool wrong user stake');
+    assert(cp.size_of_users_tokens == five_tokens, 'Call pool wrong user tokens');
+
+    // Put pool
+    assert(pp.pool_info.pool.option_type == 1, 'Put pool wrong type');
+    assert(pp.pool_info.pool.quote_token_address == ctx.usdc_address, 'Put pool wrong quote');
+    assert(pp.pool_info.pool.base_token_address == ctx.eth_address, 'Put pool wrong base');
+    assert(pp.pool_info.lptoken_address == ctx.put_lpt_address, 'Put pool wrong lpt addr');
+    assert(pp.pool_info.staked_capital == five_k_tokens, 'Put pool wrong staked');
+    assert(pp.pool_info.unlocked_capital == five_k_tokens, 'Put pool wrong unlo');
+    assert(pp.pool_info.value_of_pool_position == FixedTrait::ZERO(), 'Put pool wrong pool pos val');
+    assert(pp.value_of_user_stake == five_k_tokens, 'Put pool wrong user stake');
+    assert(pp.size_of_users_tokens == five_k_tokens, 'Put pool wrong user tokens');
+
+}
+
 // TODO: Test for these adter trade functions have been tested
 // get_option_with_position_of_user 
-// get_user_pool_infos
 
 
