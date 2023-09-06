@@ -14,7 +14,6 @@ fn get_fees(value: Fixed) -> Fixed {
     let hundred = FixedTrait::new_unscaled(100_u128, false);
     let fee_percent = FixedTrait::new_unscaled(FEE_PROPORTION_PERCENT, false);
     let res = fee_percent / hundred * value;
-    // value.mag.print();
     return res;
 }
 

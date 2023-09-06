@@ -66,6 +66,7 @@ fn assert_option_type_exists(option_type: felt252, msg: felt252) {
     assert((option_type - OPTION_CALL.into()) * (option_type - OPTION_PUT.into()) == 0, msg);
 }
 
+// TODO: This function can be deleted, addresses have .is_zero() method (so use sth like assert(!addr.is_zero(), ''))
 fn assert_address_not_zero(addr: ContractAddress, msg: felt252) {
     assert(contract_address_to_felt252(addr) != 0, msg);
 }

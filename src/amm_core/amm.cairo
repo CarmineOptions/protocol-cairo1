@@ -5,6 +5,8 @@ use carmine_protocol::types::option_::{Option_, OptionWithPremia, OptionWithUser
 use carmine_protocol::types::pool::{PoolInfo, UserPoolInfo, Pool};
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
+use starknet::ClassHash;
+
 #[starknet::interface]
 trait IAMM<TContractState> {
     fn trade_open(
@@ -191,10 +193,21 @@ trait IAMM<TContractState> {
         risk_free_rate_annualized: Fixed,
         is_for_trade: bool, // bool
     ) -> (Fixed, Fixed, bool);
-// fn empiric_median_price(self: @TContractState, key: felt252) -> Fixed;
-// TODO: Functions below
-// fn initializer(ref self: TContractState, proxy_admin: ContractAddress);
-// fn upgrade(ref self: TContractState, new_implementation: felt252);
+    fn get_current_price(
+        self: @TContractState,
+        quote_token_address: ContractAddress,
+        base_token_address: ContractAddress
+    ) -> Fixed;
+    fn get_terminal_price(
+        self: @TContractState,
+        quote_token_address: ContractAddress,
+        base_token_address: ContractAddress,
+        maturity: u64
+    ) -> Fixed;
+
+    // TODO: Functions below
+    // fn initializer(ref self: TContractState, proxy_admin: ContractAddress);
+    fn upgrade(ref self: TContractState, new_implementation: ClassHash); // TODO: this is just temp
 // fn setAdmin(ref self: TContractState, address: felt252);
 // fn getImplementationHash(self: @TContractState, ) -> felt252;
 }
@@ -327,9 +340,12 @@ mod AMM {
     use carmine_protocol::amm_core::options::Options;
     use carmine_protocol::amm_core::view::View;
     use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing;
+    use carmine_protocol::amm_core::oracles::agg::OracleAgg;
+    use carmine_protocol::amm_core::oracles::pragma::Pragma;
 
     use carmine_protocol::types::option_::{OptionWithPremia, OptionWithUsersPosition};
     use carmine_protocol::types::pool::{PoolInfo, UserPoolInfo};
+    use starknet::ClassHash;
 
     #[external(v0)]
     impl Amm of super::IAMM<ContractState> {
@@ -709,6 +725,29 @@ mod AMM {
                 risk_free_rate_annualized,
                 is_for_trade
             )
+        }
+        fn get_current_price(
+            self: @ContractState,
+            quote_token_address: ContractAddress,
+            base_token_address: ContractAddress
+        ) -> Fixed {
+            OracleAgg::get_current_price(quote_token_address, base_token_address)
+        }
+
+        fn get_terminal_price(
+            self: @ContractState,
+            quote_token_address: ContractAddress,
+            base_token_address: ContractAddress,
+            maturity: u64
+        ) -> Fixed {
+            OracleAgg::get_terminal_price(quote_token_address, base_token_address, maturity)
+        }
+
+
+        // TODO: This function is like this only for internal testing!!!!
+        fn upgrade(ref self: ContractState, new_implementation: ClassHash) {
+            assert(!new_implementation.is_zero(), 'Class hash cannot be zero');
+            starknet::replace_class_syscall(new_implementation).unwrap();
         }
     }
 }

@@ -97,10 +97,9 @@ fn get_option_size_in_pool_currency(
 fn get_time_till_maturity(maturity: Timestamp) -> Fixed {
     let curr_time = get_block_timestamp();
     let curr_time = FixedTrait::new_unscaled(curr_time.into(), false);
+    let maturity = FixedTrait::new_unscaled(maturity.into(), false);
 
-    let maturity = FixedTrait::new(maturity.into(), false);
-
-    let secs_in_year = FixedTrait::from_felt(60 * 60 * 24 * 365);
+    let secs_in_year = FixedTrait::from_unscaled_felt(60 * 60 * 24 * 365);
 
     assert(maturity >= curr_time, 'GTTM - secs_left < 0');
     let secs_left = maturity - curr_time;

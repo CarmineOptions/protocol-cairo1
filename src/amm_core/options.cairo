@@ -39,7 +39,7 @@ mod Options {
         get_pool_volatility_adjustment_speed, get_max_option_size_percent_of_voladjspd,
         get_underlying_token_address, get_pool_definition_from_lptoken_address, get_lpool_balance,
         set_lpool_balance, get_option_position, set_option_position, get_pool_locked_capital,
-        set_pool_locked_capital, get_unlocked_capital,
+        set_pool_locked_capital, get_unlocked_capital, set_option_token_address
     };
 
     use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
@@ -94,6 +94,10 @@ mod Options {
         };
 
         append_to_available_options(option_, lptoken_address);
+
+        set_option_token_address(
+            lptoken_address, option_side, maturity, strike_price, option_token_address_
+        );
     }
 
     fn mint_option_token(

@@ -15,6 +15,14 @@ mod Pragma {
 
     use carmine_protocol::amm_core::constants::{TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS,};
 
+    // Mainnet
+    // const PRAGMA_ORACLE_ADDRESS: felt252 =
+    //     0x0346c57f094d641ad94e43468628d8e9c574dcb2803ec372576ccc60a40be2c4;
+
+    // Testnet TODO: Check before mainnet launch
+    const PRAGMA_ORACLE_ADDRESS: felt252 =
+        0x446812bac98c08190dee8967180f4e3cdcd1db9373ca269904acb17f67f7093;
+
     const PRAGMA_AGGREGATION_MODE: felt252 = 0; // 0 is default for median
 
     const PRAGMA_BTC_USD_KEY: felt252 = 18669995996566340;
@@ -73,8 +81,6 @@ mod Pragma {
 
     use debug::PrintTrait;
 
-    const PRAGMA_ORACLE_ADDRESS: felt252 =
-        0x0346c57f094d641ad94e43468628d8e9c574dcb2803ec372576ccc60a40be2c4;
     fn _get_pragma_median_price(key: felt252) -> Fixed {
         let (value, decimals, last_updated_timestamp, num_sources_aggregated) =
             IPragmaOracleDispatcher {
@@ -83,8 +89,13 @@ mod Pragma {
             .get_spot_median(key);
 
         let curr_time = get_block_timestamp();
-        let time_diff = curr_time
-            - last_updated_timestamp.try_into().expect('Pragma/_GPMP - LUT too large');
+        let time_diff = if curr_time < last_updated_timestamp
+            .try_into()
+            .expect('Pragma/_GPMP - LUT too large') {
+            0
+        } else {
+            curr_time - last_updated_timestamp.try_into().expect('Pragma/_GPMP - LUT too large')
+        };
 
         assert(time_diff < 3600, 'Pragma/_GPMP - Price too old');
         assert(
@@ -104,6 +115,7 @@ mod Pragma {
         account_for_stablecoin_divergence(res, quote_token_addr, 0)
     }
 
+    // TODO Check that checkpoint is not after expiry
     fn _get_pragma_terminal_price(key: felt252, maturity: Timestamp) -> Fixed {
         let maturity: felt252 = maturity.into();
 
@@ -114,6 +126,7 @@ mod Pragma {
         }
             .get_last_spot_checkpoint_before(key, maturity);
 
+        // TODO: Handle negative time diff gracefully, it'll fail with sub overflow
         let time_diff = maturity - last_checkpoint.timestamp;
 
         assert(time_diff.try_into().unwrap() < 7200_u128, 'Pragma/GPTP - Price too old');

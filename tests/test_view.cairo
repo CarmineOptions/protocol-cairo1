@@ -2,7 +2,7 @@
 
 use starknet::ContractAddress;
 use carmine_protocol::amm_core::view::View;
-use carmine_protocol::testing::setup::deploy_setup;
+use carmine_protocol::testing::setup::{deploy_setup, _add_expired_option};
 use array::ArrayTrait;
 use debug::PrintTrait;
 use carmine_protocol::amm_core::amm::IAMMDispatcherTrait;
@@ -103,99 +103,187 @@ fn test_get_all_poolinfo() {
     assert(put_lpt.unlocked_capital == five_k_usdc, 'Unlocked capital mismatch');
     assert(put_lpt.value_of_pool_position == FixedTrait::ZERO(), 'Pool pos val mismatch');
 }
-// option_side: OptionSide,
-// maturity: Timestamp,
-// strike_price: Fixed,
-// quote_token_address: ContractAddress,
-// base_token_address: ContractAddress,
-// option_type: OptionType
 
-// fn get_total_premia(
-//     self: @TContractState, option: Option_, position_size: u256, is_closing: bool
-// ) -> (Fixed, Fixed);
+#[test]
+fn test_get_total_premia() {
+    let (ctx, dsps) = deploy_setup();
 
-// #[test]
-// fn test_get_total_premia () {
-//     let (ctx, dsps) = deploy_setup();
+    let one = 1000000000000000000;
 
-//     let one = 1000000000000000000;
+    let option_long_call = Option_ {
+        option_side: 0,
+        maturity: ctx.expiry,
+        strike_price: ctx.strike_price,
+        quote_token_address: ctx.usdc_address,
+        base_token_address: ctx.eth_address,
+        option_type: 0
+    };
 
-//     let option_long_call = Option_ {
-//         option_side: 0,
-//         maturity: ctx.expiry, 
-//         strike_price: ctx.strike_price,
-//         quote_token_address: ctx.usdc_address,
-//         base_token_address: ctx.eth_address,
-//         option_type: 0
-//     };
+    let option_short_call = Option_ {
+        option_side: 1,
+        maturity: ctx.expiry,
+        strike_price: ctx.strike_price,
+        quote_token_address: ctx.usdc_address,
+        base_token_address: ctx.eth_address,
+        option_type: 0
+    };
 
-//     let option_short_call = Option_ {
-//         option_side: 1,
-//         maturity: ctx.expiry, 
-//         strike_price: ctx.strike_price,
-//         quote_token_address: ctx.usdc_address,
-//         base_token_address: ctx.eth_address,
-//         option_type: 0
-//     };
+    let option_long_put = Option_ {
+        option_side: 0,
+        maturity: ctx.expiry,
+        strike_price: ctx.strike_price,
+        quote_token_address: ctx.usdc_address,
+        base_token_address: ctx.eth_address,
+        option_type: 1
+    };
 
-//     let option_long_put = Option_ {
-//         option_side: 0,
-//         maturity: ctx.expiry, 
-//         strike_price: ctx.strike_price,
-//         quote_token_address: ctx.usdc_address,
-//         base_token_address: ctx.eth_address,
-//         option_type: 1
-//     };
+    let option_short_put = Option_ {
+        option_side: 1,
+        maturity: ctx.expiry,
+        strike_price: ctx.strike_price,
+        quote_token_address: ctx.usdc_address,
+        base_token_address: ctx.eth_address,
+        option_type: 1
+    };
 
-//     let option_short_put = Option_ {
-//         option_side: 0,
-//         maturity: ctx.expiry, 
-//         strike_price: ctx.strike_price,
-//         quote_token_address: ctx.usdc_address,
-//         base_token_address: ctx.eth_address,
-//         option_type: 1
-//     };
+    start_prank(ctx.amm_address, ctx.admin_address);
+    start_warp(ctx.amm_address, 1000000000 + 60 * 60 * 12);
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_spot_median',
+        (140000000000, 8, 1000000000 + 60 * 60 * 12, 0)
+    );
 
-//     start_prank(ctx.amm_address, ctx.admin_address);
-//     start_warp(ctx.amm_address, 1000000000 + 60*60*12);
-//     start_mock_call(PRAGMA_ORACLE_ADDRESS.try_into().unwrap(), 'get_spot_median', (140000000000, 8, 1000000000 + 60*60*12, 0));
+    let (total_premia_before_fees_long_call, total_premia_including_fees_long_call) = dsps
+        .amm
+        .get_total_premia(option_long_call, one, false);
 
-//     let (
-//         total_premia_before_fees_long_call,
-//         total_premia_including_fees_long_call
-//     )  = dsps.amm.get_total_premia(
-//         option_long_call, one, false
-//     );
+    let (total_premia_before_fees_short_call, total_premia_including_fees_short_call) = dsps
+        .amm
+        .get_total_premia(option_short_call, one, false);
 
-// let (
-//     total_premia_before_fees_short_call,
-//     total_premia_including_fees_short_call
-// )  = dsps.amm.get_total_premia(
-//     option_short_call, one, false
-// );
+    let (total_premia_before_fees_long_put, total_premia_including_fees_long_put) = dsps
+        .amm
+        .get_total_premia(option_long_put, one, false);
 
-// let (
-//     total_premia_before_fees_long_put,
-//     total_premia_including_fees_long_put
-// )  = dsps.amm.get_total_premia(
-//     option_long_put, one, false
-// );
+    let (total_premia_before_fees_short_put, total_premia_including_fees_short_put) = dsps
+        .amm
+        .get_total_premia(option_short_put, one, false);
 
-// let (
-//     total_premia_before_fees_short_put,
-//     total_premia_including_fees_short_put
-// )  = dsps.amm.get_total_premia(
-//     option_short_put, one, false
-// );
+    assert(
+        total_premia_before_fees_long_call == FixedTrait::from_felt(14425957268832963),
+        'Long Call bf wrong'
+    );
+    assert(
+        total_premia_including_fees_long_call == FixedTrait::from_felt(14858735986897951),
+        'Long call if wrong'
+    );
 
-// total_premia_before_fees_long_call.print();
-// total_premia_including_fees_long_call.print();
-// }
+    assert(
+        total_premia_before_fees_short_call == FixedTrait::from_felt(4446708911745745),
+        'Short Call bf wrong'
+    );
+    assert(
+        total_premia_including_fees_short_call == FixedTrait::from_felt(4313307644393373),
+        'Short call if wrong'
+    );
 
-// get_total_premia
+    assert(
+        total_premia_before_fees_long_put == FixedTrait::from_felt(1869892212451346729800),
+        'Long put bf wrong'
+    );
+    assert(
+        total_premia_including_fees_long_put == FixedTrait::from_felt(1925988978824887131645),
+        'Long put if wrong'
+    );
 
-// TODO: Test for these (bug still present)
-// get_all_non_expired_options_with_premia 
+    assert(
+        total_premia_before_fees_short_put == FixedTrait::from_felt(1848856287951398584000),
+        'Short put bf wrong'
+    );
+    assert(
+        total_premia_including_fees_short_put == FixedTrait::from_felt(1793390599312856626529),
+        'Short put if wrong'
+    );
+}
+
+// fn get_all_non_expired_options_with_premia(lpt_addr: LPTAddress) -> Array<OptionWithPremia> {
+#[test]
+fn test_get_all_non_expired_options_with_premia() {
+    let (ctx, dsps) = deploy_setup();
+    _add_expired_option(ctx, dsps);
+
+    // There are 3 call options
+    //      two with maturity 1000000000 + 60*60*24
+    //      one with maturity 1000000000 - 60*60*24
+    // There are 2 put options both with maturity 1000000000 + 60*60*24
+    // Only the options with maturity 1000000000 + 60*60*24 should show -> 2 calls, 2 puts
+
+    start_warp(ctx.amm_address, 1000000000 + 60 * 60 * 12);
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_spot_median',
+        (140000000000, 8, 1000000000 + 60 * 60 * 12, 0)
+    );
+
+    let mut call_opts = dsps.amm.get_all_non_expired_options_with_premia(ctx.call_lpt_address);
+    let mut put_opts = dsps.amm.get_all_non_expired_options_with_premia(ctx.put_lpt_address);
+
+    assert(call_opts.len() == 2, 'Too many call opts');
+    assert(put_opts.len() == 2, 'Too many put opts');
+
+    let call_0 = call_opts.pop_front().unwrap();
+    let call_1 = call_opts.pop_front().unwrap();
+
+    let call_option_addr_0 = dsps
+        .amm
+        .get_option_token_address(
+            ctx.call_lpt_address,
+            call_0.option.option_side,
+            call_0.option.maturity,
+            call_0.option.strike_price
+        );
+    let call_option_addr_1 = dsps
+        .amm
+        .get_option_token_address(
+            ctx.call_lpt_address,
+            call_1.option.option_side,
+            call_1.option.maturity,
+            call_1.option.strike_price
+        );
+
+    assert(call_option_addr_0 == ctx.long_call_address, 'LC addr not matching');
+    assert(call_option_addr_1 == ctx.short_call_address, 'SC addr not matching');
+
+    let put_0 = put_opts.pop_front().unwrap();
+    let put_1 = put_opts.pop_front().unwrap();
+
+    let put_option_addr_0 = dsps
+        .amm
+        .get_option_token_address(
+            ctx.put_lpt_address,
+            put_0.option.option_side,
+            put_0.option.maturity,
+            put_0.option.strike_price
+        );
+    let put_option_addr_1 = dsps
+        .amm
+        .get_option_token_address(
+            ctx.put_lpt_address,
+            put_1.option.option_side,
+            put_1.option.maturity,
+            put_1.option.strike_price
+        );
+    assert(put_option_addr_0 == ctx.long_put_address, 'LP addr not matching');
+    assert(put_option_addr_1 == ctx.short_put_address, 'SP addr not matching');
+
+    assert(call_0.premia == FixedTrait::from_felt(14858735986897951), 'LC premia wrong');
+    assert(call_1.premia == FixedTrait::from_felt(4313307644393373), 'SC premia wrong');
+
+    assert(put_0.premia == FixedTrait::from_felt(1925988978824887131645), 'LP premia wrong');
+    assert(put_1.premia == FixedTrait::from_felt(1793390599312856626529), 'SP premia wrong');
+}
+// TODO: Test for these adter trade functions have been tested
 // get_option_with_position_of_user 
 // get_user_pool_infos
 

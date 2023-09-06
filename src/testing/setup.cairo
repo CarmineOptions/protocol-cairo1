@@ -8,14 +8,18 @@ use debug::PrintTrait;
 use traits::{Into, TryInto};
 
 use carmine_protocol::amm_core::amm::{AMM, IAMMDispatcher, IAMMDispatcherTrait};
-// use snforge_std::{declare, PreparedContract, deploy, start_prank, stop_prank};
-use snforge_std::{declare, ContractClassTrait, start_prank, stop_prank};
+use snforge_std::{
+    declare, ContractClassTrait, start_prank, stop_prank, start_warp, stop_warp, ContractClass,
+    start_mock_call, stop_mock_call
+};
 
 use carmine_protocol::tokens::my_token::{MyToken, IMyTokenDispatcher, IMyTokenDispatcherTrait};
 use carmine_protocol::tokens::option_token::{
     OptionToken, IOptionTokenDispatcher, IOptionTokenDispatcherTrait
 };
 use carmine_protocol::tokens::lptoken::{LPToken, ILPTokenDispatcher, ILPTokenDispatcherTrait};
+
+use carmine_protocol::amm_core::oracles::pragma::Pragma::{PragmaCheckpoint, PRAGMA_ORACLE_ADDRESS};
 
 // use openzeppelin::token::erc20::ERC20;
 // use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
@@ -35,6 +39,7 @@ struct Ctx {
     short_call_address: ContractAddress,
     long_put_address: ContractAddress,
     short_put_address: ContractAddress,
+    opt_contract: ContractClass
 }
 
 #[derive(Drop, Copy)]
@@ -64,17 +69,60 @@ fn get_dispatchers(ctx: Ctx) -> Dispatchers {
     }
 }
 
+#[starknet::interface]
+trait IPragmaOracle<TContractState> {
+    fn get_spot_median(
+        self: @TContractState, pair_id: felt252
+    ) -> (felt252, felt252, felt252, felt252);
+    fn get_last_spot_checkpoint_before(
+        self: @TContractState, key: felt252, timestamp: felt252
+    ) -> (PragmaCheckpoint, felt252);
+}
+
+
+#[starknet::contract]
+mod MockPragma {
+    #[storage]
+    struct Storage {}
+
+    #[external(v0)]
+    impl MockPragma of super::IPragmaOracle<ContractState> {
+        fn get_spot_median(
+            self: @ContractState, pair_id: felt252
+        ) -> (felt252, felt252, felt252, felt252) {
+            (1, 1, 1, 1)
+        }
+
+        fn get_last_spot_checkpoint_before(
+            self: @ContractState, key: felt252, timestamp: felt252
+        ) -> (super::PragmaCheckpoint, felt252) {
+            let res = super::PragmaCheckpoint {
+                timestamp: 0, value: 0, aggregation_mode: 0, num_sources_aggregated: 0,
+            };
+
+            (res, 0)
+        }
+    }
+}
+
 
 // fn deploy_setup() {
 fn deploy_setup() -> (Ctx, Dispatchers) {
     let admin_address = 123456;
 
+    let pragma_contract = declare('MockPragma');
     let mytoken_contract = declare('MyToken');
     let lptoken_contract = declare('LPToken');
     let amm_contract = declare('AMM');
     let option_token_contract = declare('OptionToken');
 
     let amm_address = amm_contract.deploy(@ArrayTrait::new()).unwrap();
+
+    // Deploy Pragma at given address
+    let pragma_address = pragma_contract
+        .deploy_at(@ArrayTrait::new(), PRAGMA_ORACLE_ADDRESS.try_into().unwrap())
+        .unwrap();
+    assert(pragma_address.into() == PRAGMA_ORACLE_ADDRESS, 'Wrong pragma address');
 
     // Deploy Call ILPT
     let mut call_lpt_data = ArrayTrait::new();
@@ -186,6 +234,7 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
         short_call_address: short_call_address,
         long_put_address: long_put_address,
         short_put_address: short_put_address,
+        opt_contract: option_token_contract
     };
     let disp = get_dispatchers(ctx);
 
@@ -320,10 +369,51 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
 
     (ctx, disp)
 }
+
 // #[test]
 // fn test_deploy_setup() {
-//     let ctx = deploy_setup();
-//     let disp = get_dispatchers(ctx);
+//     let (ctx, dsps) = deploy_setup();
+// }
+
+fn _add_expired_option(ctx: Ctx, dsps: Dispatchers) {
+    let mut long_call_data = ArrayTrait::<felt252>::new();
+    long_call_data.append('OptLongCallExpired');
+    long_call_data.append('OLC');
+    long_call_data.append(ctx.usdc_address.into());
+    long_call_data.append(ctx.eth_address.into());
+    long_call_data.append(0); // CALL
+    long_call_data.append(27670116110564327424000);
+    long_call_data.append(1000000000 - 60 * 60 * 24);
+    long_call_data.append(0); // LONG
+
+    let long_call_address = ctx.opt_contract.deploy(@long_call_data).unwrap();
+
+    start_warp(ctx.amm_address, 1000000000 - 60 * 60 * 96);
+    start_prank(ctx.amm_address, ctx.admin_address);
+
+    dsps
+        .amm
+        .add_option(
+            0,
+            1000000000 - 60 * 60 * 24,
+            ctx.strike_price,
+            ctx.usdc_address,
+            ctx.eth_address,
+            0,
+            ctx.call_lpt_address,
+            long_call_address,
+            FixedTrait::from_unscaled_felt(100)
+        );
+
+    stop_warp(ctx.amm_address);
+    stop_prank(ctx.amm_address);
+}
+// fn _add_user_position(ctx: Ctx, dsps: Dispatchers) {
+//     start_warp(ctx.amm_address, 1000000000 + 60 * 60 * 12);
+//     start_prank(ctx.amm_address, ctx.admin_address);
+//     start_mock_call(PRAGMA_ORACLE_ADDRESS.try_into().unwrap(), 'get_spot_median', (140000000000, 8, 1000000000 + 60*60*12, 0));
+
+//     let one = 1000000000000000000;
 // }
 
 

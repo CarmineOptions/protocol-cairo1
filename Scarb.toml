@@ -9,7 +9,10 @@ homepage = "https://github.com/CarmineOptions/protocol-cairo1"
 [dependencies]
 # cubit = { git = "https://github.com/influenceth/cubit.git", branch = "main" }
 cubit = { git = "https://github.com/chepelau/cubit.git", branch = "main" }
-snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry.git", tag = "v0.5.0" }
+# snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry.git", tag = "v0.5.0" }
+# snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry.git", rev = "4f863d1269217916a870978a26ae6f84dfd25b33" }
+snforge_std = {path = '../starknet-foundry/snforge_std' }
+# snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry.git", branch = "master" }
 
 openzeppelin = { version = "=0.7.0-rc.0", git = "https://github.com/OpenZeppelin/cairo-contracts.git", branch = "cairo-2"}
 

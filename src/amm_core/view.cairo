@@ -50,9 +50,11 @@ mod View {
         let mut i: u32 = 0;
         let current_block_time = get_block_timestamp();
         let mut arr = ArrayTrait::<OptionWithPremia>::new();
+        let one = 1000000000000000000;
 
         loop {
             let opt = get_available_options(lpt_addr, i);
+            i += 1;
 
             if opt.sum() == 0 {
                 // This means we've reached the end, so break
@@ -63,8 +65,7 @@ mod View {
                 continue;
             }
 
-            let total_premia = opt.premia_with_fees(1, // TODO: Resolve this type
-            );
+            let total_premia = opt.premia_with_fees(one);
 
             arr.append(OptionWithPremia { option: opt, premia: total_premia });
         };
