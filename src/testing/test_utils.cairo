@@ -27,101 +27,74 @@ fn is_close(a: Fixed, b: Fixed, rel_tol: Fixed) -> bool {
 struct Stats {
     bal_lpt_c: u256,
     bal_lpt_p: u256,
-
     bal_opt_lc: u256,
     bal_opt_sc: u256,
     bal_opt_lp: u256,
     bal_opt_sp: u256,
-
     bal_eth: u256,
     bal_usdc: u256,
-
     lpool_balance_c: u256,
     lpool_balance_p: u256,
-
-    unlocked_capital_c: u256, 
-    unlocked_capital_p: u256, 
-    
-    locked_capital_c: u256, 
-    locked_capital_p: u256, 
-
+    unlocked_capital_c: u256,
+    unlocked_capital_p: u256,
+    locked_capital_c: u256,
+    locked_capital_p: u256,
     pool_pos_val_c: Fixed,
     pool_pos_val_p: Fixed,
-
     volatility_c: Fixed,
     volatility_p: Fixed,
-
     opt_pos_lc: u128,
     opt_pos_sc: u128,
     opt_pos_lp: u128,
     opt_pos_sp: u128,
-    
 }
 
 #[generate_trait]
 impl StatsImpl of StatsTrait {
     fn new(ctx: Ctx, dsps: Dispatchers) -> Stats {
-    
-        let opt_pos_lc = dsps.amm.get_option_position(
-            ctx.call_lpt_address,
-            0,
-            ctx.expiry,
-            ctx.strike_price
-        );
+        let opt_pos_lc = dsps
+            .amm
+            .get_option_position(ctx.call_lpt_address, 0, ctx.expiry, ctx.strike_price);
 
-        let opt_pos_sc = dsps.amm.get_option_position(
-            ctx.call_lpt_address,
-            1,
-            ctx.expiry,
-            ctx.strike_price
-        );
-        let opt_pos_lp = dsps.amm.get_option_position(
-            ctx.put_lpt_address,
-            0,
-            ctx.expiry,
-            ctx.strike_price
-        );
-        let opt_pos_sp = dsps.amm.get_option_position(
-            ctx.put_lpt_address,
-            1,
-            ctx.expiry,
-            ctx.strike_price
-        );
-        
+        let opt_pos_sc = dsps
+            .amm
+            .get_option_position(ctx.call_lpt_address, 1, ctx.expiry, ctx.strike_price);
+        let opt_pos_lp = dsps
+            .amm
+            .get_option_position(ctx.put_lpt_address, 0, ctx.expiry, ctx.strike_price);
+        let opt_pos_sp = dsps
+            .amm
+            .get_option_position(ctx.put_lpt_address, 1, ctx.expiry, ctx.strike_price);
+
         Stats {
             bal_lpt_c: dsps.lptc.balance_of(ctx.admin_address),
             bal_lpt_p: dsps.lptp.balance_of(ctx.admin_address),
-
             bal_opt_lc: dsps.lc.balance_of(ctx.admin_address),
             bal_opt_sc: dsps.sc.balance_of(ctx.admin_address),
             bal_opt_lp: dsps.lp.balance_of(ctx.admin_address),
             bal_opt_sp: dsps.sp.balance_of(ctx.admin_address),
-
             bal_eth: dsps.eth.balance_of(ctx.admin_address),
             bal_usdc: dsps.usdc.balance_of(ctx.admin_address),
-
             lpool_balance_c: dsps.amm.get_lpool_balance(ctx.call_lpt_address),
             lpool_balance_p: dsps.amm.get_lpool_balance(ctx.put_lpt_address),
-
             unlocked_capital_c: dsps.amm.get_unlocked_capital(ctx.call_lpt_address),
             unlocked_capital_p: dsps.amm.get_unlocked_capital(ctx.put_lpt_address),
-
             locked_capital_c: dsps.amm.get_pool_locked_capital(ctx.call_lpt_address),
             locked_capital_p: dsps.amm.get_pool_locked_capital(ctx.put_lpt_address),
-
             pool_pos_val_c: dsps.amm.get_value_of_pool_position(ctx.call_lpt_address),
             pool_pos_val_p: dsps.amm.get_value_of_pool_position(ctx.put_lpt_address),
-
             opt_pos_lc: opt_pos_lc,
             opt_pos_sc: opt_pos_sc,
             opt_pos_lp: opt_pos_lp,
             opt_pos_sp: opt_pos_sp,
-
-            volatility_c: dsps.amm.get_option_volatility(ctx.call_lpt_address, ctx.expiry, ctx.strike_price),
-            volatility_p: dsps.amm.get_option_volatility(ctx.put_lpt_address, ctx.expiry, ctx.strike_price),
+            volatility_c: dsps
+                .amm
+                .get_option_volatility(ctx.call_lpt_address, ctx.expiry, ctx.strike_price),
+            volatility_p: dsps
+                .amm
+                .get_option_volatility(ctx.put_lpt_address, ctx.expiry, ctx.strike_price),
         }
-    } 
+    }
 }
 
-fn print_stats(st: Stats) {
-}
+fn print_stats(st: Stats) {}

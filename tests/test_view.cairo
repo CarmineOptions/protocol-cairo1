@@ -287,7 +287,7 @@ fn test_get_all_non_expired_options_with_premia() {
 #[test]
 fn test_get_user_pool_infos() {
     let (ctx, dsps) = deploy_setup();
-    
+
     let mut pool_infos = dsps.amm.get_user_pool_infos(ctx.admin_address);
 
     assert(pool_infos.len() == 2, 'too much pool info');
@@ -305,7 +305,9 @@ fn test_get_user_pool_infos() {
     assert(cp.pool_info.lptoken_address == ctx.call_lpt_address, 'Call pool wrong lpt addr');
     assert(cp.pool_info.staked_capital == five_tokens, 'Call pool wrong staked');
     assert(cp.pool_info.unlocked_capital == five_tokens, 'Call pool wrong unlo');
-    assert(cp.pool_info.value_of_pool_position == FixedTrait::ZERO(), 'Call pool wrong pool pos val');
+    assert(
+        cp.pool_info.value_of_pool_position == FixedTrait::ZERO(), 'Call pool wrong pool pos val'
+    );
     assert(cp.value_of_user_stake == five_tokens, 'Call pool wrong user stake');
     assert(cp.size_of_users_tokens == five_tokens, 'Call pool wrong user tokens');
 
@@ -316,12 +318,12 @@ fn test_get_user_pool_infos() {
     assert(pp.pool_info.lptoken_address == ctx.put_lpt_address, 'Put pool wrong lpt addr');
     assert(pp.pool_info.staked_capital == five_k_tokens, 'Put pool wrong staked');
     assert(pp.pool_info.unlocked_capital == five_k_tokens, 'Put pool wrong unlo');
-    assert(pp.pool_info.value_of_pool_position == FixedTrait::ZERO(), 'Put pool wrong pool pos val');
+    assert(
+        pp.pool_info.value_of_pool_position == FixedTrait::ZERO(), 'Put pool wrong pool pos val'
+    );
     assert(pp.value_of_user_stake == five_k_tokens, 'Put pool wrong user stake');
     assert(pp.size_of_users_tokens == five_k_tokens, 'Put pool wrong user tokens');
-
 }
-
 // TODO: Test for these adter trade functions have been tested
 // get_option_with_position_of_user 
 

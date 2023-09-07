@@ -481,9 +481,9 @@ mod State {
             .unwrap() {
             return; // Marek
         }
-        // TODO: Add david
-        // Todo: enable this
-        // assert(1 == 0, 'Caller cant halt trading');
+    // TODO: Add david
+    // Todo: enable this
+    // assert(1 == 0, 'Caller cant halt trading');
     }
 
     // @notice Returns the token that's underlying the given liquidity pool.
