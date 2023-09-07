@@ -257,7 +257,7 @@ mod Trading {
         // Check that maturity hasn't matured in case of open_position=TRUE
         // If open_position=FALSE it means the user wants to close or settle the option
         if open_position {
-            assert(current_block_time > maturity, 'VTI - opt already expired');
+            assert(current_block_time < maturity, 'VTI - opt already expired');
             assert(
                 current_block_time < (maturity - STOP_TRADING_BEFORE_MATURITY_SECONDS),
                 'VTI - Trading is no mo'

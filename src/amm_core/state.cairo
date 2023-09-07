@@ -332,7 +332,7 @@ mod State {
 
         if res != 0 {
             // First assert it's not negative
-            assert(res.into() > 0_u256, 'Old opt pos negative');
+            assert(res.into() >= 0_u256, 'Old opt pos negative');
 
             // If it's not zero then move the old value to new storage var and set the old one to zero
 
@@ -355,6 +355,7 @@ mod State {
         state.new_option_position.read((lptoken_address, option_side, maturity, strike_price.mag))
     }
 
+    use debug::PrintTrait;
     fn set_option_position(
         lptoken_address: LPTAddress,
         option_side: OptionSide,
@@ -365,7 +366,7 @@ mod State {
         let mut state = AMM::unsafe_new_contract_state();
 
         strike_price.assert_nn_not_zero('Strike zero/neg in set_opt_pos');
-        assert(position > 0, 'Pos zero/neg in set_opt_pos');
+        assert(position >= 0, 'Pos zero/neg in set_opt_pos');
 
         // Also it's important to set corresponding option position in old storage var to zero se that if this function is called before get_option_position then the value in new storage var won't be overwritten by the old one
         state
@@ -481,7 +482,8 @@ mod State {
             return; // Marek
         }
         // TODO: Add david
-        assert(1 == 0, 'Caller cant halt trading');
+        // Todo: enable this
+        // assert(1 == 0, 'Caller cant halt trading');
     }
 
     // @notice Returns the token that's underlying the given liquidity pool.

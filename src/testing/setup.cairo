@@ -367,6 +367,9 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
             hundred
         );
 
+    // Enable trading
+    disp.amm.set_trading_halt(true);
+
     (ctx, disp)
 }
 
