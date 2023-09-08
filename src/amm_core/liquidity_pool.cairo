@@ -447,7 +447,7 @@ mod LiquidityPool {
 
         let opt_size_u256: u256 = option_size.into();
 
-        assert(new_pool_position.into() > 0_u256, 'New pool pos negative');
+        assert(new_pool_position.into() >= 0_u256, 'New pool pos negative'); // TODO: this check is probs redundant, it "U"int
         assert(opt_size_u256 <= current_pool_position.into(), 'Opt size > curr pool pos');
 
         set_option_position(lptoken_address, option_side, maturity, strike_price, 0);

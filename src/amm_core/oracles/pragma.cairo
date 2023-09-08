@@ -131,8 +131,8 @@ mod Pragma {
 
         assert(time_diff.try_into().unwrap() < 7200_u128, 'Pragma/GPTP - Price too old');
         assert(
-            last_checkpoint.value.try_into().expect('Pragma/GTMP - Price too high') > 0_u128,
-            'Pragma/GPMP - Price <= 0'
+            last_checkpoint.value.try_into().expect('Pragma/GPTP - Price too high') > 0_u128,
+            'Pragma/GPTP - Price <= 0'
         );
 
         //  Pragma checkpoints should always have 8 decimals
