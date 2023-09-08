@@ -27,30 +27,22 @@ fn is_close(a: Fixed, b: Fixed, rel_tol: Fixed) -> bool {
 struct Stats {
     bal_lpt_c: u256,
     bal_lpt_p: u256,
-    
     bal_opt_lc: u256,
     bal_opt_sc: u256,
     bal_opt_lp: u256,
     bal_opt_sp: u256,
-
     bal_eth: u256,
     bal_usdc: u256,
-
     lpool_balance_c: u256,
     lpool_balance_p: u256,
-
     unlocked_capital_c: u256,
     unlocked_capital_p: u256,
-
     locked_capital_c: u256,
     locked_capital_p: u256,
-
     pool_pos_val_c: Fixed,
     pool_pos_val_p: Fixed,
-
     volatility_c: Fixed,
     volatility_p: Fixed,
-
     opt_pos_lc: u128,
     opt_pos_sc: u128,
     opt_pos_lp: u128,
@@ -118,13 +110,13 @@ impl StatsPrint of PrintTrait<Stats> {
         'Balance LPT c/p: '.print();
         self.bal_lpt_c.low.print();
         self.bal_lpt_p.low.print();
-        
+
         'Balance OPT lc/sc/lp/sp: '.print();
         self.bal_opt_lc.low.print();
         self.bal_opt_sc.low.print();
         self.bal_opt_lp.low.print();
         self.bal_opt_sp.low.print();
-        
+
         'Bal eth/usdc'.print();
         self.bal_eth.low.print();
         self.bal_usdc.low.print();

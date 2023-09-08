@@ -672,8 +672,7 @@ mod Options {
             set_option_position(
                 lptoken_address, TRADE_SIDE_SHORT, maturity, strike_price, new_pools_short_position
             );
-
-            // Burn tokens
+        // Burn tokens
         }
 
         IOptionTokenDispatcher { contract_address: option_token_address }
