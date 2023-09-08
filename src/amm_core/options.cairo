@@ -674,14 +674,15 @@ mod Options {
             );
 
             // Burn tokens
-            IOptionTokenDispatcher { contract_address: option_token_address }
-                .burn(user_address, option_size_u256);
-
-            let transfer_res = IERC20Dispatcher { contract_address: currency_address }
-                .transfer(user_address, total_user_payment,);
-
-            assert(transfer_res, 'BOTL: unable to transfer premia');
         }
+
+        IOptionTokenDispatcher { contract_address: option_token_address }
+            .burn(user_address, option_size_u256);
+
+        let transfer_res = IERC20Dispatcher { contract_address: currency_address }
+            .transfer(user_address, total_user_payment,);
+
+        assert(transfer_res, 'BOTL: unable to transfer premia');
     }
 
     fn expire_option_token(

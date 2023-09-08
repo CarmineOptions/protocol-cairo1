@@ -32,7 +32,7 @@ fn convert_amount_to_option_currency_from_base_uint256(
     //  - for put into quote token (USDC in case of ETH/USDC)   
 
     assert_option_type_exists(option_type.into(), 'CATOCFBU - unknown option type');
-    assert(amount > 0, 'CATOCFBU - amt <= 0');
+    assert(amount >= 0, 'CATOCFBU - amt <= 0');
 
     if option_type == OPTION_PUT {
         let base_token_decimals: u128 = get_decimal(base_token_address)
