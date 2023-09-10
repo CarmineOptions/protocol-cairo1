@@ -15,10 +15,10 @@ use carmine_protocol::testing::setup::{Ctx, Dispatchers};
 
 use carmine_protocol::tokens::my_token::{MyToken, IMyTokenDispatcher, IMyTokenDispatcherTrait};
 
-// Todo: tests with price above strike
+// TODO: Add more scenarios (long call in profit, short put in profit etc)
 
 #[test]
-fn test_trade_close_long() {
+fn test_trade_settle_long() {
     let (ctx, dsps) = deploy_setup();
     let five_tokens: u256 = 5000000000000000000; // with 18 decimals
     let five_k_tokens: u256 = 5000000000; // with 6 decimals
@@ -32,38 +32,10 @@ fn test_trade_close_long() {
         (140000000000, 8, 1000000000 + 60 * 60 * 12, 0) // mock price at 1_000
     );
 
-    // Open some trades
-    let _ = dsps
-        .amm
-        .trade_open(
-            0, // Call
-            ctx.strike_price,
-            ctx.expiry,
-            0, // Long
-            one_int,
-            ctx.usdc_address,
-            ctx.eth_address,
-            FixedTrait::from_unscaled_felt(100_000), // Disable this check
-            99999999999 // Disable this check
-        );
-
-    let _ = dsps
-        .amm
-        .trade_open(
-            1, // Put
-            ctx.strike_price,
-            ctx.expiry,
-            0, // Long
-            one_int,
-            ctx.usdc_address,
-            ctx.eth_address,
-            FixedTrait::from_unscaled_felt(100_000), // Disable this check
-            99999999999 // Disable this check
-        );
-
+    // Conduct some trades
     let long_call_premia = dsps
         .amm
-        .trade_close(
+        .trade_open(
             0, // Call
             ctx.strike_price,
             ctx.expiry,
@@ -71,13 +43,13 @@ fn test_trade_close_long() {
             one_int,
             ctx.usdc_address,
             ctx.eth_address,
-            FixedTrait::from_felt(1), // Disable this check
+            FixedTrait::from_unscaled_felt(100_000), // Disable this check
             99999999999 // Disable this check
         );
 
     let long_put_premia = dsps
         .amm
-        .trade_close(
+        .trade_open(
             1, // Put
             ctx.strike_price,
             ctx.expiry,
@@ -85,13 +57,69 @@ fn test_trade_close_long() {
             one_int,
             ctx.usdc_address,
             ctx.eth_address,
-            FixedTrait::from_felt(1), // Disable this check
+            FixedTrait::from_unscaled_felt(100_000), // Disable this check
             99999999999 // Disable this check
         );
 
     assert(long_call_premia == FixedTrait::from_felt(62134282537632086), 'Long Call premia wrong');
-    assert(
-        long_put_premia == FixedTrait::from_felt(1945765480687755943700), 'Long put premia wrong'
+    assert(long_put_premia == FixedTrait::from_felt(0x697aeba39402e15f14), 'Long put premia wrong');
+
+    // Warp to one second after expiry
+    stop_warp(ctx.amm_address);
+    stop_mock_call(PRAGMA_ORACLE_ADDRESS.try_into().unwrap(), 'get_spot_median');
+
+    start_warp(ctx.amm_address, 1000000000 + 60 * 60 * 24 + 1);
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_last_spot_checkpoint_before',
+        ((1000000000 + 60 * 60 * 24 - 1, 140000000000, 0, 0), 0) // mock price at 1_400
+    );
+
+    // Expire pools
+    dsps.amm.expire_option_token_for_pool(
+        ctx.call_lpt_address,
+        0, // Long
+        ctx.strike_price,
+        ctx.expiry
+    );
+    dsps.amm.expire_option_token_for_pool(
+        ctx.call_lpt_address,
+        1, // Long
+        ctx.strike_price,
+        ctx.expiry
+    );
+    dsps.amm.expire_option_token_for_pool(
+        ctx.put_lpt_address,
+        0, // Long
+        ctx.strike_price,
+        ctx.expiry
+    );
+    dsps.amm.expire_option_token_for_pool(
+        ctx.put_lpt_address,
+        1, // Long
+        ctx.strike_price,
+        ctx.expiry
+    );
+
+    // Settle the trades
+    dsps.amm.trade_settle(
+        0, // Call
+        ctx.strike_price,
+        ctx.expiry,
+        0, // Long
+        one_int,
+        ctx.usdc_address,
+        ctx.eth_address,
+    );
+
+    dsps.amm.trade_settle(
+        1, // Put
+        ctx.strike_price,
+        ctx.expiry,
+        0, // Long
+        one_int,
+        ctx.usdc_address,
+        ctx.eth_address,
     );
 
     let stats_1 = StatsTrait::new(ctx, dsps);
@@ -99,22 +127,22 @@ fn test_trade_close_long() {
     assert(stats_1.bal_lpt_c == five_tokens, 'Call lpt bal wrong');
     assert(stats_1.bal_lpt_p == five_k_tokens, 'Put lpt bal wrong');
 
-    assert(stats_1.bal_eth == 4999797901627660614, 'Eth1 bal wrong');
-    assert(stats_1.bal_usdc == 4993671191, 'Usdc1 bal wrong');
+    assert(stats_1.bal_eth == 4996530644608173865, 'Eth1 bal wrong');
+    assert(stats_1.bal_usdc == 4991355438, 'Usdc1 bal wrong');
 
     assert(stats_1.bal_opt_lc == 0, 'Opt1 lc bal wrong');
     assert(stats_1.bal_opt_sc == 0, 'Opt1 sc bal wrong');
     assert(stats_1.bal_opt_lp == 0, 'Opt1 lp bal wrong');
     assert(stats_1.bal_opt_sp == 0, 'Opt1 sp bal wrong');
 
-    assert(stats_1.lpool_balance_c == 5000202098372339386, 'Call1 lpool bal wrong');
-    assert(stats_1.lpool_balance_p == 5006328809, 'Put1 lpool bal wrong');
+    assert(stats_1.lpool_balance_c == 5003469355391826135, 'Call1 lpool bal wrong'); 
+    assert(stats_1.lpool_balance_p == 5008644562, 'Put1 lpool bal wrong'); 
 
     assert(stats_1.bal_eth + stats_1.lpool_balance_c == 2 * five_tokens, 'random eth appeared');
     assert(stats_1.bal_usdc + stats_1.lpool_balance_p == 2 * five_k_tokens, 'random usdc appeared');
 
-    assert(stats_1.unlocked_capital_c == 5000202098372339386, 'Call1 unlocked wrong');
-    assert(stats_1.unlocked_capital_p == 5006328809, 'Put1 unlocked wrong');
+    assert(stats_1.unlocked_capital_c == 5003469355391826135, 'Call1 unlocked wrong');
+    assert(stats_1.unlocked_capital_p == 5008644562, 'Put1 unlocked wrong');
 
     assert(
         stats_1.bal_eth + stats_1.unlocked_capital_c + stats_1.locked_capital_c == 2 * five_tokens,
@@ -130,23 +158,28 @@ fn test_trade_close_long() {
     assert(stats_1.locked_capital_c == 0, 'Call1 locked wrong');
     assert(stats_1.locked_capital_p == 0, 'Put1 locked wrong');
 
-    assert(stats_1.pool_pos_val_c == FixedTrait::ZERO(), 'Call1 pos val wrong');
-    assert(stats_1.pool_pos_val_p == FixedTrait::ZERO(), 'Put1 pos val wrong');
-
     assert(
-        stats_1.volatility_c == FixedTrait::from_felt(1844674407370955161600), 'Call1 vol wrong'
+        stats_1.pool_pos_val_c == FixedTrait::from_felt(0), 'Call1 pos val wrong'
     );
-    assert(stats_1.volatility_p == FixedTrait::from_felt(1844674407370955161600), 'Put1 vol wrong');
+    assert(
+        stats_1.pool_pos_val_p == FixedTrait::from_felt(0),
+        'Put1 pos val wrong'
+    );
+
+    assert(stats_1.volatility_c == FixedTrait::from_felt(2213609288845146193900), 'Call1 vol wrong');
+    assert(stats_1.volatility_p == FixedTrait::from_felt(2398076729582241710000), 'Put1 vol wrong');
 
     assert(stats_1.opt_pos_lc == 0, 'lc1 pos wrong');
     assert(stats_1.opt_pos_sc == 0, 'sc1 pos wrong');
     assert(stats_1.opt_pos_lp == 0, 'lp1 pos wrong');
     assert(stats_1.opt_pos_sp == 0, 'sp1 pos wrong');
+    
 }
 
 
 #[test]
-fn test_trade_close_short() {
+fn test_trade_settle_short() {
+
     let (ctx, dsps) = deploy_setup();
     let five_tokens: u256 = 5000000000000000000; // with 18 decimals
     let five_k_tokens: u256 = 5000000000; // with 6 decimals
@@ -160,38 +193,11 @@ fn test_trade_close_short() {
         (140000000000, 8, 1000000000 + 60 * 60 * 12, 0) // mock price at 1_000
     );
 
-    // First open some trades
-    let _ = dsps
-        .amm
-        .trade_open(
-            0, // Call
-            ctx.strike_price,
-            ctx.expiry,
-            1, // Long
-            one_int,
-            ctx.usdc_address,
-            ctx.eth_address,
-            FixedTrait::from_felt(1), // Disable this check
-            99999999999 // Disable this check
-        );
 
-    let _ = dsps
-        .amm
-        .trade_open(
-            1, // Put
-            ctx.strike_price,
-            ctx.expiry,
-            1, // short
-            one_int,
-            ctx.usdc_address,
-            ctx.eth_address,
-            FixedTrait::from_felt(1), // Disable this check
-            99999999999 // Disable this check
-        );
-
+    // Conduct some shorts
     let short_call_premia = dsps
         .amm
-        .trade_close(
+        .trade_open(
             0, // Call
             ctx.strike_price,
             ctx.expiry,
@@ -199,13 +205,13 @@ fn test_trade_close_short() {
             one_int,
             ctx.usdc_address,
             ctx.eth_address,
-            FixedTrait::from_unscaled_felt(100_000), // Disable this check
+            FixedTrait::from_felt(1), // Disable this check
             99999999999 // Disable this check
         );
 
     let short_put_premia = dsps
         .amm
-        .trade_close(
+        .trade_open(
             1, // Put
             ctx.strike_price,
             ctx.expiry,
@@ -213,13 +219,73 @@ fn test_trade_close_short() {
             one_int,
             ctx.usdc_address,
             ctx.eth_address,
-            FixedTrait::from_unscaled_felt(100_000), // Disable this check
+            FixedTrait::from_felt(1), // Disable this check
             99999999999 // Disable this check
         );
 
+        
     assert(short_call_premia == FixedTrait::from_felt(28650672047953412), 'Long Call premia wrong');
     assert(
         short_put_premia == FixedTrait::from_felt(1875771037947335154100), 'Long put premia wrong'
+    );
+
+    // Warp to one second after expiry
+    stop_warp(ctx.amm_address);
+    stop_mock_call(PRAGMA_ORACLE_ADDRESS.try_into().unwrap(), 'get_spot_median');
+
+    start_warp(ctx.amm_address, 1000000000 + 60 * 60 * 24 + 1);
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_last_spot_checkpoint_before',
+        ((1000000000 + 60 * 60 * 24 - 1, 140000000000, 0, 0), 0) // mock price at 1_400
+    );
+
+    // Expire pools
+    dsps.amm.expire_option_token_for_pool(
+        ctx.call_lpt_address,
+        0, // Long
+        ctx.strike_price,
+        ctx.expiry
+    );
+    dsps.amm.expire_option_token_for_pool(
+        ctx.call_lpt_address,
+        1, // Long
+        ctx.strike_price,
+        ctx.expiry
+    );
+    dsps.amm.expire_option_token_for_pool(
+        ctx.put_lpt_address,
+        0, // Long
+        ctx.strike_price,
+        ctx.expiry
+    );
+    dsps.amm.expire_option_token_for_pool(
+        ctx.put_lpt_address,
+        1, // Long
+        ctx.strike_price,
+        ctx.expiry
+    );
+
+
+    // Conduct some shorts
+    dsps.amm.trade_settle(
+        0, // Call
+        ctx.strike_price,
+        ctx.expiry,
+        1, // Short
+        one_int,
+        ctx.usdc_address,
+        ctx.eth_address,
+    );
+
+    dsps.amm.trade_settle(
+        1, // Put
+        ctx.strike_price,
+        ctx.expiry,
+        1, // short
+        one_int,
+        ctx.usdc_address,
+        ctx.eth_address,
     );
 
     let stats_1 = StatsTrait::new(ctx, dsps);
@@ -232,31 +298,38 @@ fn test_trade_close_short() {
     assert(stats_1.bal_opt_lp == 0, 'Opt1 lp bal wrong');
     assert(stats_1.bal_opt_sp == 0, 'Opt1 sp bal wrong');
 
-    assert(stats_1.bal_eth == 4999906810637367318, 'Eth1 bal wrong');
-    assert(stats_1.bal_usdc == 4993898855, 'Usdc1 bal wrong');
+    assert(stats_1.bal_eth == 5001506561362561699, 'Eth1 bal wrong');
+    assert(stats_1.bal_usdc == 4998635179, 'Usdc1 bal wrong');
 
-    assert(stats_1.lpool_balance_c == 5000093189362632682, 'Call1 lpool bal wrong');
-    assert(stats_1.lpool_balance_p == 5006101145, 'Put1 lpool bal wrong');
+    assert(stats_1.lpool_balance_c == 4998493438637438301, 'Call1 lpool bal wrong');
+    assert(stats_1.lpool_balance_p == 5001364821, 'Put1 lpool bal wrong');
 
-    assert(stats_1.bal_eth + stats_1.lpool_balance_c == 2 * five_tokens, 'random eth appeared');
-    assert(stats_1.bal_usdc + stats_1.lpool_balance_p == 2 * five_k_tokens, 'random usdc appeared');
+    assert(stats_1.bal_eth + stats_1.lpool_balance_c == 2*five_tokens, 'random eth appeared');
+    assert(stats_1.bal_usdc+ stats_1.lpool_balance_p  == 2*five_k_tokens, 'random usdc appeared');
 
-    assert(stats_1.unlocked_capital_c == 5000093189362632682, 'Call1 unlocked wrong');
-    assert(stats_1.unlocked_capital_p == 5006101145, 'Put1 unlocked wrong');
+    assert(stats_1.unlocked_capital_c == 4998493438637438301, 'Call1 unlocked wrong');
+    assert(stats_1.unlocked_capital_p == 5001364821, 'Put1 unlocked wrong');
 
     assert(stats_1.locked_capital_c == 0, 'Call1 locked wrong');
     assert(stats_1.locked_capital_p == 0, 'Put1 locked wrong');
 
-    assert(stats_1.pool_pos_val_c == FixedTrait::ZERO(), 'Call1 pos val wrong');
-    assert(stats_1.pool_pos_val_p == FixedTrait::ZERO(), 'Put1 pos val wrong');
+    assert(
+        stats_1.pool_pos_val_c == FixedTrait::from_felt(0), 'Call1 pos val wrong'
+    );
+    assert(
+        stats_1.pool_pos_val_p == FixedTrait::from_felt(0),
+        'Put1 pos val wrong'
+    );
 
     assert(
-        stats_1.volatility_c == FixedTrait::from_felt(1844674407370955161600), 'Call1 vol wrong'
+        stats_1.volatility_c == FixedTrait::from_felt(1475739525896764129300), 'Call1 vol wrong'
     );
-    assert(stats_1.volatility_p == FixedTrait::from_felt(1844674407370955161600), 'Put1 vol wrong');
+    assert(stats_1.volatility_p == FixedTrait::from_felt(1291272085159668613200), 'Put1 vol wrong');
 
     assert(stats_1.opt_pos_lc == 0, 'lc1 pos wrong');
     assert(stats_1.opt_pos_sc == 0, 'sc1 pos wrong');
     assert(stats_1.opt_pos_lp == 0, 'lp1 pos wrong');
     assert(stats_1.opt_pos_sp == 0, 'sp1 pos wrong');
+    
 }
+
