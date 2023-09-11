@@ -2,26 +2,27 @@ mod Pragma {
     use starknet::get_block_timestamp;
 
     use carmine_protocol::traits::{IPragmaOracleDispatcher, IPragmaOracleDispatcherTrait};
+    use super::PragmaUtils::{IOracleABIDispatcher, IOracleABIDispatcherTrait, DataType, PragmaPricesResponse, AggregationMode, Checkpoint};
 
     use carmine_protocol::amm_core::oracles::oracle_helpers::{convert_from_int_to_Fixed};
     use carmine_protocol::types::basic::{Timestamp};
 
     use starknet::ContractAddress;
+    use starknet::contract_address::contract_address_const;
     use traits::{TryInto, Into};
     use option::OptionTrait;
 
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
-
-    use carmine_protocol::amm_core::constants::{TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS,};
+    use carmine_protocol::amm_core::constants::{TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS};
 
     // Mainnet
     // const PRAGMA_ORACLE_ADDRESS: felt252 =
     //     0x0346c57f094d641ad94e43468628d8e9c574dcb2803ec372576ccc60a40be2c4;
 
     // Testnet TODO: Check before mainnet launch
-    const PRAGMA_ORACLE_ADDRESS: felt252 =
-        0x446812bac98c08190dee8967180f4e3cdcd1db9373ca269904acb17f67f7093;
+    const PRAGMA_ORACLE_ADDRESS: felt252 = 
+        0x1ab2b1d9d084ed2c9fe185ac32b3bc7fa42f85e129b97459b4fe315f4247978; // C1 version
 
     const PRAGMA_AGGREGATION_MODE: felt252 = 0; // 0 is default for median
 
@@ -41,7 +42,6 @@ mod Pragma {
     const PRAGMA_DAI_USD_KEY: felt252 = 19212080998863684;
     const PRAGMA_USDC_USD_KEY: felt252 = 6148332971638477636;
 
-
     #[derive(Copy, Drop, Serde)]
     struct PragmaCheckpoint {
         timestamp: felt252,
@@ -52,6 +52,7 @@ mod Pragma {
 
 
     fn _get_stablecoin_key(quote_token_addr: ContractAddress) -> Option<felt252> {
+        
         if quote_token_addr == TOKEN_USDC_ADDRESS
             .try_into()
             .expect('Pragma/GSK - Failed to convert') {
@@ -82,28 +83,25 @@ mod Pragma {
     use debug::PrintTrait;
 
     fn _get_pragma_median_price(key: felt252) -> Fixed {
-        let (value, decimals, last_updated_timestamp, num_sources_aggregated) =
-            IPragmaOracleDispatcher {
+
+        let res: PragmaPricesResponse = IOracleABIDispatcher {
             contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
-        }
-            .get_spot_median(key);
+        }.get_data(DataType::SpotEntry(key), AggregationMode::Median(()));
 
         let curr_time = get_block_timestamp();
-        let time_diff = if curr_time < last_updated_timestamp
-            .try_into()
-            .expect('Pragma/_GPMP - LUT too large') {
+        let time_diff = if curr_time < res.last_updated_timestamp {
             0
         } else {
-            curr_time - last_updated_timestamp.try_into().expect('Pragma/_GPMP - LUT too large')
+            curr_time - res.last_updated_timestamp
         };
 
         assert(time_diff < 3600, 'Pragma/_GPMP - Price too old');
         assert(
-            value.try_into().expect('Pragma/GPMP - Price too high') > 0_u128,
+            res.price > 0_u128,
             'Pragma/-GPMP - Price <= 0'
         );
 
-        convert_from_int_to_Fixed(value.try_into().unwrap(), decimals.try_into().unwrap())
+        convert_from_int_to_Fixed(res.price, res.decimals.try_into().expect('Pragma/_GPMP - decimals err'))
     }
 
     fn get_pragma_median_price(
@@ -117,26 +115,22 @@ mod Pragma {
 
     // TODO Check that checkpoint is not after expiry
     fn _get_pragma_terminal_price(key: felt252, maturity: Timestamp) -> Fixed {
-        let maturity: felt252 = maturity.into();
 
-        let (last_checkpoint, _) = IPragmaOracleDispatcher {
-            contract_address: PRAGMA_ORACLE_ADDRESS
-                .try_into()
-                .expect('Pragma/GTMP - Unable to convert')
-        }
-            .get_last_spot_checkpoint_before(key, maturity);
+        let (res, _) = IOracleABIDispatcher {
+            contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
+        }.get_last_checkpoint_before(DataType::SpotEntry(key), maturity, AggregationMode::Median(()));
 
         // TODO: Handle negative time diff gracefully, it'll fail with sub overflow
-        let time_diff = maturity - last_checkpoint.timestamp;
+        let time_diff = maturity - res.timestamp;
 
-        assert(time_diff.try_into().unwrap() < 7200_u128, 'Pragma/GPTP - Price too old');
+        assert(time_diff < 7200, 'Pragma/GPTP - Price too old');
         assert(
-            last_checkpoint.value.try_into().expect('Pragma/GPTP - Price too high') > 0_u128,
+            res.value > 0_u128,
             'Pragma/GPTP - Price <= 0'
         );
 
         //  Pragma checkpoints should always have 8 decimals
-        convert_from_int_to_Fixed(last_checkpoint.value.try_into().unwrap(), 8)
+        convert_from_int_to_Fixed(res.value, 8)
     }
 
     fn get_pragma_terminal_price(
@@ -168,4 +162,55 @@ mod Pragma {
             }
         }
     }
+}
+
+/////////////////////
+// Pragma Structs/Abi
+/////////////////////
+
+mod PragmaUtils {
+    #[starknet::interface]
+    trait IOracleABI<TContractState> {
+        fn get_data(
+            self: @TContractState, data_type: DataType, aggregation_mode: AggregationMode
+        ) -> PragmaPricesResponse;
+        fn get_last_checkpoint_before(
+            self: @TContractState,
+            data_type: DataType,
+            timestamp: u64,
+            aggregation_mode: AggregationMode,
+        ) -> (Checkpoint, u64);
+    }
+
+    #[derive(Drop, Copy, Serde)]
+    enum DataType {
+        SpotEntry: felt252,
+        FutureEntry: (felt252, u64),
+        GenericEntry: felt252,
+    }
+
+    #[derive(Serde, Drop, Copy)]
+    struct PragmaPricesResponse {
+        price: u128,
+        decimals: u32,
+        last_updated_timestamp: u64,
+        num_sources_aggregated: u32,
+        expiration_timestamp: Option<u64>,
+    }
+
+    #[derive(Serde, Drop)]
+    struct Checkpoint {
+        timestamp: u64,
+        value: u128,
+        aggregation_mode: AggregationMode,
+        num_sources_aggregated: u32,
+    }
+
+    #[derive(Serde, Drop, Copy)]
+    enum AggregationMode {
+        Median: (),
+        Mean: (),
+        Error: (),
+    }
+    
 }

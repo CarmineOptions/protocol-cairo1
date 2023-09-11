@@ -19,7 +19,7 @@ use carmine_protocol::tokens::option_token::{
 };
 use carmine_protocol::tokens::lptoken::{LPToken, ILPTokenDispatcher, ILPTokenDispatcherTrait};
 
-use carmine_protocol::amm_core::oracles::pragma::Pragma::{PragmaCheckpoint, PRAGMA_ORACLE_ADDRESS};
+use carmine_protocol::amm_core::oracles::pragma::Pragma::{PRAGMA_ORACLE_ADDRESS};
 
 // use openzeppelin::token::erc20::ERC20;
 // use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
@@ -69,39 +69,47 @@ fn get_dispatchers(ctx: Ctx) -> Dispatchers {
     }
 }
 
-#[starknet::interface]
-trait IPragmaOracle<TContractState> {
-    fn get_spot_median(
-        self: @TContractState, pair_id: felt252
-    ) -> (felt252, felt252, felt252, felt252);
-    fn get_last_spot_checkpoint_before(
-        self: @TContractState, key: felt252, timestamp: felt252
-    ) -> (PragmaCheckpoint, felt252);
-}
-
-
 #[starknet::contract]
 mod MockPragma {
+    use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{DataType, PragmaPricesResponse, AggregationMode, Checkpoint, IOracleABI};
+    use option::{Option, OptionTrait};
+    
     #[storage]
     struct Storage {}
 
     #[external(v0)]
-    impl MockPragma of super::IPragmaOracle<ContractState> {
-        fn get_spot_median(
-            self: @ContractState, pair_id: felt252
-        ) -> (felt252, felt252, felt252, felt252) {
-            (1, 1, 1, 1)
+    impl MockPragma of IOracleABI<ContractState> {
+        fn get_data(self: @ContractState, data_type: DataType, aggregation_mode: AggregationMode) -> PragmaPricesResponse {
+
+            // TODO: Values are currently hardcoded, since there is no support for serde of vecs with len > 4, 
+            // so we can't use start_mock_call (it takes in vec of return data, which would need to be of lenght five in this case)
+            PragmaPricesResponse {
+                price: 140000000000, 
+                decimals: 8, 
+                last_updated_timestamp: 1000000000 + 60 * 60 * 12,
+                num_sources_aggregated: 0, 
+                expiration_timestamp: Option::None(())
+            }
         }
 
-        fn get_last_spot_checkpoint_before(
-            self: @ContractState, key: felt252, timestamp: felt252
-        ) -> (super::PragmaCheckpoint, felt252) {
-            let res = super::PragmaCheckpoint {
-                timestamp: 0, value: 0, aggregation_mode: 0, num_sources_aggregated: 0,
+        fn get_last_checkpoint_before(
+            self: @ContractState,
+            data_type: DataType,
+            timestamp: u64,
+            aggregation_mode: AggregationMode,
+        ) -> (Checkpoint, u64) {
+
+            // TODO: Values are currently hardcoded since idk how to return enum when mocking a contract call 
+            let checkp = Checkpoint {
+                timestamp: 1000000000 + 60 * 60 * 24 - 1, 
+                value: 140000000000,
+                aggregation_mode: AggregationMode::Median(()),
+                num_sources_aggregated: 0
             };
 
-            (res, 0)
+            (checkp, 0)
         }
+
     }
 }
 

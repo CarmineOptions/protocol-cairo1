@@ -21,11 +21,11 @@ fn test_withdraw_liquidity() {
     let five_k_tokens: u256 = 5000000000; // with 6 decimals
 
     start_prank(ctx.amm_address, ctx.admin_address);
-    start_mock_call(
-        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
-        'get_spot_median',
-        (140000000000, 8, 1000000000 + 60 * 60 * 12, 0)
-    );
+    // start_mock_call(
+    //     PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+    //     'get_spot_median',
+    //     (140000000000, 8, 1000000000 + 60 * 60 * 12, 0)
+    // );
 
     let stats_0 = StatsTrait::new(ctx, dsps);
 

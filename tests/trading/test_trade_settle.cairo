@@ -26,11 +26,11 @@ fn test_trade_settle_long() {
 
     start_warp(ctx.amm_address, 1000000000);
     start_prank(ctx.amm_address, ctx.admin_address);
-    start_mock_call(
-        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
-        'get_spot_median',
-        (140000000000, 8, 1000000000 + 60 * 60 * 12, 0) // mock price at 1_000
-    );
+    // start_mock_call(
+    //     PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+    //     'get_spot_median',
+    //     (140000000000, 8, 1000000000 + 60 * 60 * 12, 0) // mock price at 1_000
+    // );
 
     // Conduct some trades
     let long_call_premia = dsps
@@ -66,14 +66,14 @@ fn test_trade_settle_long() {
 
     // Warp to one second after expiry
     stop_warp(ctx.amm_address);
-    stop_mock_call(PRAGMA_ORACLE_ADDRESS.try_into().unwrap(), 'get_spot_median');
+    // stop_mock_call(PRAGMA_ORACLE_ADDRESS.try_into().unwrap(), 'get_spot_median');
 
     start_warp(ctx.amm_address, 1000000000 + 60 * 60 * 24 + 1);
-    start_mock_call(
-        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
-        'get_last_spot_checkpoint_before',
-        ((1000000000 + 60 * 60 * 24 - 1, 140000000000, 0, 0), 0) // mock price at 1_400
-    );
+    // start_mock_call(
+    //     PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+    //     'get_last_spot_checkpoint_before',
+    //     ((1000000000 + 60 * 60 * 24 - 1, 140000000000, 0, 0), 0) // mock price at 1_400
+    // );
 
     // Expire pools
     dsps.amm.expire_option_token_for_pool(
@@ -187,11 +187,11 @@ fn test_trade_settle_short() {
 
     start_warp(ctx.amm_address, 1000000000);
     start_prank(ctx.amm_address, ctx.admin_address);
-    start_mock_call(
-        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
-        'get_spot_median',
-        (140000000000, 8, 1000000000 + 60 * 60 * 12, 0) // mock price at 1_000
-    );
+    // start_mock_call(
+    //     PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+    //     'get_spot_median',
+    //     (140000000000, 8, 1000000000 + 60 * 60 * 12, 0) // mock price at 1_000
+    // );
 
 
     // Conduct some shorts
@@ -231,14 +231,14 @@ fn test_trade_settle_short() {
 
     // Warp to one second after expiry
     stop_warp(ctx.amm_address);
-    stop_mock_call(PRAGMA_ORACLE_ADDRESS.try_into().unwrap(), 'get_spot_median');
+    // stop_mock_call(PRAGMA_ORACLE_ADDRESS.try_into().unwrap(), 'get_spot_median');
 
     start_warp(ctx.amm_address, 1000000000 + 60 * 60 * 24 + 1);
-    start_mock_call(
-        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
-        'get_last_spot_checkpoint_before',
-        ((1000000000 + 60 * 60 * 24 - 1, 140000000000, 0, 0), 0) // mock price at 1_400
-    );
+    // start_mock_call(
+    //     PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+    //     'get_last_spot_checkpoint_before',
+    //     ((1000000000 + 60 * 60 * 24 - 1, 140000000000, 0, 0), 0) // mock price at 1_400
+    // );
 
     // Expire pools
     dsps.amm.expire_option_token_for_pool(

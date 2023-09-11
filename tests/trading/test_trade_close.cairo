@@ -26,11 +26,11 @@ fn test_trade_close_long() {
 
     start_warp(ctx.amm_address, 1000000000);
     start_prank(ctx.amm_address, ctx.admin_address);
-    start_mock_call(
-        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
-        'get_spot_median',
-        (140000000000, 8, 1000000000 + 60 * 60 * 12, 0) // mock price at 1_000
-    );
+    // start_mock_call(
+    //     PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+    //     'get_spot_median',
+    //     (140000000000, 8, 1000000000 + 60 * 60 * 12, 0) // mock price at 1_000
+    // );
 
     // Open some trades
     let _ = dsps
@@ -154,11 +154,11 @@ fn test_trade_close_short() {
 
     start_warp(ctx.amm_address, 1000000000);
     start_prank(ctx.amm_address, ctx.admin_address);
-    start_mock_call(
-        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
-        'get_spot_median',
-        (140000000000, 8, 1000000000 + 60 * 60 * 12, 0) // mock price at 1_000
-    );
+    // start_mock_call(
+    //     PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+    //     'get_spot_median',
+    //     (140000000000, 8, 1000000000 + 60 * 60 * 12, 0) // mock price at 1_000
+    // );
 
     // First open some trades
     let _ = dsps
