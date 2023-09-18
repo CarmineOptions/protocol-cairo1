@@ -52,6 +52,13 @@ mod LiquidityPool {
     }
 
     fn get_value_of_pool_position(lptoken_address: LPTAddress) -> Fixed {
+        let non_expired = get_value_of_pool_non_expired_position(lptoken_address);
+        let expired = get_value_of_pool_expired_position(lptoken_address);
+
+        non_expired + expired
+    }
+
+    fn get_value_of_pool_non_expired_position(lptoken_address: LPTAddress) -> Fixed {
         let mut i: u32 = 0;
         let mut pool_pos: Fixed = FixedTrait::from_felt(0);
 

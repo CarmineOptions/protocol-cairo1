@@ -4,7 +4,7 @@ use carmine_protocol::types::basic::{OptionType, OptionSide};
 use carmine_protocol::types::option_::{Option_, OptionWithPremia, OptionWithUsersPosition};
 use carmine_protocol::types::pool::{PoolInfo, UserPoolInfo, Pool};
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
-
+use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::PragmaPricesResponse;
 use starknet::ClassHash;
 
 #[starknet::interface]
@@ -74,6 +74,19 @@ trait IAMM<TContractState> {
         option_token_address_: ContractAddress,
         initial_volatility: Fixed,
     );
+    fn add_option_both_sides(
+        ref self: TContractState,
+        maturity: u64,
+        strike_price: Fixed,
+        quote_token_address: ContractAddress,
+        base_token_address: ContractAddress,
+        option_type: OptionType,
+        lptoken_address: ContractAddress,
+        option_token_address_long: ContractAddress,
+        option_token_address_short: ContractAddress,
+        initial_volatility: Fixed
+    );
+
     fn get_option_token_address(
         self: @TContractState,
         lptoken_address: ContractAddress,
@@ -97,6 +110,11 @@ trait IAMM<TContractState> {
     ) -> Array<OptionWithUsersPosition>;
     fn get_all_lptoken_addresses(self: @TContractState,) -> Array<ContractAddress>;
     fn get_value_of_pool_position(self: @TContractState, lptoken_address: ContractAddress) -> Fixed;
+
+    fn get_value_of_pool_expired_position(self: @TContractState, lptoken_address: ContractAddress) -> Fixed;
+    fn get_value_of_pool_non_expired_position(self: @TContractState, lptoken_address: ContractAddress) -> Fixed;
+    
+    
     fn get_value_of_position(
         self: @TContractState,
         option: Option_,
@@ -210,6 +228,14 @@ trait IAMM<TContractState> {
     fn upgrade(ref self: TContractState, new_implementation: ClassHash); // TODO: this is just temp
 // fn setAdmin(ref self: TContractState, address: felt252);
 // fn getImplementationHash(self: @TContractState, ) -> felt252;
+
+    fn _get_ticker_key(self: @TContractState, quote_token_addr: ContractAddress, base_token_addr: ContractAddress) -> felt252;
+
+    fn _get_pragma(self: @TContractState, key: felt252) -> PragmaPricesResponse;
+    fn get_pragma(
+        self: @TContractState, quote_token_addr: ContractAddress, base_token_addr: ContractAddress,
+    ) -> PragmaPricesResponse;
+
 }
 
 
@@ -342,6 +368,8 @@ mod AMM {
     use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing;
     use carmine_protocol::amm_core::oracles::agg::OracleAgg;
     use carmine_protocol::amm_core::oracles::pragma::Pragma;
+
+    use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::PragmaPricesResponse;
 
     use carmine_protocol::types::option_::{OptionWithPremia, OptionWithUsersPosition};
     use carmine_protocol::types::pool::{PoolInfo, UserPoolInfo};
@@ -483,7 +511,30 @@ mod AMM {
                 initial_volatility,
             )
         }
-
+        fn add_option_both_sides(
+            ref self: ContractState,
+            maturity: u64,
+            strike_price: Fixed,
+            quote_token_address: ContractAddress,
+            base_token_address: ContractAddress,
+            option_type: OptionType,
+            lptoken_address: ContractAddress,
+            option_token_address_long: ContractAddress,
+            option_token_address_short: ContractAddress,
+            initial_volatility: Fixed,
+        ) {
+            Options::add_option_both_sides(
+                maturity,
+                strike_price,
+                quote_token_address,
+                base_token_address,
+                option_type,
+                lptoken_address,
+                option_token_address_long,
+                option_token_address_short,
+                initial_volatility,
+            )
+        }
 
         fn get_option_token_address(
             self: @ContractState,
@@ -537,6 +588,13 @@ mod AMM {
             View::get_all_lptoken_addresses()
         }
 
+        fn get_value_of_pool_expired_position(self: @ContractState, lptoken_address: LPTAddress) -> Fixed {
+            LiquidityPool::get_value_of_pool_expired_position(lptoken_address)
+        }
+
+        fn get_value_of_pool_non_expired_position(self: @ContractState, lptoken_address: LPTAddress) -> Fixed {
+            LiquidityPool::get_value_of_pool_non_expired_position(lptoken_address)
+        }
         fn get_value_of_pool_position(
             self: @ContractState, lptoken_address: ContractAddress
         ) -> Fixed {
@@ -749,5 +807,21 @@ mod AMM {
             assert(!new_implementation.is_zero(), 'Class hash cannot be zero');
             starknet::replace_class_syscall(new_implementation).unwrap();
         }
+
+    
+    fn _get_ticker_key(self: @ContractState, quote_token_addr: ContractAddress, base_token_addr: ContractAddress) -> felt252 {
+        Pragma::_get_ticker_key(quote_token_addr, base_token_addr)   
+    }
+
+    fn _get_pragma(self: @ContractState, key: felt252) -> PragmaPricesResponse {
+        Pragma::_get_pragma(key)
+    }
+    fn get_pragma(
+        self: @ContractState, quote_token_addr: ContractAddress, base_token_addr: ContractAddress,
+    ) -> PragmaPricesResponse {
+        Pragma::get_pragma(quote_token_addr, base_token_addr)
+    }
+        
+        
     }
 }

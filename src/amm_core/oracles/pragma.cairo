@@ -22,12 +22,13 @@ mod Pragma {
 
     // Testnet TODO: Check before mainnet launch
     const PRAGMA_ORACLE_ADDRESS: felt252 = 
-        0x1ab2b1d9d084ed2c9fe185ac32b3bc7fa42f85e129b97459b4fe315f4247978; // C1 version
+        0x620a609f88f612eb5773a6f4084f7b33be06a6fed7943445aebce80d6a146ba; // C1 version
 
-    const PRAGMA_AGGREGATION_MODE: felt252 = 0; // 0 is default for median
+    // const PRAGMA_AGGREGATION_MODE: felt252 = 0; // 0 is default for median
 
     const PRAGMA_BTC_USD_KEY: felt252 = 18669995996566340;
-    const PRAGMA_ETH_USD_KEY: felt252 = 19514442401534788;
+    // const PRAGMA_ETH_USD_KEY: felt252 = 19514442401534788;
+    const PRAGMA_ETH_USD_KEY: felt252 = 'ETH/USD';
     const PRAGMA_SOL_USD_KEY: felt252 = 23449611697214276;
     const PRAGMA_AVAX_USD_KEY: felt252 = 4708022307469480772;
     const PRAGMA_DOGE_USD_KEY: felt252 = 4922231280211678020;
@@ -81,6 +82,20 @@ mod Pragma {
     }
 
     use debug::PrintTrait;
+
+    fn _get_pragma(key: felt252) -> PragmaPricesResponse {
+        IOracleABIDispatcher {
+            contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
+        }.get_data(DataType::SpotEntry(key), AggregationMode::Median(()))
+    }
+
+    fn get_pragma(
+        quote_token_addr: ContractAddress, base_token_addr: ContractAddress,
+    ) -> PragmaPricesResponse {
+        let key = _get_ticker_key(quote_token_addr, base_token_addr);
+        _get_pragma(key)
+    }
+
 
     fn _get_pragma_median_price(key: felt252) -> Fixed {
 

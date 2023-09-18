@@ -50,6 +50,41 @@ mod Options {
     use debug::PrintTrait;
     // TODO: Add annotations
     // TODO: What about new options that are written in c2?
+    fn add_option_both_sides(
+        maturity: Timestamp,
+        strike_price: Strike,
+        quote_token_address: ContractAddress,
+        base_token_address: ContractAddress,
+        option_type: OptionType,
+        lptoken_address: ContractAddress,
+        option_token_address_long: ContractAddress,
+        option_token_address_short: ContractAddress,
+        initial_volatility: Volatility,
+    ) {
+        add_option(
+            0, // LONG
+            maturity,
+            strike_price,
+            quote_token_address,
+            base_token_address,
+            option_type,
+            lptoken_address,
+            option_token_address_long,
+            initial_volatility
+        );
+        add_option(
+            1, // SHORT
+            maturity,
+            strike_price,
+            quote_token_address,
+            base_token_address,
+            option_type,
+            lptoken_address,
+            option_token_address_short,
+            initial_volatility
+        );
+    }
+    
     fn add_option(
         option_side: OptionSide,
         maturity: Timestamp,

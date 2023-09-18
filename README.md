@@ -30,4 +30,3 @@ Plan:
   - Upgrading the amm
 - Week 4: 
   - Profit?
-
