@@ -13,6 +13,7 @@ use traits::{TryInto, Into};
 use option::OptionTrait;
 
 use carmine_protocol::amm_core::oracles::pragma::Pragma::PRAGMA_ORACLE_ADDRESS;
+use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{PragmaPricesResponse, Checkpoint, AggregationMode};
 
 
 #[test]
@@ -148,11 +149,17 @@ fn test_get_total_premia() {
 
     start_prank(ctx.amm_address, ctx.admin_address);
     start_warp(ctx.amm_address, 1000000000 + 60 * 60 * 12);
-    // start_mock_call(
-    //     PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
-    //     'get_spot_median',
-    //     (140000000000, 8, 1000000000 + 60 * 60 * 12, 0)
-    // );
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_data',
+        PragmaPricesResponse {
+            price: 140000000000,
+            decimals: 8, 
+            last_updated_timestamp: 1000000000 + 60 * 60 * 12,
+            num_sources_aggregated: 0,
+            expiration_timestamp: Option::None(())
+        }
+    );
 
     let (total_premia_before_fees_long_call, total_premia_including_fees_long_call) = dsps
         .amm
@@ -220,11 +227,17 @@ fn test_get_all_non_expired_options_with_premia() {
     // Only the options with maturity 1000000000 + 60*60*24 should show -> 2 calls, 2 puts
 
     start_warp(ctx.amm_address, 1000000000 + 60 * 60 * 12);
-    // start_mock_call(
-    //     PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
-    //     'get_spot_median',
-    //     (140000000000, 8, 1000000000 + 60 * 60 * 12, 0)
-    // );
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_data',
+        PragmaPricesResponse {
+            price: 140000000000,
+            decimals: 8, 
+            last_updated_timestamp: 1000000000 + 60 * 60 * 12,
+            num_sources_aggregated: 0,
+            expiration_timestamp: Option::None(())
+        }
+    );
 
     let mut call_opts = dsps.amm.get_all_non_expired_options_with_premia(ctx.call_lpt_address);
     let mut put_opts = dsps.amm.get_all_non_expired_options_with_premia(ctx.put_lpt_address);

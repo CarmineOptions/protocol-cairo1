@@ -89,18 +89,19 @@ mod LiquidityPool {
         let LOOKBACK = 24 * 3600 * 14;
         // ^ Only look back 2 weeks, all options should be long expired by then
         let now = get_block_timestamp();
-        let mut ix = get_available_options_usable_index(lptoken_address)
-            - 1; // Usable index should be empty, so start before
+        let last_ix =  get_available_options_usable_index(lptoken_address);
+
+        if last_ix == 0 {
+            return FixedTrait::ZERO();
+        }
+
+        let mut ix = last_ix - 1;
         let mut pool_pos: Fixed = FixedTrait::from_felt(0);
 
         loop {
             let option = get_available_options(lptoken_address, ix);
             assert(option.sum() != 0, 'GVoEO - opt sum zero');
 
-            if ix == 0 {
-                break;
-            }
-            ix -= 1; // Do this before 'continue' 
 
             if (option.maturity >= now) {
                 break; // Option is not yet expired
@@ -110,12 +111,19 @@ mod LiquidityPool {
                 break; // We're over lookback window
             };
 
+            if ix == 0 {
+                break;
+            }
+            ix -= 1;
+
             let option_position = option.pools_position();
             if option_position == 0 {
                 continue; // Don't care if there is no position - or the option is already expired
             }
 
             pool_pos += option.value_of_position(option_position);
+
+            
         };
 
         pool_pos
@@ -176,8 +184,8 @@ mod LiquidityPool {
     }
 
     fn add_lptoken(
-        quote_token_address: LPTAddress,
-        base_token_address: LPTAddress,
+        quote_token_address: ContractAddress,
+        base_token_address: ContractAddress,
         option_type: OptionType,
         lptoken_address: LPTAddress,
         pooled_token_addr: LPTAddress,

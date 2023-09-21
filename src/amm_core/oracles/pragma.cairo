@@ -14,21 +14,20 @@ mod Pragma {
 
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
-    use carmine_protocol::amm_core::constants::{TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS};
+    use carmine_protocol::amm_core::constants::{TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, TOKEN_WBTC_ADDRESS};
 
     // Mainnet
     // const PRAGMA_ORACLE_ADDRESS: felt252 =
     //     0x0346c57f094d641ad94e43468628d8e9c574dcb2803ec372576ccc60a40be2c4;
 
     // Testnet TODO: Check before mainnet launch
-    const PRAGMA_ORACLE_ADDRESS: felt252 = 
+    const PRAGMA_ORACLE_ADDRESS: felt252 =  // TODO: Add storage var for addr
         0x620a609f88f612eb5773a6f4084f7b33be06a6fed7943445aebce80d6a146ba; // C1 version
 
     // const PRAGMA_AGGREGATION_MODE: felt252 = 0; // 0 is default for median
 
-    const PRAGMA_BTC_USD_KEY: felt252 = 18669995996566340;
-    // const PRAGMA_ETH_USD_KEY: felt252 = 19514442401534788;
-    const PRAGMA_ETH_USD_KEY: felt252 = 'ETH/USD';
+    const PRAGMA_WBTC_USD_KEY: felt252 = 287680677296296772;
+    const PRAGMA_ETH_USD_KEY: felt252 = 19514442401534788;
     const PRAGMA_SOL_USD_KEY: felt252 = 23449611697214276;
     const PRAGMA_AVAX_USD_KEY: felt252 = 4708022307469480772;
     const PRAGMA_DOGE_USD_KEY: felt252 = 4922231280211678020;
@@ -66,13 +65,15 @@ mod Pragma {
     fn _get_ticker_key(
         quote_token_addr: ContractAddress, base_token_addr: ContractAddress
     ) -> felt252 {
-        if base_token_addr == TOKEN_ETH_ADDRESS
-            .try_into()
-            .expect('Pragma/GTK - Failed to convert') {
-            if quote_token_addr == TOKEN_USDC_ADDRESS
-                .try_into()
-                .expect('Pragma/GTK - Failed to convert') {
+        if base_token_addr.into() == TOKEN_ETH_ADDRESS {
+            if quote_token_addr.into() == TOKEN_USDC_ADDRESS {
                 PRAGMA_ETH_USD_KEY
+            } else {
+                0
+            }
+        } else if base_token_addr.into() == TOKEN_WBTC_ADDRESS {
+            if quote_token_addr.into() == TOKEN_USDC_ADDRESS {
+                PRAGMA_WBTC_USD_KEY
             } else {
                 0
             }
@@ -135,24 +136,26 @@ mod Pragma {
             contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
         }.get_last_checkpoint_before(DataType::SpotEntry(key), maturity, AggregationMode::Median(()));
 
+        let decs = IOracleABIDispatcher {
+            contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
+        }.get_decimals(DataType::SpotEntry(key));
+
         // TODO: Handle negative time diff gracefully, it'll fail with sub overflow
         let time_diff = maturity - res.timestamp;
 
-        assert(time_diff < 7200, 'Pragma/GPTP - Price too old');
+        assert(time_diff < 7200, 'Pragma/GPTP - Term price old');
         assert(
             res.value > 0_u128,
             'Pragma/GPTP - Price <= 0'
         );
 
-        //  Pragma checkpoints should always have 8 decimals
-        convert_from_int_to_Fixed(res.value, 8)
+        convert_from_int_to_Fixed(res.value, decs.try_into().unwrap())
     }
 
     fn get_pragma_terminal_price(
         quote_token_addr: ContractAddress, base_token_addr: ContractAddress, maturity: Timestamp
     ) -> Fixed {
         let key = _get_ticker_key(quote_token_addr, base_token_addr);
-        // .expect('Pragma/GPMP - Cant get spot key');
         let res = _get_pragma_terminal_price(key, maturity);
         account_for_stablecoin_divergence(res, quote_token_addr, maturity)
     }
@@ -177,6 +180,26 @@ mod Pragma {
             }
         }
     }
+
+    fn set_pragma_checkpoint(key: felt252) {
+        IOracleABIDispatcher {
+            contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
+        }.set_checkpoint(DataType::SpotEntry(key), AggregationMode::Median(()))
+    }
+
+    fn set_pragma_required_checkpoints() {
+
+        // Just add needed checkpoints here
+        set_pragma_checkpoint(PRAGMA_ETH_USD_KEY);
+        set_pragma_checkpoint(PRAGMA_USDC_USD_KEY);
+        set_pragma_checkpoint(PRAGMA_WBTC_USD_KEY);
+    }
+    
+    fn get_pragma_checkpoint(key: felt252, before: u64) -> (Checkpoint, u64) {
+        IOracleABIDispatcher {
+            contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
+        }.get_last_checkpoint_before(DataType::SpotEntry(key), before, AggregationMode::Median(()))
+    }
 }
 
 /////////////////////
@@ -184,8 +207,10 @@ mod Pragma {
 /////////////////////
 
 mod PragmaUtils {
+
     #[starknet::interface]
-    trait IOracleABI<TContractState> {
+    trait IOracleABI<TContractState> {    
+        fn get_decimals(self: @TContractState, data_type: DataType) -> u32;
         fn get_data(
             self: @TContractState, data_type: DataType, aggregation_mode: AggregationMode
         ) -> PragmaPricesResponse;
@@ -195,6 +220,9 @@ mod PragmaUtils {
             timestamp: u64,
             aggregation_mode: AggregationMode,
         ) -> (Checkpoint, u64);
+        fn set_checkpoint(
+            ref self: TContractState, data_type: DataType, aggregation_mode: AggregationMode
+        );
     }
 
     #[derive(Drop, Copy, Serde)]

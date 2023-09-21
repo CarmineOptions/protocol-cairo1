@@ -4,10 +4,19 @@ use debug::PrintTrait;
 use option::OptionTrait;
 use carmine_protocol::testing::test_utils::{Stats, StatsTrait};
 use carmine_protocol::amm_core::oracles::pragma::Pragma::PRAGMA_ORACLE_ADDRESS;
+use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{PragmaPricesResponse, Checkpoint, AggregationMode};
+
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 use snforge_std::{
-    declare, ContractClassTrait, start_prank, stop_prank, start_warp, stop_warp, ContractClass,
-    start_mock_call, stop_mock_call
+    declare,
+    ContractClassTrait,
+    start_prank,
+    stop_prank,
+    start_warp,
+    stop_warp,
+    ContractClass,
+    start_mock_call,
+    stop_mock_call
 };
 use carmine_protocol::amm_core::helpers::{FixedHelpersTrait, toU256_balance};
 use carmine_protocol::amm_core::amm::{AMM, IAMMDispatcher, IAMMDispatcherTrait};
@@ -27,11 +36,18 @@ fn test_expire_long () {
 
     start_warp(ctx.amm_address, 1000000000);
     start_prank(ctx.amm_address, ctx.admin_address);
-    // start_mock_call(
-    //     PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
-    //     'get_spot_median',
-    //     (140000000000, 8, 1000000000 + 60 * 60 * 12, 0) // mock price at 1_000
-    // );
+
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_data',
+        PragmaPricesResponse {
+            price: 140000000000,
+            decimals: 8, 
+            last_updated_timestamp: 1000000000 + 60 * 60 * 12,
+            num_sources_aggregated: 0,
+            expiration_timestamp: Option::None(())
+        }
+    );
 
     // Conduct some trades
     let long_call_premia = dsps
@@ -67,14 +83,24 @@ fn test_expire_long () {
 
     // Warp to one second after expiry
     stop_warp(ctx.amm_address);
-    // stop_mock_call(PRAGMA_ORACLE_ADDRESS.try_into().unwrap(), 'get_spot_median');
-
     start_warp(ctx.amm_address, 1000000000 + 60 * 60 * 24 + 1);
-    // start_mock_call(
-    //     PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
-    //     'get_last_spot_checkpoint_before',
-    //     ((1000000000 + 60 * 60 * 24 - 1, 140000000000, 0, 0), 0) // mock price at 1_400
-    // );
+
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_last_checkpoint_before',
+        (Checkpoint {
+                timestamp: 1000000000 + 60 * 60 * 24 - 1, 
+                value: 140000000000,
+                aggregation_mode: AggregationMode::Median(()),
+                num_sources_aggregated: 0
+        }, 1)
+     );
+
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_decimals',
+        8
+     );
 
     // Expire pools
     dsps.amm.expire_option_token_for_pool(
@@ -167,12 +193,17 @@ fn test_expire_short () {
 
     start_warp(ctx.amm_address, 1000000000);
     start_prank(ctx.amm_address, ctx.admin_address);
-    // start_mock_call(
-    //     PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
-    //     'get_spot_median',
-    //     (140000000000, 8, 1000000000 + 60 * 60 * 12, 0) // mock price at 1_000
-    // );
-
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_data',
+        PragmaPricesResponse {
+            price: 140000000000,
+            decimals: 8, 
+            last_updated_timestamp: 1000000000 + 60 * 60 * 12,
+            num_sources_aggregated: 0,
+            expiration_timestamp: Option::None(())
+        }
+    );
 
     // Conduct some shorts
     let short_call_premia = dsps
@@ -214,11 +245,22 @@ fn test_expire_short () {
     // stop_mock_call(PRAGMA_ORACLE_ADDRESS.try_into().unwrap(), 'get_spot_median');
 
     start_warp(ctx.amm_address, 1000000000 + 60 * 60 * 24 + 1);
-    // start_mock_call(
-    //     PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
-    //     'get_last_spot_checkpoint_before',
-    //     ((1000000000 + 60 * 60 * 24 - 1, 140000000000, 0, 0), 0) // mock price at 1_400
-    // );
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_last_checkpoint_before',
+        (Checkpoint {
+                timestamp: 1000000000 + 60 * 60 * 24 - 1, 
+                value: 140000000000,
+                aggregation_mode: AggregationMode::Median(()),
+                num_sources_aggregated: 0
+        }, 1)
+     );
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_decimals',
+        8
+     );
+
 
     // Expire pools
     dsps.amm.expire_option_token_for_pool(

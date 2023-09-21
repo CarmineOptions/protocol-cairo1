@@ -4,7 +4,7 @@ use carmine_protocol::types::basic::{OptionType, OptionSide};
 use carmine_protocol::types::option_::{Option_, OptionWithPremia, OptionWithUsersPosition};
 use carmine_protocol::types::pool::{PoolInfo, UserPoolInfo, Pool};
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
-use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::PragmaPricesResponse;
+use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{PragmaPricesResponse, Checkpoint};
 use starknet::ClassHash;
 
 #[starknet::interface]
@@ -223,6 +223,14 @@ trait IAMM<TContractState> {
         maturity: u64
     ) -> Fixed;
 
+    fn set_pragma_checkpoint(
+        ref self: TContractState,
+        key: felt252
+    );
+
+    fn get_pragma_checkpoint(self: @TContractState, key: felt252, before: u64) -> (Checkpoint, u64);
+    fn set_pragma_required_checkpoints(ref self: TContractState);
+
     // TODO: Functions below
     // fn initializer(ref self: TContractState, proxy_admin: ContractAddress);
     fn upgrade(ref self: TContractState, new_implementation: ClassHash); // TODO: this is just temp
@@ -369,7 +377,7 @@ mod AMM {
     use carmine_protocol::amm_core::oracles::agg::OracleAgg;
     use carmine_protocol::amm_core::oracles::pragma::Pragma;
 
-    use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::PragmaPricesResponse;
+    use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{PragmaPricesResponse, Checkpoint};
 
     use carmine_protocol::types::option_::{OptionWithPremia, OptionWithUsersPosition};
     use carmine_protocol::types::pool::{PoolInfo, UserPoolInfo};
@@ -822,6 +830,19 @@ mod AMM {
         Pragma::get_pragma(quote_token_addr, base_token_addr)
     }
         
+    fn set_pragma_checkpoint(
+        ref self: ContractState,
+        key: felt252
+    ) { Pragma::set_pragma_checkpoint(key) }
+
+    fn set_pragma_required_checkpoints(ref self: ContractState) {
+        Pragma::set_pragma_required_checkpoints()
+    }
+
+    fn get_pragma_checkpoint(self: @ContractState, key: felt252, before: u64) -> (Checkpoint, u64) {
+        Pragma::get_pragma_checkpoint(key, before)
+    }
+    
         
     }
 }

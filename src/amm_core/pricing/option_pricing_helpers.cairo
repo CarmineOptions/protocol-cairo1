@@ -60,7 +60,7 @@ fn get_new_volatility(
     option_type: OptionType,
     side: OptionSide,
     strike_price: Fixed,
-    get_pool_volatility_adjustment_speed: Fixed
+    pool_volatility_adjustment_speed: Fixed
 ) -> (Fixed, Fixed) {
     let hundred = FixedTrait::from_unscaled_felt(100);
     let two = FixedTrait::from_unscaled_felt(2);
@@ -68,9 +68,8 @@ fn get_new_volatility(
     let option_size_in_pool_currency = get_option_size_in_pool_currency(
         option_size, option_type, strike_price
     );
-
     let relative_option_size = option_size_in_pool_currency
-        / get_pool_volatility_adjustment_speed
+        / pool_volatility_adjustment_speed
         * hundred;
 
     let new_volatility = if side == TRADE_SIDE_LONG {

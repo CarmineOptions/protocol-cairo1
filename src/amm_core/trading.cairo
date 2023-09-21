@@ -112,7 +112,7 @@ mod Trading {
         if side == TRADE_SIDE_LONG {
             assert(total_premia <= limit_total_premia, 'Premia out of slippage bounds');
         } else {
-            assert(limit_total_premia <= total_premia, 'Premia out of slippage bounds');
+            assert(total_premia >= limit_total_premia, 'Premia out of slippage bounds');
         }
 
         // 10) Make the trade

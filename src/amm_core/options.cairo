@@ -290,6 +290,8 @@ mod Options {
         IOptionTokenDispatcher { contract_address: option_token_address }
             .mint(user_address, option_size.into());
 
+        assert(premia_including_fees_u256 > 0, 'MOTL: prem incl fees is 0');
+
         // Transfer premia 
         let transfer_res = IERC20Dispatcher { contract_address: currency_address }
             .transferFrom(user_address, curr_contract_address, premia_including_fees_u256);

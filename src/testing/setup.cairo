@@ -80,13 +80,10 @@ mod MockPragma {
     #[external(v0)]
     impl MockPragma of IOracleABI<ContractState> {
         fn get_data(self: @ContractState, data_type: DataType, aggregation_mode: AggregationMode) -> PragmaPricesResponse {
-
-            // TODO: Values are currently hardcoded, since there is no support for serde of vecs with len > 4, 
-            // so we can't use start_mock_call (it takes in vec of return data, which would need to be of lenght five in this case)
             PragmaPricesResponse {
-                price: 140000000000, 
-                decimals: 8, 
-                last_updated_timestamp: 1000000000 + 60 * 60 * 12,
+                price: 0, 
+                decimals: 0, 
+                last_updated_timestamp: 0,
                 num_sources_aggregated: 0, 
                 expiration_timestamp: Option::None(())
             }
@@ -99,22 +96,21 @@ mod MockPragma {
             aggregation_mode: AggregationMode,
         ) -> (Checkpoint, u64) {
 
-            // TODO: Values are currently hardcoded since idk how to return enum when mocking a contract call 
             let checkp = Checkpoint {
-                timestamp: 1000000000 + 60 * 60 * 24 - 1, 
-                value: 140000000000,
+                timestamp: 0, 
+                value: 0,
                 aggregation_mode: AggregationMode::Median(()),
                 num_sources_aggregated: 0
             };
-
             (checkp, 0)
         }
 
+        fn set_checkpoint( ref self: ContractState, data_type: DataType, aggregation_mode: AggregationMode) {}
+        fn get_decimals(self: @ContractState, data_type: DataType) -> u32 {0}
     }
 }
 
 
-// fn deploy_setup() {
 fn deploy_setup() -> (Ctx, Dispatchers) {
     let admin_address = 123456;
 

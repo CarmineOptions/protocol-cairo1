@@ -4,6 +4,7 @@ use debug::PrintTrait;
 use option::OptionTrait;
 use carmine_protocol::testing::test_utils::{Stats, StatsTrait};
 use carmine_protocol::amm_core::oracles::pragma::Pragma::PRAGMA_ORACLE_ADDRESS;
+use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{PragmaPricesResponse, Checkpoint, AggregationMode};
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 use snforge_std::{
     declare, ContractClassTrait, start_prank, stop_prank, start_warp, stop_warp, ContractClass,
@@ -26,11 +27,17 @@ fn test_trade_close_long() {
 
     start_warp(ctx.amm_address, 1000000000);
     start_prank(ctx.amm_address, ctx.admin_address);
-    // start_mock_call(
-    //     PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
-    //     'get_spot_median',
-    //     (140000000000, 8, 1000000000 + 60 * 60 * 12, 0) // mock price at 1_000
-    // );
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_data',
+        PragmaPricesResponse {
+            price: 140000000000,
+            decimals: 8, 
+            last_updated_timestamp: 1000000000 + 60 * 60 * 12,
+            num_sources_aggregated: 0,
+            expiration_timestamp: Option::None(())
+        }
+    );
 
     // Open some trades
     let _ = dsps
@@ -154,11 +161,17 @@ fn test_trade_close_short() {
 
     start_warp(ctx.amm_address, 1000000000);
     start_prank(ctx.amm_address, ctx.admin_address);
-    // start_mock_call(
-    //     PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
-    //     'get_spot_median',
-    //     (140000000000, 8, 1000000000 + 60 * 60 * 12, 0) // mock price at 1_000
-    // );
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_data',
+        PragmaPricesResponse {
+            price: 140000000000,
+            decimals: 8, 
+            last_updated_timestamp: 1000000000 + 60 * 60 * 12,
+            num_sources_aggregated: 0,
+            expiration_timestamp: Option::None(())
+        }
+    );
 
     // First open some trades
     let _ = dsps
