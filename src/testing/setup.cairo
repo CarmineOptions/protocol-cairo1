@@ -393,6 +393,7 @@ fn _add_expired_option(ctx: Ctx, dsps: Dispatchers) {
     let mut long_call_data = ArrayTrait::<felt252>::new();
     long_call_data.append('OptLongCallExpired');
     long_call_data.append('OLC');
+    long_call_data.append(ctx.amm_address.into());
     long_call_data.append(ctx.usdc_address.into());
     long_call_data.append(ctx.eth_address.into());
     long_call_data.append(0); // CALL

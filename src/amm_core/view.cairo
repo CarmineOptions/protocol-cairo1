@@ -4,6 +4,7 @@ mod View {
     use starknet::get_block_timestamp;
     use starknet::ContractAddress;
     use array::ArrayTrait;
+    use carmine_protocol::amm_core::helpers::pow;
 
     use core::option::OptionTrait;
 
@@ -58,13 +59,11 @@ mod View {
 
         let pool = PoolTrait::from_lpt_address(lpt_addr);
 
-        let base_addr: felt252 = pool.base_token_address.into();
+        let decs = IERC20Dispatcher {
+            contract_address: pool.base_token_address
+        }.decimals();
 
-        let one = if base_addr == TOKEN_ETH_ADDRESS {
-            1000000000000000000
-        } else {
-            100000000
-        };
+        let one = pow(10, decs.into());
 
         loop {
             let opt = get_available_options(lpt_addr, i);
