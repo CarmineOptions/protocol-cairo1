@@ -112,7 +112,7 @@ mod MockPragma {
 
 
 fn deploy_setup() -> (Ctx, Dispatchers) {
-    let admin_address = 123456;
+    let admin_address: felt252 = 0x0178227144f45dd9e704dab545018813d17383e4cd1181a94fb7086df8cc49e7; // for dummy assert admin
 
     let pragma_contract = declare('MockPragma');
     let mytoken_contract = declare('MyToken');
@@ -122,6 +122,7 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
 
     let amm_address = amm_contract.deploy(@ArrayTrait::new()).unwrap();
 
+    start_prank(amm_address, admin_address.try_into().unwrap());
     // Deploy Pragma at given address
     let pragma_address = pragma_contract
         .deploy_at(@ArrayTrait::new(), PRAGMA_ORACLE_ADDRESS.try_into().unwrap())
@@ -132,6 +133,7 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     let mut call_lpt_data = ArrayTrait::new();
     call_lpt_data.append('CLPT'); // Name
     call_lpt_data.append('CallPool'); //Symbol
+    call_lpt_data.append(amm_address.into()); // Owner
 
     let call_lpt_address = lptoken_contract.deploy(@call_lpt_data).unwrap();
 
@@ -139,6 +141,7 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     let mut put_lpt_data = ArrayTrait::new();
     put_lpt_data.append('PLPT'); // Name
     put_lpt_data.append('PutPool'); // Symbol
+    put_lpt_data.append(amm_address.into()); // Owner
     let put_lpt_address = lptoken_contract.deploy(@put_lpt_data).unwrap();
 
     // // Deploy ETH
@@ -177,6 +180,7 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     let mut long_call_data = ArrayTrait::new();
     long_call_data.append('OptLongCall');
     long_call_data.append('OLC');
+    long_call_data.append(amm_address.into());
     long_call_data.append(usdc_address.into());
     long_call_data.append(eth_address.into());
     long_call_data.append(CALL);
@@ -190,6 +194,7 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     let mut short_call_data = ArrayTrait::new();
     short_call_data.append('OptShortCall');
     short_call_data.append('OSC');
+    short_call_data.append(amm_address.into());
     short_call_data.append(usdc_address.into());
     short_call_data.append(eth_address.into());
     short_call_data.append(CALL);
@@ -203,6 +208,7 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     let mut long_put_data = ArrayTrait::new();
     long_put_data.append('OptLongPut');
     long_put_data.append('OLP');
+    long_put_data.append(amm_address.into());
     long_put_data.append(usdc_address.into());
     long_put_data.append(eth_address.into());
     long_put_data.append(PUT);
@@ -216,6 +222,7 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     let mut short_put_data = ArrayTrait::new();
     short_put_data.append('OptShortPut');
     short_put_data.append('OSP');
+    short_put_data.append(amm_address.into());
     short_put_data.append(usdc_address.into());
     short_put_data.append(eth_address.into());
     short_put_data.append(PUT);
@@ -308,8 +315,8 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
             five_k_usdc,
         );
 
-    assert(disp.lptc.balance_of(ctx.admin_address) == five_eth, 'Wher call lpt');
-    assert(disp.lptp.balance_of(ctx.admin_address) == five_k_usdc, 'Wher put lpt');
+    assert(disp.lptc.balanceOf(ctx.admin_address) == five_eth, 'Wher call lpt');
+    assert(disp.lptp.balanceOf(ctx.admin_address) == five_k_usdc, 'Wher put lpt');
 
     // Add Options
     let hundred = FixedTrait::from_unscaled_felt(100);
@@ -377,10 +384,10 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     (ctx, disp)
 }
 
-// #[test]
-// fn test_deploy_setup() {
-//     let (ctx, dsps) = deploy_setup();
-// }
+#[test]
+fn test_deploy_setup() {
+    let (ctx, dsps) = deploy_setup();
+}
 
 fn _add_expired_option(ctx: Ctx, dsps: Dispatchers) {
     let mut long_call_data = ArrayTrait::<felt252>::new();

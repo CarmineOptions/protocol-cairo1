@@ -95,10 +95,10 @@ trait IAMM<TContractState> {
         strike_price: Fixed,
     ) -> ContractAddress;
     fn get_lptokens_for_underlying(
-        ref self: TContractState, pooled_token_addr: ContractAddress, underlying_amt: u256,
+        self: @TContractState, pooled_token_addr: ContractAddress, underlying_amt: u256,
     ) -> u256;
     fn get_underlying_for_lptokens(
-        self: @TContractState, pooled_token_addr: ContractAddress, lpt_amt: u256
+        self: @TContractState, lptoken_addr: ContractAddress, lpt_amt: u256
     ) -> u256;
     fn get_available_lptoken_addresses(self: @TContractState, order_i: felt252) -> ContractAddress;
     fn get_all_options(self: @TContractState, lptoken_address: ContractAddress) -> Array<Option_>;
@@ -223,12 +223,12 @@ trait IAMM<TContractState> {
         maturity: u64
     ) -> Fixed;
 
+    fn get_pragma_checkpoint(self: @TContractState, key: felt252, before: u64) -> (Checkpoint, u64);
     fn set_pragma_checkpoint(
         ref self: TContractState,
         key: felt252
     );
 
-    fn get_pragma_checkpoint(self: @TContractState, key: felt252, before: u64) -> (Checkpoint, u64);
     fn set_pragma_required_checkpoints(ref self: TContractState);
 
     // TODO: Functions below
@@ -383,6 +383,8 @@ mod AMM {
     use carmine_protocol::types::pool::{PoolInfo, UserPoolInfo};
     use starknet::ClassHash;
 
+    use carmine_protocol::utils::assert_admin_only; //  Just Dummy admin assert
+
     #[external(v0)]
     impl Amm of super::IAMM<ContractState> {
         fn trade_open(
@@ -467,6 +469,7 @@ mod AMM {
         }
 
         fn set_trading_halt(ref self: ContractState, new_status: bool) {
+            assert_admin_only();
             State::set_trading_halt(new_status)
         }
 
@@ -484,6 +487,7 @@ mod AMM {
             volatility_adjustment_speed: Fixed,
             max_lpool_bal: u256,
         ) {
+            assert_admin_only();
             LiquidityPool::add_lptoken(
                 quote_token_address,
                 base_token_address,
@@ -507,6 +511,7 @@ mod AMM {
             option_token_address_: ContractAddress,
             initial_volatility: Fixed,
         ) {
+            assert_admin_only();
             Options::add_option(
                 option_side,
                 maturity,
@@ -531,6 +536,7 @@ mod AMM {
             option_token_address_short: ContractAddress,
             initial_volatility: Fixed,
         ) {
+            assert_admin_only();
             Options::add_option_both_sides(
                 maturity,
                 strike_price,
@@ -555,15 +561,15 @@ mod AMM {
         }
 
         fn get_lptokens_for_underlying(
-            ref self: ContractState, pooled_token_addr: ContractAddress, underlying_amt: u256,
+            self: @ContractState, pooled_token_addr: ContractAddress, underlying_amt: u256,
         ) -> u256 {
             LiquidityPool::get_lptokens_for_underlying(pooled_token_addr, underlying_amt)
         }
 
         fn get_underlying_for_lptokens(
-            self: @ContractState, pooled_token_addr: ContractAddress, lpt_amt: u256
+            self: @ContractState, lptoken_addr: ContractAddress, lpt_amt: u256
         ) -> u256 {
-            LiquidityPool::get_underlying_for_lptokens(pooled_token_addr, lpt_amt)
+            LiquidityPool::get_underlying_for_lptokens(lptoken_addr, lpt_amt)
         }
 
 
@@ -676,6 +682,7 @@ mod AMM {
         fn set_max_option_size_percent_of_voladjspd(
             ref self: ContractState, max_opt_size_as_perc_of_vol_adjspd: u128
         ) {
+            assert_admin_only();
             State::set_max_option_size_percent_of_voladjspd(max_opt_size_as_perc_of_vol_adjspd)
         }
 
@@ -694,6 +701,7 @@ mod AMM {
         fn set_max_lpool_balance(
             ref self: ContractState, lpt_addr: ContractAddress, max_lpool_bal: u256
         ) {
+            assert_admin_only();
             State::set_max_lpool_balance(lpt_addr, max_lpool_bal)
         }
 

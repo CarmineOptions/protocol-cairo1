@@ -8,6 +8,11 @@ mod View {
     use core::option::OptionTrait;
 
     use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use carmine_protocol::tokens::option_token::{
+        IOptionTokenDispatcher, IOptionTokenDispatcherTrait
+    };
+
+    use carmine_protocol::amm_core::constants::{TOKEN_ETH_ADDRESS, TOKEN_WBTC_ADDRESS};
 
     use starknet::contract_address::{
         contract_address_to_felt252, contract_address_try_from_felt252
@@ -50,7 +55,16 @@ mod View {
         let mut i: u32 = 0;
         let current_block_time = get_block_timestamp();
         let mut arr = ArrayTrait::<OptionWithPremia>::new();
-        let one = 1000000000000000000;
+
+        let pool = PoolTrait::from_lpt_address(lpt_addr);
+
+        let base_addr: felt252 = pool.base_token_address.into();
+
+        let one = if base_addr == TOKEN_ETH_ADDRESS {
+            1000000000000000000
+        } else {
+            100000000
+        };
 
         loop {
             let opt = get_available_options(lpt_addr, i);
@@ -94,8 +108,8 @@ mod View {
                     break;
                 }
 
-                let pos_size = IERC20Dispatcher { contract_address: option.opt_address() }
-                    .balanceOf(user_address);
+                let pos_size = IOptionTokenDispatcher { contract_address: option.opt_address() }
+                    .balanceOf(user_address); // TODO: Add camel case function to opt token
 
                 if pos_size == 0 {
                     opt_idx += 1;
@@ -172,8 +186,6 @@ mod View {
 
         pool_infos
     }
-
-    // fn get_option_info_from_addresses(lptoken, optiontoken) // TODO: Do we even need this?
 
     fn get_total_premia(option: Option_, position_size: u256, is_closing: bool) -> (Fixed, Fixed) {
         let correct_option = option.correct_side(is_closing);

@@ -289,7 +289,7 @@ fn test_get_all_non_expired_options_with_premia() {
         );
     assert(put_option_addr_0 == ctx.long_put_address, 'LP addr not matching');
     assert(put_option_addr_1 == ctx.short_put_address, 'SP addr not matching');
-
+    
     assert(call_0.premia == FixedTrait::from_felt(14858735986897951), 'LC premia wrong');
     assert(call_1.premia == FixedTrait::from_felt(4313307644393373), 'SC premia wrong');
 

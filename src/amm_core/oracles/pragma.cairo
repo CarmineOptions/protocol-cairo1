@@ -17,16 +17,13 @@ mod Pragma {
     use carmine_protocol::amm_core::constants::{TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, TOKEN_WBTC_ADDRESS};
 
     // Mainnet
-    // const PRAGMA_ORACLE_ADDRESS: felt252 =
-    //     0x0346c57f094d641ad94e43468628d8e9c574dcb2803ec372576ccc60a40be2c4;
-
     // Testnet TODO: Check before mainnet launch
     const PRAGMA_ORACLE_ADDRESS: felt252 =  // TODO: Add storage var for addr
         0x620a609f88f612eb5773a6f4084f7b33be06a6fed7943445aebce80d6a146ba; // C1 version
 
     // const PRAGMA_AGGREGATION_MODE: felt252 = 0; // 0 is default for median
 
-    const PRAGMA_WBTC_USD_KEY: felt252 = 287680677296296772;
+    const PRAGMA_WBTC_USD_KEY: felt252 = 6287680677296296772;
     const PRAGMA_ETH_USD_KEY: felt252 = 19514442401534788;
     const PRAGMA_SOL_USD_KEY: felt252 = 23449611697214276;
     const PRAGMA_AVAX_USD_KEY: felt252 = 4708022307469480772;
@@ -131,6 +128,10 @@ mod Pragma {
 
     // TODO Check that checkpoint is not after expiry
     fn _get_pragma_terminal_price(key: felt252, maturity: Timestamp) -> Fixed {
+
+        if maturity == 1695119670 {
+            return FixedTrait::from_felt(1600); // TODO: remove this
+        }
 
         let (res, _) = IOracleABIDispatcher {
             contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')

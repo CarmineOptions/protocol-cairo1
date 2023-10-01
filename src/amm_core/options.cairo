@@ -762,7 +762,7 @@ mod Options {
         // Make sure that user owns the option tokens
         let user_address = get_caller_address();
         let user_tokens_owned = IOptionTokenDispatcher { contract_address: option_token_address }
-            .balance_of(user_address);
+            .balanceOf(user_address);
         assert(user_tokens_owned > 0, 'EOT - User has no tokens');
 
         let current_block_time = get_block_timestamp();

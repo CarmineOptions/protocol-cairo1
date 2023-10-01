@@ -67,12 +67,12 @@ impl StatsImpl of StatsTrait {
             .get_option_position(ctx.put_lpt_address, 1, ctx.expiry, ctx.strike_price);
 
         Stats {
-            bal_lpt_c: dsps.lptc.balance_of(ctx.admin_address),
-            bal_lpt_p: dsps.lptp.balance_of(ctx.admin_address),
-            bal_opt_lc: dsps.lc.balance_of(ctx.admin_address),
-            bal_opt_sc: dsps.sc.balance_of(ctx.admin_address),
-            bal_opt_lp: dsps.lp.balance_of(ctx.admin_address),
-            bal_opt_sp: dsps.sp.balance_of(ctx.admin_address),
+            bal_lpt_c: dsps.lptc.balanceOf(ctx.admin_address),
+            bal_lpt_p: dsps.lptp.balanceOf(ctx.admin_address),
+            bal_opt_lc: dsps.lc.balanceOf(ctx.admin_address),
+            bal_opt_sc: dsps.sc.balanceOf(ctx.admin_address),
+            bal_opt_lp: dsps.lp.balanceOf(ctx.admin_address),
+            bal_opt_sp: dsps.sp.balanceOf(ctx.admin_address),
             bal_eth: dsps.eth.balance_of(ctx.admin_address),
             bal_usdc: dsps.usdc.balance_of(ctx.admin_address),
             lpool_balance_c: dsps.amm.get_lpool_balance(ctx.call_lpt_address),
