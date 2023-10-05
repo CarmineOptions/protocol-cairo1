@@ -13,6 +13,7 @@ trait IOptionToken<TState> {
     fn decimals(self: @TState) -> u8;
     fn totalSupply(self: @TState) -> u256;
     fn balanceOf(self: @TState, account: ContractAddress) -> u256;
+    fn balance_of(self: @TState, account: ContractAddress) -> u256;
     fn allowance(self: @TState, owner: ContractAddress, spender: ContractAddress) -> u256;
 
     fn owner(self: @TState) -> ContractAddress;
@@ -159,6 +160,11 @@ mod OptionToken {
         }
 
         fn balanceOf(self: @ContractState, account: ContractAddress) -> u256 {
+            let erc20_unsafe_state = ERC20::unsafe_new_contract_state();
+            ERC20::ERC20Impl::balance_of(@erc20_unsafe_state, account)
+        }
+        
+        fn balance_of(self: @ContractState, account: ContractAddress) -> u256 {
             let erc20_unsafe_state = ERC20::unsafe_new_contract_state();
             ERC20::ERC20Impl::balance_of(@erc20_unsafe_state, account)
         }

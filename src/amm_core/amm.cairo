@@ -685,7 +685,7 @@ mod AMM {
                 lp_token_amount,
             );
 
-            ReentrancyGuard::InternalImpl::start(ref re_guard_unsafe_state);
+            ReentrancyGuard::InternalImpl::end(ref re_guard_unsafe_state);
         }
 
         fn get_unlocked_capital(self: @ContractState, lptoken_address: ContractAddress) -> u256 {

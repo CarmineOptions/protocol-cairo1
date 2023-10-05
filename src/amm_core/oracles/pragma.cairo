@@ -141,6 +141,8 @@ mod Pragma {
             contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
         }.get_decimals(DataType::SpotEntry(key));
 
+        assert(decs > 0, 'Pragma/GPTP - decs zero');
+
         // TODO: Handle negative time diff gracefully, it'll fail with sub overflow
         let time_diff = maturity - res.timestamp;
 
@@ -149,13 +151,36 @@ mod Pragma {
             res.value > 0_u128,
             'Pragma/GPTP - Price <= 0'
         );
-
         convert_from_int_to_Fixed(res.value, decs.try_into().unwrap())
     }
 
     fn get_pragma_terminal_price(
         quote_token_addr: ContractAddress, base_token_addr: ContractAddress, maturity: Timestamp
     ) -> Fixed {
+        
+        // TODO: REMOVE THIS
+        if base_token_addr.into() == TOKEN_ETH_ADDRESS {
+            if maturity == 1696377599 {
+                return FixedTrait::from_felt(30405583789254716162048);
+            }
+            
+            if maturity == 1696463999 {
+                return FixedTrait::from_felt(30405583789254716162048);
+            }
+        }
+
+        if base_token_addr.into() == TOKEN_WBTC_ADDRESS {
+            if maturity == 1696377599 {
+                return FixedTrait::from_felt(512480803027932216819712);
+            }
+            
+            if maturity == 1696463999 {
+                return FixedTrait::from_felt(512480803027932216819712);
+            }
+        }
+
+
+        
         let key = _get_ticker_key(quote_token_addr, base_token_addr);
         let res = _get_pragma_terminal_price(key, maturity);
         account_for_stablecoin_divergence(res, quote_token_addr, maturity)

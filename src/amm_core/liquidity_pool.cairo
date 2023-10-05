@@ -54,25 +54,31 @@ mod LiquidityPool {
     fn get_value_of_pool_position(lptoken_address: LPTAddress) -> Fixed {
         let non_expired = get_value_of_pool_non_expired_position(lptoken_address);
         let expired = get_value_of_pool_expired_position(lptoken_address);
-
         non_expired + expired
+
     }
 
     fn get_value_of_pool_non_expired_position(lptoken_address: LPTAddress) -> Fixed {
         let mut i: u32 = 0;
         let mut pool_pos: Fixed = FixedTrait::from_felt(0);
+        let now = get_block_timestamp();
 
         loop {
             let option = get_available_options(lptoken_address, i);
+            i += 1;
 
             if option.sum() == 0 {
                 break;
             }
-            i += 1;
 
             let option_position = option.pools_position();
             if option_position == 0 {
                 continue;
+            }
+
+            if option.maturity < now {
+                // Option is expired
+                continue; 
             }
 
             pool_pos += option.value_of_position(option_position);
@@ -86,8 +92,8 @@ mod LiquidityPool {
     // from the begining
     // TODO: use this func
     fn get_value_of_pool_expired_position(lptoken_address: LPTAddress) -> Fixed {
-        let LOOKBACK = 24 * 3600 * 14;
-        // ^ Only look back 2 weeks, all options should be long expired by then
+        let LOOKBACK = 24 * 3600 * 7 * 4;
+        // ^ Only look back 4 weeks, all options should be long expired by then
         let now = get_block_timestamp();
         let last_ix =  get_available_options_usable_index(lptoken_address);
 

@@ -194,7 +194,7 @@ impl Option_Impl of Option_Trait {
         premia_with_fees
     }
 
-
+    
     fn value_of_position(self: Option_, position_size: Int) -> Fixed {
         let current_block_time = get_block_timestamp();
         let is_ripe = self.maturity <= current_block_time;
@@ -205,7 +205,6 @@ impl Option_Impl of Option_Trait {
             let terminal_price = get_terminal_price(
                 self.quote_token_address, self.base_token_address, self.maturity
             );
-
             let (long_value, short_value) = split_option_locked_capital(
                 self.option_type, position_size_cubit, self.strike_price, terminal_price
             );
@@ -216,7 +215,6 @@ impl Option_Impl of Option_Trait {
                 return short_value;
             }
         }
-
         // Fail if the value of option that matures in 2 hours or less (can't price the option)
         let stop_trading_by = self.maturity - STOP_TRADING_BEFORE_MATURITY_SECONDS;
         assert(current_block_time <= stop_trading_by, 'GVoP - Wait till maturity');

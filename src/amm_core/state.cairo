@@ -6,7 +6,6 @@ mod State {
         contract_address_to_felt252, contract_address_try_from_felt252
     };
     use core::option::OptionTrait;
-
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
     use carmine_protocol::amm_core::helpers::{
@@ -14,6 +13,7 @@ mod State {
         FixedHelpersTrait
     };
 
+    use carmine_protocol::utils::assert_admin_only;
     use carmine_protocol::amm_core::constants::{
         OPTION_CALL, OPTION_PUT, VOLATILITY_LOWER_BOUND, VOLATILITY_UPPER_BOUND
     };
@@ -287,7 +287,7 @@ mod State {
     }
 
     fn set_max_option_size_percent_of_voladjspd(value: Int) {
-        // TODO: Assert admin
+        assert_admin_only();
         let mut state = AMM::unsafe_new_contract_state();
         state.max_option_size_percent_of_voladjspd.write(value)
     }
@@ -410,7 +410,7 @@ mod State {
 
     fn set_max_lpool_balance(lpt_addr: LPTAddress, max_bal: u256) {
         let mut state = AMM::unsafe_new_contract_state();
-        // TODO: Assert admin only!!!!!!!!!!!
+        assert_admin_only();
 
         assert(max_bal >= 0, 'Max lpool bal < 0'); // Kinda useless
 
@@ -455,7 +455,8 @@ mod State {
     }
 
     fn set_trading_halt(new_status: bool) {
-        assert_trading_halt_allowed();
+        // assert_trading_halt_allowed();
+        assert_admin_only();
 
         assert_option_type_exists(new_status.into(), 'Unknown halt status');
         let mut state = AMM::unsafe_new_contract_state();

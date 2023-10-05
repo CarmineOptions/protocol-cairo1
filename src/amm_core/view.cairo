@@ -108,7 +108,7 @@ mod View {
                 }
 
                 let pos_size = IOptionTokenDispatcher { contract_address: option.opt_address() }
-                    .balanceOf(user_address); // TODO: Add camel case function to opt token
+                    .balance_of(user_address); // TODO: Add camel case function to opt token
 
                 if pos_size == 0 {
                     opt_idx += 1;

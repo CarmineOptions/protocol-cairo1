@@ -99,6 +99,10 @@ mod Options {
         assert_option_type_exists(option_type.into(), 'Undefined option type');
         assert_option_side_exists(option_side.into(), 'Undefined option side');
 
+        let now = get_block_timestamp();
+
+        assert(maturity > now, 'Cant add past matuirty');
+
         let opt_address = get_option_token_address(
             lptoken_address, option_side, maturity, strike_price
         );
@@ -755,14 +759,14 @@ mod Options {
         // Check that the pool's position was expired correctly
         let current_pool_position_2 =
             get_option_position( // FIXME this is called twice in the happy case
-            lptoken_address, TRADE_SIDE_SHORT, maturity, strike_price
+            lptoken_address, option_side, maturity, strike_price
         );
         assert(current_pool_position_2 == 0, 'EOT - pool pos not zero');
 
         // Make sure that user owns the option tokens
         let user_address = get_caller_address();
         let user_tokens_owned = IOptionTokenDispatcher { contract_address: option_token_address }
-            .balanceOf(user_address);
+            .balance_of(user_address);
         assert(user_tokens_owned > 0, 'EOT - User has no tokens');
 
         let current_block_time = get_block_timestamp();
