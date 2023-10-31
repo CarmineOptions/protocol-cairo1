@@ -5,28 +5,14 @@ Currently it is pretty garbage so don't even try running build/tests.
 
 Below is a list of things that need to be tested/finished:
 ## TODO:
-- [ ] ReentrancyGuards
-- [ ] Proxy/Admin!!
+- [x] ReentrancyGuards
+- [x] Proxy/Admin!!
 - [ ] Tokens - new vs old
-- [ ] Correct interfaces for tokens
-- [ ] Test AMM itself
+- [x] Correct interfaces for tokens
+- [x] Test AMM itself
 - [ ] Test upgrade from old AMM
-- [ ] Trading Halt
-- [ ] Upgrade Function!
-- [ ] Check interfaces
+- [x] Trading Halt
+- [x] Upgrade Function!
+- [x] Check interfaces
 
-Plan: 
-- Week 1: 
-  - Internal tests
-  - Check compatibility with outside contracts
-    - Tokens, oracle
-  - Simple Dashboard 
-  - Trade, expire few options
-  - Deposit/Withdraw liq
-  - Add proxy, reetrancy guard
-- Week 2:
-  - Public testing
-- Week 3:
-  - Upgrading the amm
-- Week 4: 
-  - Profit?
+
