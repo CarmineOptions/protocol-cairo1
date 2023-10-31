@@ -42,7 +42,7 @@ mod ILHedge {
         iterate_strike_prices, buy_options_at_strike_to_hedge_at,
         price_options_at_strike_to_hedge_at
     };
-    use carmine_protocol::ilhedge::pragma::Pragma::get_pragma_median_price;
+    use carmine_protocol::amm_core::oracles::pragma::Pragma::get_pragma_median_price;
     use carmine_protocol::ilhedge::helpers::{convert_from_Fixed_to_int, convert_from_int_to_Fixed};
 
     #[storage]
