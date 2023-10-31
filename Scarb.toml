@@ -10,7 +10,7 @@ sierra-replace-ids = false
 
 [dependencies]
 cubit = { git = "https://github.com/chepelau/cubit.git", branch = "main" }
-snforge_std = { path = "/workspaces/protocol-cairo1/starknet-foundry/snforge_std"}
+snforge_std = { git = "https://github.com/tensojka/starknet-foundry.git", branch = "patch-1"}
 openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", tag = "v0.7.0" }
 alexandria_sorting = { git = "https://github.com/keep-starknet-strange/alexandria", rev = "27fbf5b" }
 starknet = ">=2.2.0"
