@@ -1,3 +1,8 @@
+
+//
+// @title Constants Contract
+//
+
 use core::traits::TryInto;
 use starknet::ContractAddress;
 use starknet::contract_address::contract_address_to_felt252;
@@ -14,6 +19,10 @@ const OPTION_PUT: u8 = 1;
 const TRADE_SIDE_LONG: u8 = 0;
 const TRADE_SIDE_SHORT: u8 = 1;
 
+
+// @notice Return the opposite option side of the input
+// @param trade_side: Option side
+// @return opposite side: Opposite option side
 fn get_opposite_side(trade_side: u8) -> u8 {
     assert_option_side_exists(trade_side.into(), 'GES - invalid option side');
 
