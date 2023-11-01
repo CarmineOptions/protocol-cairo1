@@ -173,7 +173,7 @@ mod ILHedge {
                         already_hedged += amount_to_hedge;
                         cost_base +=
                             price_options_at_strike_to_hedge_at(
-                                tobuy, tohedge, amount_to_hedge, expiry, self.amm_address.read(), true
+                                tobuy, tohedge, amount_to_hedge, expiry, self.amm_address.read(), quote_token_addr, base_token_addr, true
                             );
                     },
                     Option::None(()) => {
@@ -204,7 +204,7 @@ mod ILHedge {
                             - portf_val_puts; // in USDC, with decimals
                         cost_quote +=
                             price_options_at_strike_to_hedge_at(
-                                tobuy, tohedge, amount_to_hedge, expiry, self.amm_address.read(), false
+                                tobuy, tohedge, amount_to_hedge, expiry, self.amm_address.read(), quote_token_addr, base_token_addr, false
                             );
                     },
                     Option::None(()) => {

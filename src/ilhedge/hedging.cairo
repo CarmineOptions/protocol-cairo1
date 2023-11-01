@@ -143,18 +143,18 @@ fn buy_options_at_strike_to_hedge_at(
     let notional = how_many_options_at_strike_to_hedge_at(
         to_buy_strike, to_hedge_strike, payoff, calls
     );
-    buy_option(to_buy_strike, notional, expiry, calls, amm_address);
+    buy_option(to_buy_strike, notional, expiry, calls, amm_address, quote_token_addr, base_token_addr);
 }
 
 
 fn price_options_at_strike_to_hedge_at(
-    to_buy_strike: Fixed, to_hedge_strike: Fixed, payoff: Fixed, expiry: u64, amm_address: ContractAddress, calls: bool
+    to_buy_strike: Fixed, to_hedge_strike: Fixed, payoff: Fixed, expiry: u64, amm_address: ContractAddress, quote_token_addr: ContractAddress, base_token_addr: ContractAddress, calls: bool
 ) -> u128 {
     let notional = how_many_options_at_strike_to_hedge_at(
         to_buy_strike, to_hedge_strike, payoff, calls
     );
     //notional
-    price_option(to_buy_strike, notional, expiry, calls, amm_address)
+    price_option(to_buy_strike, notional, expiry, calls, amm_address, quote_token_addr, base_token_addr)
 }
 
 

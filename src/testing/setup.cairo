@@ -152,8 +152,8 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     eth_constr_data.append(10000000000000000000); // Initial supply, low, 10 * 10**18
     eth_constr_data.append(0); // Initial supply, high
     eth_constr_data.append(admin_address); // Recipient
-
-    let eth_address = mytoken_contract.deploy(@eth_constr_data).unwrap();
+    // ETH address is same for both mainnet&testnet
+    let eth_address = mytoken_contract.deploy_at(@eth_constr_data, 0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7.try_into().unwrap()).unwrap();
 
     // // Deploy USDC
     let mut usdc_constr_data = ArrayTrait::new();
