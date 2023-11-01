@@ -1,45 +1,70 @@
 mod Trading {
     use starknet::get_block_timestamp;
     use starknet::ContractAddress;
-    use traits::{TryInto, Into};
     use option::OptionTrait;
+    use traits::TryInto;
+    use traits::Into;
 
-    use cubit::f128::types::fixed::{Fixed, FixedTrait};
+    use cubit::f128::types::fixed::Fixed;
+    use cubit::f128::types::fixed::FixedTrait;
 
-    use carmine_protocol::types::basic::{
-        Math64x61_, OptionType, OptionSide, LPTAddress, Int, Timestamp
-    };
+    use carmine_protocol::types::basic::Math64x61_;
+    use carmine_protocol::types::basic::OptionType;
+    use carmine_protocol::types::basic::OptionSide;
+    use carmine_protocol::types::basic::LPTAddress;
+    use carmine_protocol::types::basic::Int;
+    use carmine_protocol::types::basic::Timestamp;
 
-    use carmine_protocol::amm_core::helpers::{fromU256_balance,};
-    use carmine_protocol::amm_core::helpers::{toU256_balance, check_deadline};
+    use carmine_protocol::amm_core::helpers::fromU256_balance;
+    use carmine_protocol::amm_core::helpers::toU256_balance;
+    use carmine_protocol::amm_core::helpers::check_deadline;
 
-    use carmine_protocol::amm_core::state::State::{
-        get_option_volatility, get_pool_volatility_adjustment_speed, set_option_volatility,
-        get_trading_halt, is_option_available, get_lptoken_address_for_given_option,
-    };
+    use carmine_protocol::amm_core::state::State::get_option_volatility;
+    use carmine_protocol::amm_core::state::State::get_pool_volatility_adjustment_speed;
+    use carmine_protocol::amm_core::state::State::set_option_volatility;
+    use carmine_protocol::amm_core::state::State::get_trading_halt;
+    use carmine_protocol::amm_core::state::State::is_option_available;
+    use carmine_protocol::amm_core::state::State::get_lptoken_address_for_given_option;
 
-    use carmine_protocol::amm_core::options::Options::{
-        mint_option_token, burn_option_token, expire_option_token
-    };
+    use carmine_protocol::amm_core::options::Options::mint_option_token;
+    use carmine_protocol::amm_core::options::Options::burn_option_token;
+    use carmine_protocol::amm_core::options::Options::expire_option_token;
 
-    use carmine_protocol::amm_core::constants::{
-        RISK_FREE_RATE, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side,
-        STOP_TRADING_BEFORE_MATURITY_SECONDS,
-    };
+    use carmine_protocol::amm_core::constants::RISK_FREE_RATE;
+    use carmine_protocol::amm_core::constants::TRADE_SIDE_LONG;
+    use carmine_protocol::amm_core::constants::TRADE_SIDE_SHORT;
+    use carmine_protocol::amm_core::constants::get_opposite_side;
+    use carmine_protocol::amm_core::constants::STOP_TRADING_BEFORE_MATURITY_SECONDS;
 
-    use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing::{black_scholes,};
+    use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing::black_scholes;
     use carmine_protocol::amm_core::pricing::fees::get_fees;
-    use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
-        convert_amount_to_option_currency_from_base_uint256, get_new_volatility,
-        get_time_till_maturity, select_and_adjust_premia, add_premia_fees,
-        assert_option_type_exists, assert_option_side_exists
-    };
 
-    use carmine_protocol::amm_core::oracles::agg::OracleAgg::{
-        get_current_price, get_terminal_price,
-    };
+    use carmine_protocol::amm_core::pricing::option_pricing_helpers::convert_amount_to_option_currency_from_base_uint256;
+    use carmine_protocol::amm_core::pricing::option_pricing_helpers::get_new_volatility;
+    use carmine_protocol::amm_core::pricing::option_pricing_helpers::get_time_till_maturity;
+    use carmine_protocol::amm_core::pricing::option_pricing_helpers::select_and_adjust_premia;
+    use carmine_protocol::amm_core::pricing::option_pricing_helpers::add_premia_fees;
+    use carmine_protocol::amm_core::pricing::option_pricing_helpers::assert_option_type_exists;
+    use carmine_protocol::amm_core::pricing::option_pricing_helpers::assert_option_side_exists;
 
+    use carmine_protocol::amm_core::oracles::agg::OracleAgg::get_current_price;
+    use carmine_protocol::amm_core::oracles::agg::OracleAgg::get_terminal_price;
 
+    // @notice Executes option trade
+    // @dev options_size is always denominated in the lowest possible unit of BASE tokens (ETH in case
+    //      of ETH/USDC), e.g. wei in case of ETH.
+    // @dev Option size of 1 ETH would be 10**18 since 1 ETH = 10**18 wei.
+    // @param option_type: Type of the option 0 for Call, 1 for Put
+    // @param strike_price: Option's strike price in terms of Fixed, ie strike 1500 is
+    //      1500*2**64 = 27670116110564327424000 -> use FixedTrait::new(27670116110564327424000, false) as input value
+    // @param maturity: Option's maturity as unix timestamp 
+    // @param side: Side of the option 0 for Long, 1 for Short
+    // @param option_size: Size to be traded denominated in the lowest possible unit of BASE tokens
+    // @param quote_token_address: Address of the quote token (USDC in ETH/USDC)
+    // @param base_token_address: Address of the base token (ETH in ETH/USDC)
+    // @param lptoken_address: Address of the liquidity pool token
+    // @param limit_total_premia: Limit for premia with fees, min when short and max when long
+    // @return premia: Premia for one unit of underlying (not adjusted for size or fees) in terms of Fixed
     fn do_trade(
         option_type: OptionType,
         strike_price: Fixed,
@@ -51,7 +76,6 @@ mod Trading {
         lptoken_address: LPTAddress,
         limit_total_premia: Fixed,
     ) -> Fixed {
-        // TODO: ReentrancyGuard.start();
 
         // Helper Values
         let option_size_cubit = fromU256_balance(option_size.into(), base_token_address);
@@ -132,6 +156,20 @@ mod Trading {
         return premia;
     }
 
+    // @notice Closes existing position or part of it
+    // @dev options_size is always denominated in the lowest possible unit of base token - "wei" for ETH/USDC
+    // @dev options_size of 1 ETH would be 10**18 since 1 ETH = 10**18 wei.
+    // @param option_type: Type of the option 0 for Call, 1 for Put
+    // @param strike_price: Option's strike price in terms of Fixed, ie strike 1500 is
+    //      1500*2**64 = 27670116110564327424000 -> use FixedTrait::new(27670116110564327424000, false) as input value
+    // @param maturity: Option's maturity as unix timestamp
+    // @param side: Side of the option 0 for Long, 1 for Short
+    // @param option_size: Size to be traded in base token lowest unit (ie 10**18 for size 1 of ETH/USDC)
+    // @param quote_token_address: Address of the quote token (USDC in ETH/USDC)
+    // @param base_token_address: Address of the base token (ETH in ETH/USDC)
+    // @param lptoken_address: Address of the liquidity pool token
+    // @param limit_total_premia: Limit for premia with fees, min when short and max when long
+    // @return premia: Premia for one unit of underlying (not adjusted for size or fees) in terms of Fixed
     fn close_position(
         option_type: OptionType,
         strike_price: Fixed,
@@ -227,6 +265,21 @@ mod Trading {
         return premia;
     }
 
+    // @notice Validates trade inputs and fails if any input is not valid
+    // @dev options_size is always denominated in the lowest possible unit of base token - "wei" for ETH/USDC
+    // @dev options_size of 1 ETH would be 10**18 since 1 ETH = 10**18 wei.
+    // @param option_type: Type of the option 0 for Call, 1 for Put
+    // @param strike_price: Option's strike price in terms of Fixed, ie strike 1500 is
+    //      1500*2**64 = 27670116110564327424000 -> use FixedTrait::new(27670116110564327424000, false) as input value
+    // @param maturity: Option's maturity as unix timestamp
+    // @param option_side: Side of the option 0 for Long, 1 for Short
+    // @param option_size: Size to be traded denominated in the lowest possible unit of BASE tokens
+    // @param quote_token_address: Address of the quote token (USDC in ETH/USDC)
+    // @param base_token_address: Address of the base token (ETH in ETH/USDC)
+    // @param lptoken_address: Address of the liquidity pool token
+    // @param open_position: True if user wants to open position, false otherwise
+    // @param limit_total_premia: Limit for premia with fees, min when short and max when long
+    // @param tx_deadline: Fail the transaction if the current block timestamp is greater that the deadline
     fn validate_trade_input(
         option_type: OptionType,
         strike_price: Fixed,
@@ -276,6 +329,20 @@ mod Trading {
         assert(tx_deadline >= 1, 'VTI - tx deadline <= 0');
     }
 
+    // @notice External function for opening a position
+    // @dev options_size is always denominated in the lowest possible unit of base token - "wei" for ETH/USDC
+    // @dev options_size of 1 ETH would be 10**18 since 1 ETH = 10**18 wei
+    // @param option_type: Type of the option 0 for Call, 1 for Put
+    // @param strike_price: Option's strike price in terms of Fixed, ie strike 1500 is
+    //      1500*2**64 = 27670116110564327424000 -> use FixedTrait::new(27670116110564327424000, false) as input value
+    // @param maturity: Option's maturity as unix timestamp
+    // @param option_side: Side of the option 0 for Long, 1 for Short
+    // @param option_size: Size to be traded denominated in the lowest possible unit of BASE tokens
+    // @param quote_token_address: Address of the quote token (USDC in ETH/USDC)
+    // @param base_token_address: Address of the base token (ETH in ETH/USDC)
+    // @param limit_total_premia: Limit for premia with fees, min when short and max when long
+    // @param tx_deadline: Fail the transaction if the current block time is greater that the deadline
+    // @return premia: Premia that was paid in terms of Fixed
     fn trade_open(
         option_type: OptionType,
         strike_price: Fixed,
@@ -319,7 +386,21 @@ mod Trading {
             limit_total_premia,
         )
     }
-
+        
+    // @notice External function for closing a position
+    // @dev options_size is always denominated in the lowest possible unit of base token - "wei" for ETH/USDC
+    // @dev options_size of 1 ETH would be 10**18 since 1 ETH = 10**18 wei
+    // @param option_type: Type of the option 0 for Call, 1 for Put
+    // @param strike_price: Option's strike price in terms of Fixed, ie strike 1500 is
+    //      1500*2**64 = 27670116110564327424000 -> use FixedTrait::new(27670116110564327424000, false) as input value
+    // @param maturity: Option's maturity as unix timestamp
+    // @param option_side: Side of the option 0 for Long, 1 for Short
+    // @param option_size: Size to be traded denominated in the lowest possible unit of BASE tokens
+    // @param quote_token_address: Address of the quote token (USDC in ETH/USDC)
+    // @param base_token_address: Address of the base token (ETH in ETH/USDC)
+    // @param limit_total_premia: Limit for premia with fees, min when short and max when long
+    // @param tx_deadline: Fail the transaction if the current block time is greater that the deadline
+    // @return premia: Per unit premium without fee adjustment in terms of Fixed
     fn trade_close(
         option_type: OptionType,
         strike_price: Fixed,
@@ -365,7 +446,17 @@ mod Trading {
         )
     }
 
-
+    // @notice External function for settling a position
+    // @dev options_size is always denominated in the lowest possible unit of base token - "wei" for ETH/USDC
+    // @dev options_size of 1 ETH would be 10**18 since 1 ETH = 10**18 wei
+    // @param option_type: Type of the option 0 for Call, 1 for Put
+    // @param strike_price: Option's strike price in terms of Fixed, ie strike 1500 is
+    //      1500*2**64 = 27670116110564327424000 -> use FixedTrait::new(27670116110564327424000, false) as input value
+    // @param maturity: Option's maturity as unix timestamp
+    // @param option_side: Side of the option 0 for Long, 1 for Short
+    // @param option_size: Size to be traded denominated in the lowest possible unit of BASE tokens
+    // @param quote_token_address: Address of the quote token (USDC in ETH/USDC)
+    // @param base_token_address: Address of the base token (ETH in ETH/USDC)
     fn trade_settle(
         option_type: OptionType,
         strike_price: Fixed,
