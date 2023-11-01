@@ -5,6 +5,7 @@ use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{PragmaPricesRespo
 use cubit::f128::types::{Fixed, FixedTrait};
 use carmine_protocol::ilhedge::contract::{IILHedgeDispatcher, IILHedgeDispatcherTrait};
 use carmine_protocol::testing::setup::{Ctx, Dispatchers};
+use carmine_protocol::amm_core::amm::{AMM, IAMMDispatcher, IAMMDispatcherTrait};
 
 #[test]
 fn test_ilhedge() {
@@ -42,14 +43,14 @@ fn add_needed_options(ctx: Ctx, dsps: Dispatchers) {
     let FIXED_BASE = 18446744073709551616; // 2**64
     let CALL = 0;
     let PUT = 1;
-    add_option_to_amm(ctx, dsps, strike, 1700 * FIXED_BASE, CALL);
-    add_option_to_amm(ctx, dsps, strike, 1800 * FIXED_BASE, CALL);
-    add_option_to_amm(ctx, dsps, strike, 1900 * FIXED_BASE, CALL);
-    add_option_to_amm(ctx, dsps, strike, 2000 * FIXED_BASE, CALL);
-    add_option_to_amm(ctx, dsps, strike, 1300 * FIXED_BASE, PUT);
-    add_option_to_amm(ctx, dsps, strike, 1400 * FIXED_BASE, PUT);
-    add_option_to_amm(ctx, dsps, strike, 1500 * FIXED_BASE, PUT);
-    add_option_to_amm(ctx, dsps, strike, 1600 * FIXED_BASE, PUT);
+    add_option_to_amm(ctx, dsps, 1700 * FIXED_BASE, CALL);
+    add_option_to_amm(ctx, dsps, 1800 * FIXED_BASE, CALL);
+    add_option_to_amm(ctx, dsps, 1900 * FIXED_BASE, CALL);
+    add_option_to_amm(ctx, dsps, 2000 * FIXED_BASE, CALL);
+    add_option_to_amm(ctx, dsps, 1300 * FIXED_BASE, PUT);
+    add_option_to_amm(ctx, dsps, 1400 * FIXED_BASE, PUT);
+    add_option_to_amm(ctx, dsps, 1500 * FIXED_BASE, PUT);
+    add_option_to_amm(ctx, dsps, 1600 * FIXED_BASE, PUT);
 }
 
 fn add_option_to_amm(ctx: Ctx, dsps: Dispatchers, strike: u128, option_type: u8) {
@@ -72,22 +73,8 @@ fn add_option_to_amm(ctx: Ctx, dsps: Dispatchers, strike: u128, option_type: u8)
     long_constructor_data.append(strike.into());
     long_constructor_data.append(expiry.into());
     long_constructor_data.append(LONG);
-
-    let lpt_addr = if (option_type == 0) {ctx.call_lpt_address}else{ctx.call_lpt_address};
     let long_option_address = option_token_contract.deploy(@long_constructor_data).unwrap();
-    disp
-    .amm
-    .add_option(
-        LONG.try_into().unwrap(),
-        expiry,
-        strike,
-        ctx.usdc_address,
-        ctx.eth_address,
-        option_type.try_into().unwrap(),
-        lpt_addr,
-        long_option_address,
-        hundred
-    );
+
 
     let mut short_constructor_data: Array<felt252> = ArrayTrait::new();
     short_constructor_data.append('OptShort');
@@ -99,21 +86,22 @@ fn add_option_to_amm(ctx: Ctx, dsps: Dispatchers, strike: u128, option_type: u8)
     short_constructor_data.append(strike.into());
     short_constructor_data.append(expiry.into());
     short_constructor_data.append(SHORT);
-
     let short_option_address = option_token_contract.deploy(@short_constructor_data).unwrap();
-    disp
+
+
+    let lpt_addr = if (option_type == 0) {ctx.call_lpt_address}else{ctx.call_lpt_address};
+    dsps
     .amm
-    .add_option(
-        SHORT.try_into().unwrap(),
+    .add_option_both_sides(
         expiry,
         strike,
         ctx.usdc_address,
         ctx.eth_address,
         option_type.try_into().unwrap(),
         lpt_addr,
+        long_option_address,
         short_option_address,
         hundred
     );
-
     stop_prank(ctx.amm_address);
 }
