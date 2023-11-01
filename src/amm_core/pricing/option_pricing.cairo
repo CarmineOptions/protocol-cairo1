@@ -2,11 +2,13 @@ mod OptionPricing {
     // Module that calculates Black-Scholes with Choudhury's approximation to std normal CDF
     // https://www.hrpub.org/download/20140305/MS7-13401470.pdf.
 
-    use cubit::f128::types::fixed::{Fixed, FixedTrait};
+    use cubit::f128::types::fixed::Fixed;
+    use cubit::f128::types::fixed::FixedTrait;
     use cubit::f128::math::comp::max;
     use debug::PrintTrait;
 
-    use array::{ArrayTrait, SpanTrait};
+    use array::ArrayTrait; 
+    use array::SpanTrait;
 
     const CONST_A: u128 = 4168964160658358665; // 0.226 * 2**64
     const CONST_B: u128 = 11805916207174113034; // 0.64  * 2**64
@@ -290,7 +292,7 @@ use array::ArrayTrait;
 use option::OptionTrait;
 use traits::Into;
 
-// Helper function
+// Helper function for testing
 fn is_close(a: Fixed, b: Fixed, rel_tol: Fixed) -> bool {
     let tmp = (a - b).abs() / b;
 

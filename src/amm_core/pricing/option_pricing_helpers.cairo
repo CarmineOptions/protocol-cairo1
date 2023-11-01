@@ -1,16 +1,31 @@
+
+//
+// @title Helper module for options pricing
+//
+
 use starknet::ContractAddress;
-use traits::{Into, TryInto};
+use traits::Into;
+use traits::TryInto;
 use option::OptionTrait;
 use starknet::get_block_timestamp;
 
-use cubit::f128::types::fixed::{Fixed, FixedTrait};
-use carmine_protocol::amm_core::helpers::{
-    get_decimal, assert_option_type_exists, assert_option_side_exists, pow
-};
-use carmine_protocol::amm_core::constants::{TRADE_SIDE_LONG, TRADE_SIDE_SHORT};
+use cubit::f128::types::fixed::Fixed;
+use cubit::f128::types::fixed::FixedTrait;
+use carmine_protocol::amm_core::helpers::get_decimal;
+use carmine_protocol::amm_core::helpers::assert_option_type_exists;
+use carmine_protocol::amm_core::helpers::assert_option_side_exists;
+use carmine_protocol::amm_core::helpers::pow;
 
-use carmine_protocol::types::basic::{OptionType, OptionSide, Timestamp};
-use carmine_protocol::amm_core::constants::{OPTION_CALL, OPTION_PUT};
+use carmine_protocol::amm_core::constants::TRADE_SIDE_LONG;
+use carmine_protocol::amm_core::constants::TRADE_SIDE_SHORT;
+
+use carmine_protocol::types::basic::OptionType;
+use carmine_protocol::types::basic::OptionSide;
+use carmine_protocol::types::basic::Timestamp;
+
+use carmine_protocol::amm_core::constants::OPTION_CALL; 
+use carmine_protocol::amm_core::constants::OPTION_PUT; 
+
 use carmine_protocol::amm_core::helpers::FixedHelpersTrait;
 
 // @notice Converts amount to the currency used by the option
@@ -54,6 +69,14 @@ fn convert_amount_to_option_currency_from_base_uint256(
     return amount;
 }
 
+// @notice Calculates new volatility and trade volatility
+// @param current_volatility: Current volatility in Fixed
+// @param option_size: Option size in Fixed... for example 1.2 size is represented as 1.2 * 2 ** 64
+// @param option_type: 0 for CALL and 1 for put
+// @param side: 0 for LONG and 1 for SHORT
+// @param strike_price: strike price in Fixed
+// @param pool_volatility_adjustment_speed: parameter that determines speed of volatility adjustments
+// @return New volatility and trade volatility
 fn get_new_volatility(
     current_volatility: Fixed,
     option_size: Fixed,
@@ -83,6 +106,12 @@ fn get_new_volatility(
     (new_volatility, trade_volatility)
 }
 
+// @notice Converts option size into pool's currency
+// @dev for call it does no transform and for put it multiplies the size by strike
+// @param option_size: Option size to be converted in Fixed
+// @param option_type: Option type - 0 for call and 1 for put
+// @param strike_price: Strike price in Fixed
+// @return Converted size in Fixed
 fn get_option_size_in_pool_currency(
     option_size: Fixed, option_type: OptionType, strike_price: Fixed
 ) -> Fixed {
@@ -93,6 +122,12 @@ fn get_option_size_in_pool_currency(
     }
 }
 
+// @notice Gets time till maturity in years
+// @dev Calculates time till maturity in terms of Fixed type
+//      Inputted maturity if not in the same type -> has to converted... and it is number
+//      of seconds corresponding to unix timestamp
+// @param maturity: Maturity as unix timestamp
+// @return time till maturity 
 fn get_time_till_maturity(maturity: Timestamp) -> Fixed {
     let curr_time = get_block_timestamp();
     let curr_time = FixedTrait::new_unscaled(curr_time.into(), false);
@@ -108,6 +143,17 @@ fn get_time_till_maturity(maturity: Timestamp) -> Fixed {
     secs_left / secs_in_year
 }
 
+// @notice Selects value based on option type and if call adjusts the value to base tokens
+// @dev  Call and Put premia on input are in quote tokens (in USDC in case of ETH/USDC)
+//      This function puts them into their respective currency
+//      (and selects the premia based on option_type)
+//          - call premia into base token (ETH in case of ETH/USDC)
+//          - put premia stays the same, ie in quote tokens (USDC in case of ETH/USDC)
+// @param call_premia: Call premium
+// @param put_premia: Put premium
+// @param option_type: Option type - 0 for call and 1 for put
+// @param underlying_price: Price of the underlying (spot) in Fixed
+// @return Select either put or call premium and if call adjust by price of underlying
 fn select_and_adjust_premia(
     call_premia: Fixed, put_premia: Fixed, option_type: OptionType, underlying_price: Fixed
 ) -> Fixed {
@@ -120,6 +166,11 @@ fn select_and_adjust_premia(
     }
 }
 
+// @notice Adds premium and fees (for long add and for short diff)
+// @param side: 0 for long and 1 for short
+// @param total_premia_before_fees: premium in Fixed
+// @param total_fees: fees in Fixed
+// @return Premium adjusted for fees
 fn add_premia_fees(side: OptionSide, total_premia_before_fees: Fixed, total_fees: Fixed) -> Fixed {
     assert_option_side_exists(side.into(), 'APF - invalid option side');
 
