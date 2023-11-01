@@ -8,8 +8,8 @@ use carmine_protocol::amm_core::constants::FEE_PROPORTION_PERCENT;
 
 // @notice Calculate fees from the value
 // @dev Fees might be in the future dependent on many different variables and on the current state
-// @param value: Value that fees will be calculated from
-// @return fees: Calculated fees
+// @param value: Value that fees will be calculated from in terms of Fixed
+// @return fees: Calculated fees in terms of Fixed
 fn get_fees(value: Fixed) -> Fixed {
     let hundred = FixedTrait::new_unscaled(100_u128, false);
     let fee_percent = FixedTrait::new_unscaled(FEE_PROPORTION_PERCENT, false);
