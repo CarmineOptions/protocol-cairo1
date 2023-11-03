@@ -7,10 +7,11 @@ use carmine_protocol::ilhedge::contract::{IILHedgeDispatcher, IILHedgeDispatcher
 use carmine_protocol::testing::setup::{Ctx, Dispatchers};
 use carmine_protocol::amm_core::amm::{AMM, IAMMDispatcher, IAMMDispatcherTrait};
 
+use debug::PrintTrait;
 #[test]
 fn test_ilhedge() {
     let (ctx, dsps) = deploy_setup();
-
+    'hi'.print();
     // set spot price
     start_mock_call(
         PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
@@ -24,6 +25,7 @@ fn test_ilhedge() {
         }
     );
     add_needed_options(ctx, dsps);
+    'hello'.print();
 
     let ilhedge_contract = declare('ILHedge');
 
@@ -40,28 +42,25 @@ fn test_ilhedge() {
 }
 
 fn add_needed_options(ctx: Ctx, dsps: Dispatchers) {
-    let FIXED_BASE = 18446744073709551616; // 2**64
     let CALL = 0;
     let PUT = 1;
-    add_option_to_amm(ctx, dsps, 1700 * FIXED_BASE, CALL);
-    add_option_to_amm(ctx, dsps, 1800 * FIXED_BASE, CALL);
-    add_option_to_amm(ctx, dsps, 1900 * FIXED_BASE, CALL);
-    add_option_to_amm(ctx, dsps, 2000 * FIXED_BASE, CALL);
-    add_option_to_amm(ctx, dsps, 1300 * FIXED_BASE, PUT);
-    add_option_to_amm(ctx, dsps, 1400 * FIXED_BASE, PUT);
-    add_option_to_amm(ctx, dsps, 1500 * FIXED_BASE, PUT);
-    add_option_to_amm(ctx, dsps, 1600 * FIXED_BASE, PUT);
+    add_option_to_amm(ctx, dsps, 1700, CALL);
+    add_option_to_amm(ctx, dsps, 1800, CALL);
+    add_option_to_amm(ctx, dsps, 1900, CALL);
+    add_option_to_amm(ctx, dsps, 2000, CALL);
+    add_option_to_amm(ctx, dsps, 1300, PUT);
+    add_option_to_amm(ctx, dsps, 1400, PUT);
+    // add_option_to_amm(ctx, dsps, 1500, PUT); // already added
+    add_option_to_amm(ctx, dsps, 1600, PUT);
 }
 
 fn add_option_to_amm(ctx: Ctx, dsps: Dispatchers, strike: u128, option_type: u8) {
     start_prank(ctx.amm_address, ctx.admin_address);
-    let FIXED_BASE = 18446744073709551616; // 2**64
     let expiry: u64 = 1000000000 + 60 * 60 * 24; // current time plus 24 hours
     let LONG = 0;
     let SHORT = 1;
     let hundred = FixedTrait::from_unscaled_felt(100);
-
-    let option_token_contract = declare('OptionToken');
+    let strike_fixed = FixedTrait::from_unscaled_felt(strike.into());
 
     let mut long_constructor_data: Array<felt252> = ArrayTrait::new();
     long_constructor_data.append('OptLong');
@@ -70,10 +69,10 @@ fn add_option_to_amm(ctx: Ctx, dsps: Dispatchers, strike: u128, option_type: u8)
     long_constructor_data.append(ctx.usdc_address.into());
     long_constructor_data.append(ctx.eth_address.into());
     long_constructor_data.append(option_type.into());
-    long_constructor_data.append(strike.into());
+    long_constructor_data.append(strike_fixed.mag.into());
     long_constructor_data.append(expiry.into());
     long_constructor_data.append(LONG);
-    let long_option_address = option_token_contract.deploy(@long_constructor_data).unwrap();
+    let long_option_address = ctx.opt_contract.deploy(@long_constructor_data).unwrap();
 
 
     let mut short_constructor_data: Array<felt252> = ArrayTrait::new();
@@ -83,10 +82,10 @@ fn add_option_to_amm(ctx: Ctx, dsps: Dispatchers, strike: u128, option_type: u8)
     short_constructor_data.append(ctx.usdc_address.into());
     short_constructor_data.append(ctx.eth_address.into());
     short_constructor_data.append(option_type.into());
-    short_constructor_data.append(strike.into());
+    short_constructor_data.append(strike_fixed.mag.into());
     short_constructor_data.append(expiry.into());
     short_constructor_data.append(SHORT);
-    let short_option_address = option_token_contract.deploy(@short_constructor_data).unwrap();
+    let short_option_address = ctx.opt_contract.deploy(@short_constructor_data).unwrap();
 
 
     let lpt_addr = if (option_type == 0) {ctx.call_lpt_address}else{ctx.call_lpt_address};
@@ -94,10 +93,10 @@ fn add_option_to_amm(ctx: Ctx, dsps: Dispatchers, strike: u128, option_type: u8)
     .amm
     .add_option_both_sides(
         expiry,
-        strike,
+        strike_fixed,
         ctx.usdc_address,
         ctx.eth_address,
-        option_type.try_into().unwrap(),
+        option_type,
         lpt_addr,
         long_option_address,
         short_option_address,

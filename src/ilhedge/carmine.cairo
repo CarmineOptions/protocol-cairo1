@@ -54,6 +54,8 @@ fn price_option(strike: Fixed, notional: u128, expiry: u64, calls: bool, amm_add
     notional.print();
     'strike:'.print();
     strike.print();
+    'calls:'.print();
+    calls.print();
     let option = Option_ {
         option_side: 0,
         maturity: expiry.into(),
