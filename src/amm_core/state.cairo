@@ -355,7 +355,6 @@ mod State {
         state.new_option_position.read((lptoken_address, option_side, maturity, strike_price.mag))
     }
 
-    use debug::PrintTrait;
     fn set_option_position(
         lptoken_address: LPTAddress,
         option_side: OptionSide,

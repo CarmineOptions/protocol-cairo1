@@ -28,6 +28,8 @@ mod ILHedge {
     use option::OptionTrait;
     use traits::{Into, TryInto};
 
+    use debug::PrintTrait;
+
     use starknet::ContractAddress;
     use starknet::ClassHash;
     use starknet::{get_caller_address, get_contract_address};
@@ -185,12 +187,15 @@ mod ILHedge {
                 match strikes_puts.pop_front() {
                     Option::Some(strike_pair) => {
                         let (tobuy, tohedge) = *strike_pair;
+                        'tobuy(in puts):'.print();
+                        tobuy.print();
                         // compute how much portf value would be at each hedged strike
                         // converts the excess to the hedge result asset (calls -> convert to eth)
                         // for each strike
                         let portf_val_puts = compute_portfolio_value(
                             curr_price, notional, false, tohedge
                         ); // value of second asset is precisely as much as user put in, expecting conversion
+                        'computed portf val puts'.print();
                         assert(portf_val_puts > FixedTrait::ZERO(), 'portf val puts < 0?');
                         assert(
                             portf_val_puts < (convert_from_int_to_Fixed(notional, 18) * curr_price),

@@ -36,14 +36,19 @@ fn test_ilhedge() {
     assert(ilhedge_address.into() != 0, 'ilhedge addr 0');
     let ilhedge = IILHedgeDispatcher { contract_address: ilhedge_address };
     let expiry = 1000000000 + 60 * 60 * 24; // current time plus 24 hours, taken from setup
-    let (pricecalls, priceputs) = ilhedge.price_hedge(10000000000000, ctx.usdc_address, ctx.eth_address, expiry);
+    let (pricecalls, priceputs) = ilhedge.price_hedge(1000000000000000000, ctx.usdc_address, ctx.eth_address, expiry);
+    'pricecalls:'.print();
+    pricecalls.print();
     assert(pricecalls == 69, 'pricecalls wut');
+    'priceputs:'.print();
+    priceputs.print();
     assert(priceputs == 42, 'priceputs wut');
 }
 
 fn add_needed_options(ctx: Ctx, dsps: Dispatchers) {
     let CALL = 0;
     let PUT = 1;
+    add_option_to_amm(ctx, dsps, 1600, PUT);
     add_option_to_amm(ctx, dsps, 1700, CALL);
     add_option_to_amm(ctx, dsps, 1800, CALL);
     add_option_to_amm(ctx, dsps, 1900, CALL);
@@ -51,7 +56,6 @@ fn add_needed_options(ctx: Ctx, dsps: Dispatchers) {
     add_option_to_amm(ctx, dsps, 1300, PUT);
     add_option_to_amm(ctx, dsps, 1400, PUT);
     // add_option_to_amm(ctx, dsps, 1500, PUT); // already added
-    add_option_to_amm(ctx, dsps, 1600, PUT);
 }
 
 fn add_option_to_amm(ctx: Ctx, dsps: Dispatchers, strike: u128, option_type: u8) {
@@ -88,7 +92,7 @@ fn add_option_to_amm(ctx: Ctx, dsps: Dispatchers, strike: u128, option_type: u8)
     let short_option_address = ctx.opt_contract.deploy(@short_constructor_data).unwrap();
 
 
-    let lpt_addr = if (option_type == 0) {ctx.call_lpt_address}else{ctx.call_lpt_address};
+    let lpt_addr = if (option_type == 0) {ctx.call_lpt_address}else{ctx.put_lpt_address};
     dsps
     .amm
     .add_option_both_sides(
