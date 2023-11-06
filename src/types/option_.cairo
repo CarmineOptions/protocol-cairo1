@@ -194,7 +194,7 @@ impl Option_Impl of Option_Trait {
         premia_with_fees
     }
 
-    
+
     fn value_of_position(self: Option_, position_size: Int) -> Fixed {
         let current_block_time = get_block_timestamp();
         let is_ripe = self.maturity <= current_block_time;

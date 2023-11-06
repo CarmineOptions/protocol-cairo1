@@ -76,7 +76,6 @@ mod Trading {
         lptoken_address: LPTAddress,
         limit_total_premia: Fixed,
     ) -> Fixed {
-
         // Helper Values
         let option_size_cubit = fromU256_balance(option_size.into(), base_token_address);
 
@@ -386,7 +385,7 @@ mod Trading {
             limit_total_premia,
         )
     }
-        
+
     // @notice External function for closing a position
     // @dev options_size is always denominated in the lowest possible unit of base token - "wei" for ETH/USDC
     // @dev options_size of 1 ETH would be 10**18 since 1 ETH = 10**18 wei

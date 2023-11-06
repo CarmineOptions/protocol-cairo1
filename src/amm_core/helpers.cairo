@@ -1,4 +1,3 @@
-
 use starknet::contract_address::contract_address_try_from_felt252;
 use starknet::get_block_timestamp;
 use starknet::ContractAddress;

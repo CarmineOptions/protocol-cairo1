@@ -2,7 +2,10 @@ mod Pragma {
     use starknet::get_block_timestamp;
 
     use carmine_protocol::traits::{IPragmaOracleDispatcher, IPragmaOracleDispatcherTrait};
-    use super::PragmaUtils::{IOracleABIDispatcher, IOracleABIDispatcherTrait, DataType, PragmaPricesResponse, AggregationMode, Checkpoint};
+    use super::PragmaUtils::{
+        IOracleABIDispatcher, IOracleABIDispatcherTrait, DataType, PragmaPricesResponse,
+        AggregationMode, Checkpoint
+    };
 
     use carmine_protocol::amm_core::oracles::oracle_helpers::{convert_from_int_to_Fixed};
     use carmine_protocol::types::basic::{Timestamp};
@@ -14,11 +17,14 @@ mod Pragma {
 
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
-    use carmine_protocol::amm_core::constants::{TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, TOKEN_WBTC_ADDRESS};
+    use carmine_protocol::amm_core::constants::{
+        TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, TOKEN_WBTC_ADDRESS
+    };
 
     // Mainnet
     // Testnet TODO: Check before mainnet launch
-    const PRAGMA_ORACLE_ADDRESS: felt252 =  // TODO: Add storage var for addr
+    const PRAGMA_ORACLE_ADDRESS: felt252 =
+        // TODO: Add storage var for addr
         0x620a609f88f612eb5773a6f4084f7b33be06a6fed7943445aebce80d6a146ba; // C1 version
 
     // const PRAGMA_AGGREGATION_MODE: felt252 = 0; // 0 is default for median
@@ -49,7 +55,6 @@ mod Pragma {
 
 
     fn _get_stablecoin_key(quote_token_addr: ContractAddress) -> Option<felt252> {
-        
         if quote_token_addr == TOKEN_USDC_ADDRESS
             .try_into()
             .expect('Pragma/GSK - Failed to convert') {
@@ -84,7 +89,8 @@ mod Pragma {
     fn _get_pragma(key: felt252) -> PragmaPricesResponse {
         IOracleABIDispatcher {
             contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
-        }.get_data(DataType::SpotEntry(key), AggregationMode::Median(()))
+        }
+            .get_data(DataType::SpotEntry(key), AggregationMode::Median(()))
     }
 
     fn get_pragma(
@@ -96,10 +102,10 @@ mod Pragma {
 
 
     fn _get_pragma_median_price(key: felt252) -> Fixed {
-
         let res: PragmaPricesResponse = IOracleABIDispatcher {
             contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
-        }.get_data(DataType::SpotEntry(key), AggregationMode::Median(()));
+        }
+            .get_data(DataType::SpotEntry(key), AggregationMode::Median(()));
 
         let curr_time = get_block_timestamp();
         let time_diff = if curr_time < res.last_updated_timestamp {
@@ -109,12 +115,11 @@ mod Pragma {
         };
 
         assert(time_diff < 3600, 'Pragma/_GPMP - Price too old');
-        assert(
-            res.price > 0_u128,
-            'Pragma/-GPMP - Price <= 0'
-        );
+        assert(res.price > 0_u128, 'Pragma/-GPMP - Price <= 0');
 
-        convert_from_int_to_Fixed(res.price, res.decimals.try_into().expect('Pragma/_GPMP - decimals err'))
+        convert_from_int_to_Fixed(
+            res.price, res.decimals.try_into().expect('Pragma/_GPMP - decimals err')
+        )
     }
 
     fn get_pragma_median_price(
@@ -128,18 +133,21 @@ mod Pragma {
 
     // TODO Check that checkpoint is not after expiry
     fn _get_pragma_terminal_price(key: felt252, maturity: Timestamp) -> Fixed {
-
         if maturity == 1695119670 {
             return FixedTrait::from_felt(1600); // TODO: remove this
         }
 
         let (res, _) = IOracleABIDispatcher {
             contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
-        }.get_last_checkpoint_before(DataType::SpotEntry(key), maturity, AggregationMode::Median(()));
+        }
+            .get_last_checkpoint_before(
+                DataType::SpotEntry(key), maturity, AggregationMode::Median(())
+            );
 
         let decs = IOracleABIDispatcher {
             contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
-        }.get_decimals(DataType::SpotEntry(key));
+        }
+            .get_decimals(DataType::SpotEntry(key));
 
         assert(decs > 0, 'Pragma/GPTP - decs zero');
 
@@ -147,23 +155,19 @@ mod Pragma {
         let time_diff = maturity - res.timestamp;
 
         assert(time_diff < 7200, 'Pragma/GPTP - Term price old');
-        assert(
-            res.value > 0_u128,
-            'Pragma/GPTP - Price <= 0'
-        );
+        assert(res.value > 0_u128, 'Pragma/GPTP - Price <= 0');
         convert_from_int_to_Fixed(res.value, decs.try_into().unwrap())
     }
 
     fn get_pragma_terminal_price(
         quote_token_addr: ContractAddress, base_token_addr: ContractAddress, maturity: Timestamp
     ) -> Fixed {
-        
         // TODO: REMOVE THIS
         if base_token_addr.into() == TOKEN_ETH_ADDRESS {
             if maturity == 1696377599 {
                 return FixedTrait::from_felt(30405583789254716162048);
             }
-            
+
             if maturity == 1696463999 {
                 return FixedTrait::from_felt(30405583789254716162048);
             }
@@ -173,14 +177,12 @@ mod Pragma {
             if maturity == 1696377599 {
                 return FixedTrait::from_felt(512480803027932216819712);
             }
-            
+
             if maturity == 1696463999 {
                 return FixedTrait::from_felt(512480803027932216819712);
             }
         }
 
-
-        
         let key = _get_ticker_key(quote_token_addr, base_token_addr);
         let res = _get_pragma_terminal_price(key, maturity);
         account_for_stablecoin_divergence(res, quote_token_addr, maturity)
@@ -210,21 +212,24 @@ mod Pragma {
     fn set_pragma_checkpoint(key: felt252) {
         IOracleABIDispatcher {
             contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
-        }.set_checkpoint(DataType::SpotEntry(key), AggregationMode::Median(()))
+        }
+            .set_checkpoint(DataType::SpotEntry(key), AggregationMode::Median(()))
     }
 
     fn set_pragma_required_checkpoints() {
-
         // Just add needed checkpoints here
         set_pragma_checkpoint(PRAGMA_ETH_USD_KEY);
         set_pragma_checkpoint(PRAGMA_USDC_USD_KEY);
         set_pragma_checkpoint(PRAGMA_WBTC_USD_KEY);
     }
-    
+
     fn get_pragma_checkpoint(key: felt252, before: u64) -> (Checkpoint, u64) {
         IOracleABIDispatcher {
             contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
-        }.get_last_checkpoint_before(DataType::SpotEntry(key), before, AggregationMode::Median(()))
+        }
+            .get_last_checkpoint_before(
+                DataType::SpotEntry(key), before, AggregationMode::Median(())
+            )
     }
 }
 
@@ -233,9 +238,8 @@ mod Pragma {
 /////////////////////
 
 mod PragmaUtils {
-
     #[starknet::interface]
-    trait IOracleABI<TContractState> {    
+    trait IOracleABI<TContractState> {
         fn get_decimals(self: @TContractState, data_type: DataType) -> u32;
         fn get_data(
             self: @TContractState, data_type: DataType, aggregation_mode: AggregationMode
@@ -281,5 +285,4 @@ mod PragmaUtils {
         Mean: (),
         Error: (),
     }
-    
 }

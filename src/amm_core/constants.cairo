@@ -1,4 +1,3 @@
-
 //
 // @title Constants Contract
 //
@@ -46,7 +45,7 @@ const TOKEN_ETH_ADDRESS: felt252 =
 const TOKEN_USDC_ADDRESS: felt252 =
     0x005a643907b9a4bc6a55e9069c4fd5fd1f5c79a22470690f75556c4736e34426; // testnet
 
-const TOKEN_WBTC_ADDRESS: felt252 = 
+const TOKEN_WBTC_ADDRESS: felt252 =
     0x012d537dc323c439dc65c976fad242d5610d27cfb5f31689a0a319b8be7f3d56; // testnet
 
 // Tests --------------------------------------------------------------------------------------------------------------

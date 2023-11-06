@@ -71,20 +71,24 @@ fn get_dispatchers(ctx: Ctx) -> Dispatchers {
 
 #[starknet::contract]
 mod MockPragma {
-    use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{DataType, PragmaPricesResponse, AggregationMode, Checkpoint, IOracleABI};
+    use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{
+        DataType, PragmaPricesResponse, AggregationMode, Checkpoint, IOracleABI
+    };
     use option::{Option, OptionTrait};
-    
+
     #[storage]
     struct Storage {}
 
     #[external(v0)]
     impl MockPragma of IOracleABI<ContractState> {
-        fn get_data(self: @ContractState, data_type: DataType, aggregation_mode: AggregationMode) -> PragmaPricesResponse {
+        fn get_data(
+            self: @ContractState, data_type: DataType, aggregation_mode: AggregationMode
+        ) -> PragmaPricesResponse {
             PragmaPricesResponse {
-                price: 0, 
-                decimals: 0, 
+                price: 0,
+                decimals: 0,
                 last_updated_timestamp: 0,
-                num_sources_aggregated: 0, 
+                num_sources_aggregated: 0,
                 expiration_timestamp: Option::None(())
             }
         }
@@ -95,9 +99,8 @@ mod MockPragma {
             timestamp: u64,
             aggregation_mode: AggregationMode,
         ) -> (Checkpoint, u64) {
-
             let checkp = Checkpoint {
-                timestamp: 0, 
+                timestamp: 0,
                 value: 0,
                 aggregation_mode: AggregationMode::Median(()),
                 num_sources_aggregated: 0
@@ -105,14 +108,19 @@ mod MockPragma {
             (checkp, 0)
         }
 
-        fn set_checkpoint( ref self: ContractState, data_type: DataType, aggregation_mode: AggregationMode) {}
-        fn get_decimals(self: @ContractState, data_type: DataType) -> u32 {0}
+        fn set_checkpoint(
+            ref self: ContractState, data_type: DataType, aggregation_mode: AggregationMode
+        ) {}
+        fn get_decimals(self: @ContractState, data_type: DataType) -> u32 {
+            0
+        }
     }
 }
 
 
 fn deploy_setup() -> (Ctx, Dispatchers) {
-    let admin_address: felt252 = 0x0178227144f45dd9e704dab545018813d17383e4cd1181a94fb7086df8cc49e7; // for dummy assert admin
+    let admin_address: felt252 =
+        0x0178227144f45dd9e704dab545018813d17383e4cd1181a94fb7086df8cc49e7; // for dummy assert admin
 
     let pragma_contract = declare('MockPragma');
     let mytoken_contract = declare('MyToken');

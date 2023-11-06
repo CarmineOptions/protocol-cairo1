@@ -1,4 +1,3 @@
-
 //
 // @title Helper module for options pricing
 //
@@ -23,8 +22,8 @@ use carmine_protocol::types::basic::OptionType;
 use carmine_protocol::types::basic::OptionSide;
 use carmine_protocol::types::basic::Timestamp;
 
-use carmine_protocol::amm_core::constants::OPTION_CALL; 
-use carmine_protocol::amm_core::constants::OPTION_PUT; 
+use carmine_protocol::amm_core::constants::OPTION_CALL;
+use carmine_protocol::amm_core::constants::OPTION_PUT;
 
 use carmine_protocol::amm_core::helpers::FixedHelpersTrait;
 

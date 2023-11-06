@@ -117,7 +117,7 @@ mod Options {
             initial_volatility
         );
     }
-    
+
     // @notice Adds option into the AMM. Requires all the option definition.
     // @param option_side: Either 0 or 1. 0 for long option and 1 for short.
     // @param maturity: Maturity as unix timestamp.
@@ -162,8 +162,7 @@ mod Options {
             .strike_price();
         let contr_maturity = IOptionTokenDispatcher { contract_address: option_token_address }
             .maturity();
-        let contr_side = IOptionTokenDispatcher { contract_address: option_token_address }
-            .side();
+        let contr_side = IOptionTokenDispatcher { contract_address: option_token_address }.side();
 
         assert(contr_opt_type == option_type, 'Option type input doesnt match');
         assert(contr_strike == strike_price, 'Strike price input doesnt match');
@@ -514,7 +513,6 @@ mod Options {
 
         assert(transfer_res, 'MOTS: unable to transfer premia');
     }
-
 
 
     // @notice Burns option token (closes position) for user and "sends" capital to the user.

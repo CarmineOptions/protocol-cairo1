@@ -87,7 +87,6 @@ mod LiquidityPool {
         let non_expired = get_value_of_pool_non_expired_position(lptoken_address);
         let expired = get_value_of_pool_expired_position(lptoken_address);
         non_expired + expired
-
     }
 
     // @notice Retrieves the value of the non expired position within the pool
@@ -117,7 +116,7 @@ mod LiquidityPool {
 
             if option.maturity < now {
                 // Option is expired
-                continue; 
+                continue;
             }
 
             pool_pos += option.value_of_position(option_position);
@@ -141,7 +140,7 @@ mod LiquidityPool {
         let LOOKBACK = 24 * 3600 * 7 * 8;
         // ^ Only look back 8 weeks, all options should be long expired by then
         let now = get_block_timestamp();
-        let last_ix =  get_available_options_usable_index(lptoken_address);
+        let last_ix = get_available_options_usable_index(lptoken_address);
 
         if last_ix == 0 {
             return FixedTrait::ZERO();
@@ -153,7 +152,6 @@ mod LiquidityPool {
         loop {
             let option = get_available_options(lptoken_address, ix);
             assert(option.sum() != 0, 'GVoEO - opt sum zero');
-
 
             if (option.maturity >= now) {
                 break; // Option is not yet expired
@@ -174,7 +172,6 @@ mod LiquidityPool {
             }
 
             pool_pos += option.value_of_position(option_position);
-            
         };
 
         pool_pos
@@ -299,7 +296,7 @@ mod LiquidityPool {
         set_pool_volatility_adjustment_speed(lptoken_address, volatility_adjustment_speed);
         set_max_lpool_balance(lptoken_address, max_lpool_bal);
     }
-    
+
 
     // @notice Mints LP tokens and deposits liquidity into the LP
     // @dev Assumes the underlying token is already approved (directly call approve() on the token being
@@ -363,7 +360,6 @@ mod LiquidityPool {
 
         IERC20Dispatcher { contract_address: pooled_token_address }
             .transferFrom(caller_addr, own_addr, amount);
-            
     // TODO: reentrancyGuard.end()
     }
 
@@ -427,7 +423,6 @@ mod LiquidityPool {
         IERC20Dispatcher { contract_address: lptoken_address }.burn(caller_addr, lp_token_amount);
     // TODO: ReentrancyGuard.end();
     }
-
 
 
     // @notice Helper function for expiring pool's options.
@@ -572,7 +567,9 @@ mod LiquidityPool {
 
         let opt_size_u256: u256 = option_size.into();
 
-        assert(new_pool_position.into() >= 0_u256, 'New pool pos negative'); // TODO: this check is probs redundant, its "u"int
+        assert(
+            new_pool_position.into() >= 0_u256, 'New pool pos negative'
+        ); // TODO: this check is probs redundant, its "u"int
         assert(opt_size_u256 <= current_pool_position.into(), 'Opt size > curr pool pos');
 
         set_option_position(lptoken_address, option_side, maturity, strike_price, 0);

@@ -13,7 +13,7 @@ mod State {
     use carmine_protocol::amm_core::helpers::FixedHelpersTrait;
 
     use carmine_protocol::utils::assert_admin_only;
-    
+
     use carmine_protocol::amm_core::constants::OPTION_CALL;
     use carmine_protocol::amm_core::constants::OPTION_PUT;
     use carmine_protocol::amm_core::constants::VOLATILITY_LOWER_BOUND;
@@ -198,9 +198,7 @@ mod State {
     // @param strike_price: Strike price of given option
     // @returns volatility: volatility of given option
     fn get_option_volatility(
-        lptoken_address: LPTAddress,
-        maturity: Timestamp,
-        strike_price: Strike
+        lptoken_address: LPTAddress, maturity: Timestamp, strike_price: Strike
     ) -> Volatility {
         let mut state = AMM::unsafe_new_contract_state();
 
@@ -261,7 +259,6 @@ mod State {
 
         state.new_available_options.read((lptoken_address, idx))
     }
-
 
 
     // @notice Appends new option to available options for given pool
@@ -358,7 +355,6 @@ mod State {
     }
 
 
-
     // @notice Sets max option size as a percentage of pool volatility adjustment speed
     // @param value: percentage, ie 20
     fn set_max_option_size_percent_of_voladjspd(value: Int) {
@@ -380,9 +376,7 @@ mod State {
         let state = AMM::unsafe_new_contract_state();
         let pool = state.pool_definition_from_lptoken_address.read(lptoken_address);
 
-        assert(
-           !pool.quote_token_address.is_zero(), 'Quote addr doesnt exist'
-        );
+        assert(!pool.quote_token_address.is_zero(), 'Quote addr doesnt exist');
         assert(!pool.base_token_address.is_zero(), 'Base addr doesnt exist');
         assert_option_type_exists(pool.option_type.into(), 'Unknown option type');
 
@@ -615,9 +609,9 @@ mod State {
             .unwrap() {
             return; // Marek
         }
-        // TODO: Add david
-        // Todo: enable this
-        // assert(1 == 0, 'Caller cant halt trading');
+    // TODO: Add david
+    // Todo: enable this
+    // assert(1 == 0, 'Caller cant halt trading');
     }
 
     // @notice  Returns the token that's underlying the given liquidity pool.
@@ -699,12 +693,8 @@ mod State {
         let state = AMM::unsafe_new_contract_state();
         let pool = state.pool_definition_from_lptoken_address.read(lpt_addr);
 
-        assert(
-            pool.quote_token_address.is_zero(), 'Given lpt registered - 0'
-        );
-        assert(
-            pool.base_token_address.is_zero(), 'Given lpt registered - 1'
-        );
+        assert(pool.quote_token_address.is_zero(), 'Given lpt registered - 0');
+        assert(pool.base_token_address.is_zero(), 'Given lpt registered - 1');
     }
 
     // @notice Sets pool definition for the given LP token address

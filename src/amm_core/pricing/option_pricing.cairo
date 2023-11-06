@@ -7,7 +7,7 @@ mod OptionPricing {
     use cubit::f128::math::comp::max;
     use debug::PrintTrait;
 
-    use array::ArrayTrait; 
+    use array::ArrayTrait;
     use array::SpanTrait;
 
     const CONST_A: u128 = 4168964160658358665; // 0.226 * 2**64

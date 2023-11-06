@@ -1,4 +1,3 @@
-
 use starknet::ContractAddress;
 use carmine_protocol::amm_core::view::View;
 use carmine_protocol::testing::setup::{deploy_setup, _add_expired_option};
@@ -12,7 +11,9 @@ use traits::{TryInto, Into};
 use option::OptionTrait;
 
 use carmine_protocol::amm_core::oracles::pragma::Pragma::PRAGMA_ORACLE_ADDRESS;
-use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{PragmaPricesResponse, Checkpoint, AggregationMode};
+use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{
+    PragmaPricesResponse, Checkpoint, AggregationMode
+};
 
 
 #[test]
@@ -29,7 +30,7 @@ fn test_dummy() {
         'get_data',
         PragmaPricesResponse {
             price: 140000000000,
-            decimals: 8, 
+            decimals: 8,
             last_updated_timestamp: 1000000000 + 60 * 60 * 12,
             num_sources_aggregated: 0,
             expiration_timestamp: Option::None(())
@@ -64,23 +65,21 @@ fn test_dummy() {
             99999999999 // Disable this check
         );
 
-
     start_warp(ctx.amm_address, 1000000000 + 60 * 60 * 24 + 1);
     start_mock_call(
         PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
         'get_last_checkpoint_before',
-        (Checkpoint {
-                timestamp: 1000000000 + 60 * 60 * 24 - 1, 
+        (
+            Checkpoint {
+                timestamp: 1000000000 + 60 * 60 * 24 - 1,
                 value: 140000000000,
                 aggregation_mode: AggregationMode::Median(()),
                 num_sources_aggregated: 0
-        }, 1)
-     );
-    start_mock_call(
-        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
-        'get_decimals',
-        8
-     );
+            },
+            1
+        )
+    );
+    start_mock_call(PRAGMA_ORACLE_ADDRESS.try_into().unwrap(), 'get_decimals', 8);
 
     // let call_pos = dsps.amm.get_option_position(
     //     ctx.call_lpt_address,
@@ -104,12 +103,7 @@ fn test_dummy() {
     //     ctx.put_lpt_address
     // );
 
-    let call_val = dsps.amm.get_value_of_pool_expired_position(
-        ctx.call_lpt_address
-    );
+    let call_val = dsps.amm.get_value_of_pool_expired_position(ctx.call_lpt_address);
 
-    let put_val = dsps.amm.get_value_of_pool_expired_position(
-        ctx.put_lpt_address
-    );
-
+    let put_val = dsps.amm.get_value_of_pool_expired_position(ctx.put_lpt_address);
 }

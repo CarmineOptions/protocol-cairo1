@@ -59,9 +59,7 @@ mod View {
 
         let pool = PoolTrait::from_lpt_address(lpt_addr);
 
-        let decs = IERC20Dispatcher {
-            contract_address: pool.base_token_address
-        }.decimals();
+        let decs = IERC20Dispatcher { contract_address: pool.base_token_address }.decimals();
 
         let one = pow(10, decs.into());
 

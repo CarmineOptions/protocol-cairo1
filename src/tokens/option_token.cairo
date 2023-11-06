@@ -4,10 +4,9 @@ use cubit::f128::types::Fixed;
 
 #[starknet::interface]
 trait IOptionToken<TState> {
-
     fn set_owner_admin(ref self: TState, owner: ContractAddress);
     fn upgrade(ref self: TState, new_class_hash: ClassHash);
-    
+
     fn name(self: @TState) -> felt252;
     fn symbol(self: @TState) -> felt252;
     fn decimals(self: @TState) -> u8;
@@ -23,7 +22,7 @@ trait IOptionToken<TState> {
     fn strike_price(self: @TState) -> Fixed;
     fn maturity(self: @TState) -> u64;
     fn side(self: @TState) -> u8;
-    
+
     fn transfer(ref self: TState, recipient: ContractAddress, amount: u256) -> bool;
     fn transferFrom(
         ref self: TState, sender: ContractAddress, recipient: ContractAddress, amount: u256
@@ -32,7 +31,6 @@ trait IOptionToken<TState> {
 
     fn mint(ref self: TState, recipient: ContractAddress, amount: u256);
     fn burn(ref self: TState, account: ContractAddress, amount: u256);
-
 }
 
 
@@ -80,12 +78,11 @@ mod OptionToken {
         maturity: u64,
         side: u8,
     ) {
-
         let mut erc20_unsafe_state = ERC20::unsafe_new_contract_state();
         let mut ownable_unsafe_state = Ownable::unsafe_new_contract_state();
         ERC20::InternalImpl::initializer(ref erc20_unsafe_state, name, symbol);
         Ownable::InternalImpl::initializer(ref ownable_unsafe_state, owner);
-        
+
         self._option_token_quote_token_address.write(quote_token_address);
         self._option_token_base_token_address.write(base_token_address);
         self._option_token_option_type.write(option_type);
@@ -101,7 +98,6 @@ mod OptionToken {
     use carmine_protocol::utils::assert_admin_only;
     #[external(v0)]
     impl OptionTokenImpl of IOptionToken<ContractState> {
-
         fn name(self: @ContractState) -> felt252 {
             let erc20_unsafe_state = ERC20::unsafe_new_contract_state();
             ERC20::ERC20Impl::name(@erc20_unsafe_state)
@@ -116,43 +112,35 @@ mod OptionToken {
             18
         }
 
-        fn allowance(self: @ContractState, owner: ContractAddress, spender: ContractAddress) -> u256 {
+        fn allowance(
+            self: @ContractState, owner: ContractAddress, spender: ContractAddress
+        ) -> u256 {
             let erc20_unsafe_state = ERC20::unsafe_new_contract_state();
-            ERC20::ERC20Impl::allowance(
-                @erc20_unsafe_state, owner, spender
-            )
+            ERC20::ERC20Impl::allowance(@erc20_unsafe_state, owner, spender)
         }
 
-        fn transfer(ref self: ContractState, recipient: ContractAddress, amount: u256) -> bool { 
+        fn transfer(ref self: ContractState, recipient: ContractAddress, amount: u256) -> bool {
             let mut erc20_unsafe_state = ERC20::unsafe_new_contract_state();
-            ERC20::ERC20Impl::transfer(
-                ref erc20_unsafe_state, recipient, amount
-            )
+            ERC20::ERC20Impl::transfer(ref erc20_unsafe_state, recipient, amount)
         }
 
         fn approve(ref self: ContractState, spender: ContractAddress, amount: u256) -> bool {
             let mut erc20_unsafe_state = ERC20::unsafe_new_contract_state();
-            ERC20::ERC20Impl::transfer(
-                ref erc20_unsafe_state, spender, amount
-            )
+            ERC20::ERC20Impl::transfer(ref erc20_unsafe_state, spender, amount)
         }
-        
+
         fn mint(ref self: ContractState, recipient: ContractAddress, amount: u256) {
             let mut erc20_unsafe_state = ERC20::unsafe_new_contract_state();
             let ownable_unsafe_state = Ownable::unsafe_new_contract_state();
             Ownable::InternalImpl::assert_only_owner(@ownable_unsafe_state);
-            ERC20::InternalImpl::_mint(
-                ref erc20_unsafe_state, recipient, amount
-            )
+            ERC20::InternalImpl::_mint(ref erc20_unsafe_state, recipient, amount)
         }
 
         fn burn(ref self: ContractState, account: ContractAddress, amount: u256) {
             let mut erc20_unsafe_state = ERC20::unsafe_new_contract_state();
             let ownable_unsafe_state = Ownable::unsafe_new_contract_state();
             Ownable::InternalImpl::assert_only_owner(@ownable_unsafe_state);
-            ERC20::InternalImpl::_burn(
-                ref erc20_unsafe_state, account, amount
-            )
+            ERC20::InternalImpl::_burn(ref erc20_unsafe_state, account, amount)
         }
         fn totalSupply(self: @ContractState) -> u256 {
             let erc20_unsafe_state = ERC20::unsafe_new_contract_state();
@@ -163,14 +151,17 @@ mod OptionToken {
             let erc20_unsafe_state = ERC20::unsafe_new_contract_state();
             ERC20::ERC20Impl::balance_of(@erc20_unsafe_state, account)
         }
-        
+
         fn balance_of(self: @ContractState, account: ContractAddress) -> u256 {
             let erc20_unsafe_state = ERC20::unsafe_new_contract_state();
             ERC20::ERC20Impl::balance_of(@erc20_unsafe_state, account)
         }
 
         fn transferFrom(
-            ref self: ContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256
+            ref self: ContractState,
+            sender: ContractAddress,
+            recipient: ContractAddress,
+            amount: u256
         ) -> bool {
             let mut erc20_unsafe_state = ERC20::unsafe_new_contract_state();
             ERC20::ERC20Impl::transfer_from(ref erc20_unsafe_state, sender, recipient, amount)
@@ -178,7 +169,7 @@ mod OptionToken {
 
         fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
             assert_admin_only();
-            
+
             assert(!new_class_hash.is_zero(), 'Class hash cannot be zero');
             starknet::replace_class_syscall(new_class_hash).unwrap();
             self.emit(Upgraded { class_hash: new_class_hash });

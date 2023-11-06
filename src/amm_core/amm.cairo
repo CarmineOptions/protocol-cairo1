@@ -111,10 +111,14 @@ trait IAMM<TContractState> {
     fn get_all_lptoken_addresses(self: @TContractState,) -> Array<ContractAddress>;
     fn get_value_of_pool_position(self: @TContractState, lptoken_address: ContractAddress) -> Fixed;
 
-    fn get_value_of_pool_expired_position(self: @TContractState, lptoken_address: ContractAddress) -> Fixed;
-    fn get_value_of_pool_non_expired_position(self: @TContractState, lptoken_address: ContractAddress) -> Fixed;
-    
-    
+    fn get_value_of_pool_expired_position(
+        self: @TContractState, lptoken_address: ContractAddress
+    ) -> Fixed;
+    fn get_value_of_pool_non_expired_position(
+        self: @TContractState, lptoken_address: ContractAddress
+    ) -> Fixed;
+
+
     fn get_value_of_position(
         self: @TContractState,
         option: Option_,
@@ -224,26 +228,24 @@ trait IAMM<TContractState> {
     ) -> Fixed;
 
     fn get_pragma_checkpoint(self: @TContractState, key: felt252, before: u64) -> (Checkpoint, u64);
-    fn set_pragma_checkpoint(
-        ref self: TContractState,
-        key: felt252
-    );
+    fn set_pragma_checkpoint(ref self: TContractState, key: felt252);
 
     fn set_pragma_required_checkpoints(ref self: TContractState);
 
     // TODO: Functions below
     // fn initializer(ref self: TContractState, proxy_admin: ContractAddress);
     fn upgrade(ref self: TContractState, new_implementation: ClassHash); // TODO: this is just temp
-// fn setAdmin(ref self: TContractState, address: felt252);
-// fn getImplementationHash(self: @TContractState, ) -> felt252;
+    // fn setAdmin(ref self: TContractState, address: felt252);
+    // fn getImplementationHash(self: @TContractState, ) -> felt252;
 
-    fn _get_ticker_key(self: @TContractState, quote_token_addr: ContractAddress, base_token_addr: ContractAddress) -> felt252;
+    fn _get_ticker_key(
+        self: @TContractState, quote_token_addr: ContractAddress, base_token_addr: ContractAddress
+    ) -> felt252;
 
     fn _get_pragma(self: @TContractState, key: felt252) -> PragmaPricesResponse;
     fn get_pragma(
         self: @TContractState, quote_token_addr: ContractAddress, base_token_addr: ContractAddress,
     ) -> PragmaPricesResponse;
-
 }
 
 
@@ -377,7 +379,9 @@ mod AMM {
     use carmine_protocol::amm_core::oracles::agg::OracleAgg;
     use carmine_protocol::amm_core::oracles::pragma::Pragma;
 
-    use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{PragmaPricesResponse, Checkpoint};
+    use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{
+        PragmaPricesResponse, Checkpoint
+    };
 
     use carmine_protocol::types::option_::{OptionWithPremia, OptionWithUsersPosition};
     use carmine_protocol::types::pool::{PoolInfo, UserPoolInfo};
@@ -402,7 +406,7 @@ mod AMM {
         ) -> Fixed {
             let mut re_guard_unsafe_state = ReentrancyGuard::unsafe_new_contract_state();
             ReentrancyGuard::InternalImpl::start(ref re_guard_unsafe_state);
-            
+
             let premia = Trading::trade_open(
                 option_type,
                 strike_price,
@@ -414,9 +418,9 @@ mod AMM {
                 limit_total_premia,
                 tx_deadline,
             );
-            
+
             ReentrancyGuard::InternalImpl::end(ref re_guard_unsafe_state);
-            
+
             premia
         }
 
@@ -434,7 +438,7 @@ mod AMM {
         ) -> Fixed {
             let mut re_guard_unsafe_state = ReentrancyGuard::unsafe_new_contract_state();
             ReentrancyGuard::InternalImpl::start(ref re_guard_unsafe_state);
-            
+
             let premia = Trading::trade_close(
                 option_type,
                 strike_price,
@@ -616,11 +620,15 @@ mod AMM {
             View::get_all_lptoken_addresses()
         }
 
-        fn get_value_of_pool_expired_position(self: @ContractState, lptoken_address: LPTAddress) -> Fixed {
+        fn get_value_of_pool_expired_position(
+            self: @ContractState, lptoken_address: LPTAddress
+        ) -> Fixed {
             LiquidityPool::get_value_of_pool_expired_position(lptoken_address)
         }
 
-        fn get_value_of_pool_non_expired_position(self: @ContractState, lptoken_address: LPTAddress) -> Fixed {
+        fn get_value_of_pool_non_expired_position(
+            self: @ContractState, lptoken_address: LPTAddress
+        ) -> Fixed {
             LiquidityPool::get_value_of_pool_non_expired_position(lptoken_address)
         }
         fn get_value_of_pool_position(
@@ -655,10 +663,9 @@ mod AMM {
             option_type: OptionType,
             amount: u256,
         ) {
-
             let mut re_guard_unsafe_state = ReentrancyGuard::unsafe_new_contract_state();
             ReentrancyGuard::InternalImpl::start(ref re_guard_unsafe_state);
-            
+
             LiquidityPool::deposit_liquidity(
                 pooled_token_addr, quote_token_address, base_token_address, option_type, amount,
             );
@@ -676,7 +683,7 @@ mod AMM {
         ) {
             let mut re_guard_unsafe_state = ReentrancyGuard::unsafe_new_contract_state();
             ReentrancyGuard::InternalImpl::start(ref re_guard_unsafe_state);
-            
+
             LiquidityPool::withdraw_liquidity(
                 pooled_token_addr,
                 quote_token_address,
@@ -699,10 +706,9 @@ mod AMM {
             strike_price: Fixed,
             maturity: u64,
         ) {
-
             let mut re_guard_unsafe_state = ReentrancyGuard::unsafe_new_contract_state();
             ReentrancyGuard::InternalImpl::start(ref re_guard_unsafe_state);
-            
+
             LiquidityPool::expire_option_token_for_pool(
                 lptoken_address, option_side, strike_price, maturity,
             );
@@ -855,33 +861,38 @@ mod AMM {
             starknet::replace_class_syscall(new_implementation).unwrap();
         }
 
-    
-    fn _get_ticker_key(self: @ContractState, quote_token_addr: ContractAddress, base_token_addr: ContractAddress) -> felt252 {
-        Pragma::_get_ticker_key(quote_token_addr, base_token_addr)   
-    }
 
-    fn _get_pragma(self: @ContractState, key: felt252) -> PragmaPricesResponse {
-        Pragma::_get_pragma(key)
-    }
-    fn get_pragma(
-        self: @ContractState, quote_token_addr: ContractAddress, base_token_addr: ContractAddress,
-    ) -> PragmaPricesResponse {
-        Pragma::get_pragma(quote_token_addr, base_token_addr)
-    }
-        
-    fn set_pragma_checkpoint(
-        ref self: ContractState,
-        key: felt252
-    ) { Pragma::set_pragma_checkpoint(key) }
+        fn _get_ticker_key(
+            self: @ContractState,
+            quote_token_addr: ContractAddress,
+            base_token_addr: ContractAddress
+        ) -> felt252 {
+            Pragma::_get_ticker_key(quote_token_addr, base_token_addr)
+        }
 
-    fn set_pragma_required_checkpoints(ref self: ContractState) {
-        Pragma::set_pragma_required_checkpoints()
-    }
+        fn _get_pragma(self: @ContractState, key: felt252) -> PragmaPricesResponse {
+            Pragma::_get_pragma(key)
+        }
+        fn get_pragma(
+            self: @ContractState,
+            quote_token_addr: ContractAddress,
+            base_token_addr: ContractAddress,
+        ) -> PragmaPricesResponse {
+            Pragma::get_pragma(quote_token_addr, base_token_addr)
+        }
 
-    fn get_pragma_checkpoint(self: @ContractState, key: felt252, before: u64) -> (Checkpoint, u64) {
-        Pragma::get_pragma_checkpoint(key, before)
-    }
-    
-        
+        fn set_pragma_checkpoint(ref self: ContractState, key: felt252) {
+            Pragma::set_pragma_checkpoint(key)
+        }
+
+        fn set_pragma_required_checkpoints(ref self: ContractState) {
+            Pragma::set_pragma_required_checkpoints()
+        }
+
+        fn get_pragma_checkpoint(
+            self: @ContractState, key: felt252, before: u64
+        ) -> (Checkpoint, u64) {
+            Pragma::get_pragma_checkpoint(key, before)
+        }
     }
 }

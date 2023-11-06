@@ -13,7 +13,9 @@ use traits::{TryInto, Into};
 use option::OptionTrait;
 
 use carmine_protocol::amm_core::oracles::pragma::Pragma::PRAGMA_ORACLE_ADDRESS;
-use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{PragmaPricesResponse, Checkpoint, AggregationMode};
+use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{
+    PragmaPricesResponse, Checkpoint, AggregationMode
+};
 
 
 #[test]
@@ -154,7 +156,7 @@ fn test_get_total_premia() {
         'get_data',
         PragmaPricesResponse {
             price: 140000000000,
-            decimals: 8, 
+            decimals: 8,
             last_updated_timestamp: 1000000000 + 60 * 60 * 12,
             num_sources_aggregated: 0,
             expiration_timestamp: Option::None(())
@@ -232,7 +234,7 @@ fn test_get_all_non_expired_options_with_premia() {
         'get_data',
         PragmaPricesResponse {
             price: 140000000000,
-            decimals: 8, 
+            decimals: 8,
             last_updated_timestamp: 1000000000 + 60 * 60 * 12,
             num_sources_aggregated: 0,
             expiration_timestamp: Option::None(())
@@ -289,7 +291,7 @@ fn test_get_all_non_expired_options_with_premia() {
         );
     assert(put_option_addr_0 == ctx.long_put_address, 'LP addr not matching');
     assert(put_option_addr_1 == ctx.short_put_address, 'SP addr not matching');
-    
+
     assert(call_0.premia == FixedTrait::from_felt(14858735986897951), 'LC premia wrong');
     assert(call_1.premia == FixedTrait::from_felt(4313307644393373), 'SC premia wrong');
 
