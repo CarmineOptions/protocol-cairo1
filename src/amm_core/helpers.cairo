@@ -1,52 +1,82 @@
-use starknet::contract_address::{contract_address_to_felt252, contract_address_try_from_felt252};
+
+use starknet::contract_address::contract_address_try_from_felt252;
 use starknet::get_block_timestamp;
 use starknet::ContractAddress;
 use traits::Into;
 use traits::TryInto;
 use option::OptionTrait;
 
-use core::cmp::{max, min};
+use core::cmp::max;
+use core::cmp::min;
 
 use integer::U128DivRem;
 
-use cubit::f128::types::fixed::{Fixed, FixedTrait, MAX_u128, FixedInto};
+use cubit::f128::types::fixed::Fixed;
+use cubit::f128::types::fixed::FixedTrait;
+use cubit::f128::types::fixed::MAX_u128;
+use cubit::f128::types::fixed::FixedInto;
 
-use carmine_protocol::amm_core::oracles::agg::OracleAgg::{get_terminal_price, get_current_price};
+use carmine_protocol::amm_core::oracles::agg::OracleAgg::get_terminal_price;
+use carmine_protocol::amm_core::oracles::agg::OracleAgg::get_current_price;
 
-use carmine_protocol::types::basic::{Math64x61_, OptionSide, OptionType, Int, Timestamp};
+use carmine_protocol::types::basic::Math64x61_;
+use carmine_protocol::types::basic::OptionSide;
+use carmine_protocol::types::basic::OptionType;
+use carmine_protocol::types::basic::Int;
+use carmine_protocol::types::basic::Timestamp;
 
-use carmine_protocol::types::option_::{Option_};
+use carmine_protocol::types::option_::Option_;
 
 use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing::black_scholes;
 use carmine_protocol::amm_core::pricing::fees::get_fees;
-use carmine_protocol::amm_core::pricing::option_pricing_helpers::{
-    get_new_volatility, get_time_till_maturity, select_and_adjust_premia, add_premia_fees,
-};
 
-use carmine_protocol::amm_core::constants::{
-    OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT, get_opposite_side,
-    STOP_TRADING_BEFORE_MATURITY_SECONDS, RISK_FREE_RATE, TOKEN_ETH_ADDRESS, TOKEN_USDC_ADDRESS
-};
+use carmine_protocol::amm_core::pricing::option_pricing_helpers::get_new_volatility;
+use carmine_protocol::amm_core::pricing::option_pricing_helpers::get_time_till_maturity;
+use carmine_protocol::amm_core::pricing::option_pricing_helpers::select_and_adjust_premia;
+use carmine_protocol::amm_core::pricing::option_pricing_helpers::add_premia_fees;
+
+use carmine_protocol::amm_core::constants::OPTION_CALL;
+use carmine_protocol::amm_core::constants::OPTION_PUT;
+use carmine_protocol::amm_core::constants::TRADE_SIDE_LONG;
+use carmine_protocol::amm_core::constants::TRADE_SIDE_SHORT;
+use carmine_protocol::amm_core::constants::get_opposite_side;
+use carmine_protocol::amm_core::constants::STOP_TRADING_BEFORE_MATURITY_SECONDS;
+use carmine_protocol::amm_core::constants::RISK_FREE_RATE;
+use carmine_protocol::amm_core::constants::TOKEN_ETH_ADDRESS;
+use carmine_protocol::amm_core::constants::TOKEN_USDC_ADDRESS;
 
 use carmine_protocol::traits::IERC20Dispatcher;
 use carmine_protocol::traits::IERC20DispatcherTrait;
 
+// Some helpful functions for Fixed type
 #[generate_trait]
 impl FixedHelpersImpl of FixedHelpersTrait {
+    // @notice Asserts that given Fixed number is >= 0
+    // @param self: Fixed Instance
+    // @param msg: Error message for assert statement
     fn assert_nn_not_zero(self: Fixed, msg: felt252) {
         assert(self > FixedTrait::ZERO(), msg);
     }
 
+    // @notice Asserts that given Fixed number is > 0
+    // @param self: Fixed Instance
+    // @param msg: Error message for assert statement
     fn assert_nn(self: Fixed, errmsg: felt252) {
         assert(self >= FixedTrait::ZERO(), errmsg)
     }
 
+    // @notice Converts Fixed number to Math64x61 number (used in Cairo 0)
+    // @param self: Fixed Instance
+    // @returns Math64x61 (num * 2**61)
     fn to_legacyMath(self: Fixed) -> Math64x61_ {
         // Fixed is 8 times the old math
         let new: felt252 = (self / FixedTrait::from_unscaled_felt(8)).into();
         new
     }
 
+    // @notice Converts Math64x61 number to Fixed number
+    // @param num: Math64x61 number
+    // @returns Fixed number
     fn from_legacyMath(num: Math64x61_) -> Fixed {
         // 2**61 is 8 times smaller than 2**64
         // so we can just multiply old legacy math number by 8 to get cubit 
@@ -54,29 +84,39 @@ impl FixedHelpersImpl of FixedHelpersTrait {
     }
 }
 
-// This takes in felt252 since uints might overflow if option_side is negative
+// @notice Asserts that given option side is valid (either 0 or 1)
+// @param option_side: Option side value to be checked
+// @param msg: Error message for assert statement
 fn assert_option_side_exists(option_side: felt252, msg: felt252) {
     assert(
         (option_side - TRADE_SIDE_LONG.into()) * (option_side - TRADE_SIDE_SHORT.into()) == 0, msg
     );
 }
 
-// This takes in felt252 since uints might overflow if option_side is negative
+// @notice Asserts that given option type is valid (either 0 or 1)
+// @param option_type: Option type value to be checked
+// @param msg: Error message for assert statement
 fn assert_option_type_exists(option_type: felt252, msg: felt252) {
     assert((option_type - OPTION_CALL.into()) * (option_type - OPTION_PUT.into()) == 0, msg);
 }
 
 // TODO: This function can be deleted, addresses have .is_zero() method (so use sth like assert(!addr.is_zero(), ''))
 fn assert_address_not_zero(addr: ContractAddress, msg: felt252) {
-    assert(contract_address_to_felt252(addr) != 0, msg);
+    assert(!addr.is_zero(), msg);
 }
 
+// @notice Asserts that current timestamp is less or equal to tx deadline
+// @param deadline:  Deadline timestamp of tx
 fn check_deadline(deadline: Timestamp) {
     let current_block_time = get_block_timestamp();
     assert(current_block_time <= deadline, 'TX is too old');
 }
 
 
+// @notice Returns value of a to the power of b
+// @param a:  base
+// @param b: exponent
+// @return a ** b
 fn pow(a: u128, b: u128) -> u128 {
     let mut x: u128 = a;
     let mut n = b;
