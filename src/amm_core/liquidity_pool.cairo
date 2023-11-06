@@ -3,61 +3,100 @@ mod LiquidityPool {
     use starknet::get_caller_address;
     use starknet::info::get_contract_address;
     use starknet::get_block_timestamp;
-
-    use starknet::contract_address::{
-        contract_address_to_felt252, contract_address_try_from_felt252
-    };
-    use traits::{Into, TryInto};
-    use option::OptionTrait;
-    use cubit::f128::types::fixed::{Fixed, FixedTrait};
     use integer::U256DivRem;
 
-    use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use traits::Into;
+    use traits::TryInto;
+    use option::OptionTrait;
 
-    use carmine_protocol::types::basic::{LPTAddress, OptionType, OptionSide, Int, Timestamp};
+    use cubit::f128::types::fixed::Fixed;
+    use cubit::f128::types::fixed::FixedTrait;
 
-    use carmine_protocol::types::option_::{Option_, Option_Trait};
-    use carmine_protocol::types::pool::{Pool};
+    use carmine_protocol::traits::IERC20Dispatcher;
+    use carmine_protocol::traits::IERC20DispatcherTrait;
 
+    use carmine_protocol::types::basic::LPTAddress;
+    use carmine_protocol::types::basic::OptionType;
+    use carmine_protocol::types::basic::OptionSide;
+    use carmine_protocol::types::basic::Int;
+    use carmine_protocol::types::basic::Timestamp;
 
-    use carmine_protocol::amm_core::amm::AMM::{
-        DepositLiquidity, WithdrawLiquidity, ExpireOptionTokenForPool, emit_event
-    };
+    use carmine_protocol::types::option_::Option_;
+    use carmine_protocol::types::option_::Option_Trait;
+    use carmine_protocol::types::pool::Pool;
+
+    use carmine_protocol::amm_core::amm::AMM::DepositLiquidity;
+    use carmine_protocol::amm_core::amm::AMM::WithdrawLiquidity;
+    use carmine_protocol::amm_core::amm::AMM::ExpireOptionTokenForPool;
+    use carmine_protocol::amm_core::amm::AMM::emit_event;
 
     use carmine_protocol::amm_core::oracles::agg::OracleAgg::get_terminal_price;
 
-    use carmine_protocol::amm_core::state::State::{
-        get_available_options, get_option_position, get_option_volatility,
-        get_lptoken_address_for_given_option, get_pool_volatility_adjustment_speed,
-        get_unlocked_capital, get_underlying_token_address,
-        fail_if_existing_pool_definition_from_lptoken_address,
-        append_to_available_lptoken_addresses, set_lptoken_address_for_given_option,
-        set_pool_definition_from_lptoken_address, set_underlying_token_address,
-        set_pool_volatility_adjustment_speed, set_max_lpool_balance, get_lpool_balance,
-        set_lpool_balance, get_max_lpool_balance, get_pool_locked_capital, set_pool_locked_capital,
-        get_option_info, set_option_position, get_available_options_usable_index
-    };
+    use carmine_protocol::amm_core::state::State::get_available_options;
+    use carmine_protocol::amm_core::state::State::get_option_position;
+    use carmine_protocol::amm_core::state::State::get_option_volatility;
+    use carmine_protocol::amm_core::state::State::get_lptoken_address_for_given_option;
+    use carmine_protocol::amm_core::state::State::get_pool_volatility_adjustment_speed;
+    use carmine_protocol::amm_core::state::State::get_unlocked_capital;
+    use carmine_protocol::amm_core::state::State::get_underlying_token_address;
+    use carmine_protocol::amm_core::state::State::fail_if_existing_pool_definition_from_lptoken_address;
+    use carmine_protocol::amm_core::state::State::append_to_available_lptoken_addresses;
+    use carmine_protocol::amm_core::state::State::set_lptoken_address_for_given_option;
+    use carmine_protocol::amm_core::state::State::set_pool_definition_from_lptoken_address;
+    use carmine_protocol::amm_core::state::State::set_underlying_token_address;
+    use carmine_protocol::amm_core::state::State::set_pool_volatility_adjustment_speed;
+    use carmine_protocol::amm_core::state::State::set_max_lpool_balance;
+    use carmine_protocol::amm_core::state::State::get_lpool_balance;
+    use carmine_protocol::amm_core::state::State::set_lpool_balance;
+    use carmine_protocol::amm_core::state::State::get_max_lpool_balance;
+    use carmine_protocol::amm_core::state::State::get_pool_locked_capital;
+    use carmine_protocol::amm_core::state::State::set_pool_locked_capital;
+    use carmine_protocol::amm_core::state::State::get_option_info;
+    use carmine_protocol::amm_core::state::State::set_option_position;
+    use carmine_protocol::amm_core::state::State::get_available_options_usable_index;
 
-    use carmine_protocol::amm_core::helpers::{
-        toU256_balance, assert_option_type_exists, assert_address_not_zero,
-        get_underlying_from_option_data, fromU256_balance, split_option_locked_capital
-    };
+    use carmine_protocol::amm_core::helpers::toU256_balance;
+    use carmine_protocol::amm_core::helpers::assert_option_type_exists;
+    use carmine_protocol::amm_core::helpers::assert_address_not_zero;
+    use carmine_protocol::amm_core::helpers::get_underlying_from_option_data;
+    use carmine_protocol::amm_core::helpers::fromU256_balance;
+    use carmine_protocol::amm_core::helpers::split_option_locked_capital;
 
-    use carmine_protocol::amm_core::constants::{
-        OPTION_CALL, OPTION_PUT, TRADE_SIDE_LONG, TRADE_SIDE_SHORT
-    };
+    use carmine_protocol::amm_core::constants::OPTION_CALL;
+    use carmine_protocol::amm_core::constants::OPTION_PUT;
+    use carmine_protocol::amm_core::constants::TRADE_SIDE_LONG;
+    use carmine_protocol::amm_core::constants::TRADE_SIDE_SHORT;
 
+
+    // @notice Retrieves the value of a single position, independent of the holder.
+    // @param option: Struct containing option definition data
+    // @param position_size: Size of the position, in of Int(u128)
+    // @return position_value: Value of the position in terms of Fixed
     fn get_value_of_position(option: Option_, position_size: Int) -> Fixed {
         option.value_of_position(position_size)
     }
 
+
+    // @notice Retrieves the value of the position within the pool
+    // @dev Returns a total value of pools position (sum of value of all options held by pool, even the matured ones).
+    // @dev Used in get_lptokens_for_underlying, which is why it isn't in view.cairo.
+    // @param lptoken_address: Address of the liquidity pool token
+    // @return res: Value of the position within specified liquidity pool
     fn get_value_of_pool_position(lptoken_address: LPTAddress) -> Fixed {
+        // TODO: Check this thoroughly
         let non_expired = get_value_of_pool_non_expired_position(lptoken_address);
         let expired = get_value_of_pool_expired_position(lptoken_address);
         non_expired + expired
 
     }
 
+    // @notice Retrieves the value of the non expired position within the pool
+    // @dev Returns a total value of pools non expired position (sum of value of all options held by pool).
+    // @dev Goes through all options in storage var "available_options"... is able to iterate by i
+    // @dev (from 0 to n)
+    // @dev It gets 0 from available_option(n), if the n-1 is the "last" option.
+    // @param lptoken_address: Address of the liquidity pool token
+    // @return res: Value of the non_expired position within specified liquidity pool
     fn get_value_of_pool_non_expired_position(lptoken_address: LPTAddress) -> Fixed {
         let mut i: u32 = 0;
         let mut pool_pos: Fixed = FixedTrait::from_felt(0);
@@ -91,9 +130,16 @@ mod LiquidityPool {
     // walk the index backwards like two weeks, instead of iterating over all options
     // from the begining
     // TODO: use this func
+
+    // @notice Retrieves the value of the expired position within the pool
+    // @dev Returns a total value of pools non expired position.
+    // @dev Walks backwards (iteration starts from last index) all options in storage var "available_options" 
+    // @dev     that expired in last 8 weeks
+    // @param lptoken_address: Address of the liquidity pool token
+    // @return res: Value of the expired position within specified liquidity pool
     fn get_value_of_pool_expired_position(lptoken_address: LPTAddress) -> Fixed {
-        let LOOKBACK = 24 * 3600 * 7 * 4;
-        // ^ Only look back 4 weeks, all options should be long expired by then
+        let LOOKBACK = 24 * 3600 * 7 * 8;
+        // ^ Only look back 8 weeks, all options should be long expired by then
         let now = get_block_timestamp();
         let last_ix =  get_available_options_usable_index(lptoken_address);
 
@@ -128,7 +174,6 @@ mod LiquidityPool {
             }
 
             pool_pos += option.value_of_position(option_position);
-
             
         };
 
@@ -139,6 +184,12 @@ mod LiquidityPool {
     // # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     // Provide/remove liquidity
     // # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+    // @notice Calculates how many LP tokens correspond to the given amount of underlying token
+    // @dev Quote or base tokens are used based on the pool being put/call
+    // @param lptoken_address: Address of the liquidity pool token
+    // @param underlying_amt: Amount of underlying tokens, in Uint256!!!
+    // @return lpt_amt: How many LP tokens correspond to the given amount of underlying token in u256
     fn get_lptokens_for_underlying(lptoken_address: LPTAddress, underlying_amt: u256) -> u256 {
         let free_capital = get_unlocked_capital(lptoken_address);
         let currency_address = get_underlying_token_address(lptoken_address);
@@ -166,6 +217,14 @@ mod LiquidityPool {
         to_mint_additional_q + to_mint
     }
 
+    // @notice Computes the amount of underlying token that corresponds to a given amount of LP token
+    // @dev Doesn't take into account whether this underlying is actually free to be withdrawn.
+    // @dev computes this essentially: my_underlying = (total_underlying/total_lpt)*my_lpt
+    // @dev notation used: ... = (a)*my_lpt = b
+    // @param lptoken_address: Address of the liquidity pool token
+    // @param lpt_amt: Amount of liquidity pool tokens, in Uint256!!!
+    // @return underlying_amt: Amount of underlying token that correspond to the given amount of
+    //      LP token, in u256
     fn get_underlying_for_lptokens(lptoken_address: LPTAddress, lpt_amt: u256) -> u256 {
         let lpt_supply = IERC20Dispatcher { contract_address: lptoken_address }.totalSupply();
         let free_capital = get_unlocked_capital(lptoken_address);
@@ -189,6 +248,16 @@ mod LiquidityPool {
         to_burn_addition_q + b
     }
 
+
+    // @notice Adds a new liqudity pool through registering LP token in the AMM.
+    // @dev This function initializes new pool
+    // @param quote_token_address: Address of the quote token (USDC in ETH/USDC)
+    // @param base_token_address: Address of the base token (ETH in ETH/USDC)
+    // @param option_type: Type of the option 0 for Call, 1 for Put
+    // @param lptoken_address: Address of the liquidity pool token
+    // @param pooled_token_addr: Address of the pooled token
+    // @param volatility_adjustment_speed: Constant that determines how fast the volatility is changing
+    // @param max_lpool_bal: Maximum balance of the bool for given pooled token
     fn add_lptoken(
         quote_token_address: ContractAddress,
         base_token_address: ContractAddress,
@@ -230,7 +299,16 @@ mod LiquidityPool {
         set_pool_volatility_adjustment_speed(lptoken_address, volatility_adjustment_speed);
         set_max_lpool_balance(lptoken_address, max_lpool_bal);
     }
+    
 
+    // @notice Mints LP tokens and deposits liquidity into the LP
+    // @dev Assumes the underlying token is already approved (directly call approve() on the token being
+    // @dev deposited to allow this contract to claim them)
+    // @param pooled_token_addr: Address that should correspond to the underlying token address of the pool
+    // @param quote_token_address: Address of the quote token (USDC in ETH/USDC)
+    // @param base_token_address: Address of the base token (ETH in ETH/USDC)
+    // @param option_type: Type of the option 0 for Call, 1 for Put
+    // @param amount: Amount of underlying token to deposit - in u256
     fn deposit_liquidity(
         pooled_token_address: ContractAddress,
         quote_token_address: ContractAddress,
@@ -285,9 +363,19 @@ mod LiquidityPool {
 
         IERC20Dispatcher { contract_address: pooled_token_address }
             .transferFrom(caller_addr, own_addr, amount);
+            
     // TODO: reentrancyGuard.end()
     }
 
+    // @notice Withdraw liquidity from the LP
+    // @dev Withdraws liquidity only if there is enough available liquidity (ie enough unlocked
+    //      capital). If that is not the case the transaction fails.
+    // @param pooled_token_addr: Address that should correspond to the underlying token address of the pool
+    // @param quote_token_address: Address of the quote token (USDC in ETH/USDC)
+    // @param base_token_address: Address of the base token (ETH in ETH/USDC)
+    // @param option_type: Type of the option 0 for Call, 1 for Put
+    // @param lp_token_amount: LP token amount in terms of LP tokens, not underlying tokens
+    //       as in deposit_liquidity
     fn withdraw_liquidity(
         pooled_token_address: ContractAddress,
         quote_token_address: ContractAddress,
@@ -341,6 +429,16 @@ mod LiquidityPool {
     }
 
 
+
+    // @notice Helper function for expiring pool's options.
+    // @dev It basically adjusts the internal state of the AMM.
+    // @param lptoken_address: Address of the LP token
+    // @param long_value: Pool's long position
+    // @param short_value: Pool's short position
+    // @param option_size: Size of the position
+    // @param option_side: Option's side from the perspective of the pool
+    // @param maturity: Option's maturity
+    // @param strike_price: Option's strike price
     fn adjust_lpool_balance_and_pool_locked_capital_expired_options(
         lptoken_address: ContractAddress,
         long_value: u256,
@@ -409,6 +507,12 @@ mod LiquidityPool {
         }
     }
 
+    // @notice Expires option token but only for pool.
+    // @dev First pool's position has to be expired, before any user's position is expired (settled).
+    // @param lptoken_address: Address of the LP token
+    // @param option_side: Option's side from the perspective of the pool
+    // @param strike_price: Option's strike price
+    // @param maturity: Option's maturity
     fn expire_option_token_for_pool(
         lptoken_address: ContractAddress,
         option_side: OptionSide,
@@ -468,7 +572,7 @@ mod LiquidityPool {
 
         let opt_size_u256: u256 = option_size.into();
 
-        assert(new_pool_position.into() >= 0_u256, 'New pool pos negative'); // TODO: this check is probs redundant, it "U"int
+        assert(new_pool_position.into() >= 0_u256, 'New pool pos negative'); // TODO: this check is probs redundant, its "u"int
         assert(opt_size_u256 <= current_pool_position.into(), 'Opt size > curr pool pos');
 
         set_option_position(lptoken_address, option_side, maturity, strike_price, 0);
