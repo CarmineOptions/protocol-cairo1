@@ -184,7 +184,7 @@ mod Options {
         append_to_available_options(option_, lptoken_address);
 
         set_option_token_address(
-            lptoken_address, option_side, maturity, strike_price, option_token_address_
+            lptoken_address, option_side, maturity, strike_price, option_token_address
         );
     }
 

@@ -198,8 +198,8 @@ mod State {
     // @param strike_price: Strike price of given option
     // @returns volatility: volatility of given option
     fn get_option_volatility(
-        lptoken_address: LPTAddress
-        maturity: Timestamp
+        lptoken_address: LPTAddress,
+        maturity: Timestamp,
         strike_price: Strike
     ) -> Volatility {
         let mut state = AMM::unsafe_new_contract_state();
