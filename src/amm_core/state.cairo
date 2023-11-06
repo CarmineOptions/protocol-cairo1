@@ -2,57 +2,90 @@ mod State {
     use starknet::get_caller_address;
     use starknet::ContractAddress;
     use traits::{Into, TryInto};
-    use starknet::contract_address::{
-        contract_address_to_felt252, contract_address_try_from_felt252
-    };
+    use starknet::contract_address::contract_address_try_from_felt252;
     use core::option::OptionTrait;
-    use cubit::f128::types::fixed::{Fixed, FixedTrait};
+    use cubit::f128::types::fixed::Fixed;
+    use cubit::f128::types::fixed::FixedTrait;
 
-    use carmine_protocol::amm_core::helpers::{
-        assert_option_side_exists, assert_option_type_exists, assert_address_not_zero,
-        FixedHelpersTrait
-    };
+    use carmine_protocol::amm_core::helpers::assert_option_side_exists;
+    use carmine_protocol::amm_core::helpers::assert_option_type_exists;
+    use carmine_protocol::amm_core::helpers::assert_address_not_zero;
+    use carmine_protocol::amm_core::helpers::FixedHelpersTrait;
 
     use carmine_protocol::utils::assert_admin_only;
-    use carmine_protocol::amm_core::constants::{
-        OPTION_CALL, OPTION_PUT, VOLATILITY_LOWER_BOUND, VOLATILITY_UPPER_BOUND
-    };
-    use carmine_protocol::amm_core::amm::AMM::{
-        option_token_addressContractMemberStateTrait,
-        new_option_token_addressContractMemberStateTrait,
-        pool_volatility_separateContractMemberStateTrait, option_volatilityContractMemberStateTrait,
-        pool_definition_from_lptoken_addressContractMemberStateTrait,
-        available_lptoken_adressesContractMemberStateTrait,
-        underlying_token_addressContractMemberStateTrait, trading_haltedContractMemberStateTrait,
-        lptoken_addr_for_given_pooled_tokenContractMemberStateTrait,
-        max_lpool_balanceContractMemberStateTrait, pool_locked_capital_ContractMemberStateTrait,
-        lpool_balance_ContractMemberStateTrait, new_option_positionContractMemberStateTrait,
-        max_option_size_percent_of_voladjspdContractMemberStateTrait,
-        option_position_ContractMemberStateTrait, new_available_optionsContractMemberStateTrait,
-        available_optionsContractMemberStateTrait,
-        new_pool_volatility_adjustment_speedContractMemberStateTrait,
-        new_available_options_usable_indexContractMemberStateTrait,
-        pool_volatility_adjustment_speedContractMemberStateTrait, pool_volatility_separate,
-        option_volatility, pool_volatility_adjustment_speed, new_pool_volatility_adjustment_speed,
-        option_position_, new_option_position, option_token_address, new_option_token_address,
-        available_options, new_available_options, new_available_options_usable_index,
-        max_lpool_balance, lptoken_addr_for_given_pooled_token, trading_halted,
-        available_lptoken_adresses, max_option_size_percent_of_voladjspd, underlying_token_address,
-        pool_definition_from_lptoken_address, lpool_balance_, pool_locked_capital_
-    };
+    
+    use carmine_protocol::amm_core::constants::OPTION_CALL;
+    use carmine_protocol::amm_core::constants::OPTION_PUT;
+    use carmine_protocol::amm_core::constants::VOLATILITY_LOWER_BOUND;
+    use carmine_protocol::amm_core::constants::VOLATILITY_UPPER_BOUND;
+
+    use carmine_protocol::amm_core::amm::AMM::option_token_addressContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::new_option_token_addressContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::pool_volatility_separateContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::option_volatilityContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::pool_definition_from_lptoken_addressContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::available_lptoken_adressesContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::underlying_token_addressContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::trading_haltedContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::lptoken_addr_for_given_pooled_tokenContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::max_lpool_balanceContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::pool_locked_capital_ContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::lpool_balance_ContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::new_option_positionContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::max_option_size_percent_of_voladjspdContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::option_position_ContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::new_available_optionsContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::available_optionsContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::new_pool_volatility_adjustment_speedContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::new_available_options_usable_indexContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::pool_volatility_adjustment_speedContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::pool_volatility_separate;
+    use carmine_protocol::amm_core::amm::AMM::option_volatility;
+    use carmine_protocol::amm_core::amm::AMM::pool_volatility_adjustment_speed;
+    use carmine_protocol::amm_core::amm::AMM::new_pool_volatility_adjustment_speed;
+    use carmine_protocol::amm_core::amm::AMM::option_position_;
+    use carmine_protocol::amm_core::amm::AMM::new_option_position;
+    use carmine_protocol::amm_core::amm::AMM::option_token_address;
+    use carmine_protocol::amm_core::amm::AMM::new_option_token_address;
+    use carmine_protocol::amm_core::amm::AMM::available_options;
+    use carmine_protocol::amm_core::amm::AMM::new_available_options;
+    use carmine_protocol::amm_core::amm::AMM::new_available_options_usable_index;
+    use carmine_protocol::amm_core::amm::AMM::max_lpool_balance;
+    use carmine_protocol::amm_core::amm::AMM::lptoken_addr_for_given_pooled_token;
+    use carmine_protocol::amm_core::amm::AMM::trading_halted;
+    use carmine_protocol::amm_core::amm::AMM::available_lptoken_adresses;
+    use carmine_protocol::amm_core::amm::AMM::max_option_size_percent_of_voladjspd;
+    use carmine_protocol::amm_core::amm::AMM::underlying_token_address;
+    use carmine_protocol::amm_core::amm::AMM::pool_definition_from_lptoken_address;
+    use carmine_protocol::amm_core::amm::AMM::lpool_balance_;
+    use carmine_protocol::amm_core::amm::AMM::pool_locked_capital_;
 
     use carmine_protocol::amm_core::amm::AMM;
 
-    use carmine_protocol::types::basic::{
-        LPTAddress, OptionSide, OptionType, Math64x61_, LegacyVolatility, LegacyStrike, Volatility,
-        Strike, Int, Timestamp
-    };
+    use carmine_protocol::types::basic::LPTAddress;
+    use carmine_protocol::types::basic::OptionSide;
+    use carmine_protocol::types::basic::OptionType;
+    use carmine_protocol::types::basic::Math64x61_;
+    use carmine_protocol::types::basic::LegacyVolatility;
+    use carmine_protocol::types::basic::LegacyStrike;
+    use carmine_protocol::types::basic::Volatility;
+    use carmine_protocol::types::basic::Strike;
+    use carmine_protocol::types::basic::Int;
+    use carmine_protocol::types::basic::Timestamp;
 
-    use carmine_protocol::types::pool::{Pool};
-    use carmine_protocol::types::option_::{
-        LegacyOption, Option_, LegacyOption_to_Option, Option_to_LegacyOption, Option_Trait
-    };
+    use carmine_protocol::types::pool::Pool;
+    use carmine_protocol::types::option_::LegacyOption;
+    use carmine_protocol::types::option_::Option_;
+    use carmine_protocol::types::option_::LegacyOption_to_Option;
+    use carmine_protocol::types::option_::Option_to_LegacyOption;
+    use carmine_protocol::types::option_::Option_Trait;
 
+    // @notice Writes option token address into storage var, mapped against option definition
+    // @param lptoken_addres: Address of a pool which the option belongs to
+    // @param option_side: 0 for long, 1 for short
+    // @param maturity: Maturity of given option
+    // @param strike_price: Strike price of given option
+    // @param opt_address: Option token address
     fn set_option_token_address(
         lptoken_address: LPTAddress,
         option_side: OptionSide,
@@ -63,10 +96,10 @@ mod State {
         let mut state = AMM::unsafe_new_contract_state();
 
         assert_option_side_exists(option_side.into(), 'SOTA - opt side 0');
-        assert(contract_address_to_felt252(lptoken_address) != 0, 'SOTE - lpt addr 0');
+        assert(!lptoken_address.is_zero(), 'SOTE - lpt addr 0');
         assert(maturity > 0, 'SOTA - maturity <= 0');
         strike_price.assert_nn_not_zero('sota - maturity <= 0');
-        assert(contract_address_to_felt252(opt_address) != 0, 'SOTE - opt addr 0');
+        assert(!opt_address.is_zero(), 'SOTE - opt addr 0');
 
         // Set old storage var to zero in case this function get called before the getter
         // option_token_address::InternalContractStateTrait::write(
@@ -82,6 +115,13 @@ mod State {
             .write((lptoken_address, option_side, maturity, strike_price.mag), opt_address);
     }
 
+
+    // @notice Retrieves option token address based on option definition
+    // @param lptoken_addres: Address of a pool which the option belongs to
+    // @param option_side: 0 for long, 1 for short
+    // @param maturity: Maturity of given option
+    // @param strike_price: Strike price of given option
+    // @returns opt_address: Option token address
     fn get_option_token_address(
         lptoken_address: LPTAddress,
         option_side: OptionSide,
@@ -95,7 +135,7 @@ mod State {
             .option_token_address
             .read((lptoken_address, option_side, maturity.into(), strike_price.to_legacyMath()));
 
-        if contract_address_to_felt252(option_token_addr) != 0 {
+        if !option_token_addr.is_zero() {
             // Write value to new storage var
             set_option_token_address(
                 lptoken_address, option_side, maturity, strike_price, option_token_addr
@@ -120,6 +160,11 @@ mod State {
         return res;
     }
 
+    // @notice Sets option volatility based on it's definition
+    // @param lptoken_addres: Address of a pool which the option belongs to
+    // @param maturity: Maturity of given option
+    // @param strike_price: Strike price of given option
+    // @param volatility: volatility of given option
     fn set_option_volatility(
         lptoken_address: LPTAddress,
         maturity: Timestamp,
@@ -147,8 +192,15 @@ mod State {
             .write((lptoken_address, maturity.into(), strike_price.mag), volatility);
     }
 
+    // @notice Retrieves option volatility based on it's definition
+    // @param lptoken_addres: Address of a pool which the option belongs to
+    // @param maturity: Maturity of given option
+    // @param strike_price: Strike price of given option
+    // @returns volatility: volatility of given option
     fn get_option_volatility(
-        lptoken_address: LPTAddress, maturity: Timestamp, strike_price: Strike,
+        lptoken_address: LPTAddress
+        maturity: Timestamp
+        strike_price: Strike
     ) -> Volatility {
         let mut state = AMM::unsafe_new_contract_state();
 
@@ -186,10 +238,18 @@ mod State {
         return res;
     }
 
+    // @notice Returns the first free option index for the given lptoken address.
+    // @dev Returns lowest index that does not contain any specified option (only zeros).
+    // @param lptoken_address: Address of liquidity pool
+    // @returns available_index: first available index in storage var
     fn get_available_options_usable_index(lptoken_address: ContractAddress) -> u32 {
         AMM::unsafe_new_contract_state().new_available_options_usable_index.read(lptoken_address)
     }
 
+    // @notice Returns the option for given pool and index
+    // @param lptoken_address: Address of liquidity pool
+    // @param idx: Index in storage var
+    // @returns option: Option struct stored under the given index
     fn get_available_options(lptoken_address: LPTAddress, idx: u32) -> Option_ {
         let state = AMM::unsafe_new_contract_state();
 
@@ -202,6 +262,11 @@ mod State {
         state.new_available_options.read((lptoken_address, idx))
     }
 
+
+
+    // @notice Appends new option to available options for given pool
+    // @param option: Option struct to be stored
+    // @param lptoken_address: Address of liquidity pool correspending to the option
     fn append_to_available_options(option: Option_, lptoken_address: LPTAddress) {
         let mut state = AMM::unsafe_new_contract_state();
 
@@ -220,7 +285,11 @@ mod State {
         state.new_available_options_usable_index.write(lptoken_address, usable_index + 1);
     }
 
-    // Migrates old options and returns first empty index
+    // @notice Helper function for migrating from C0 AMM options to new C1 AMM ones
+    // @dev iterates over all of the available options and migrates all of them
+    // @param lptoken_address: Address of liquidity pool to be migrated
+    // @param idx: index of option that is to be migrated
+    // @returns idx: available index for storing new option
     fn migrate_old_options(lptoken_address: ContractAddress, idx: u32) -> u32 {
         let mut state = AMM::unsafe_new_contract_state();
 
@@ -241,6 +310,9 @@ mod State {
         migrate_old_options(lptoken_address, idx + 1)
     }
 
+    // @notice Sets pool volatility adjustment speed
+    // @param lptoken_addres: Address of a liquidity pool
+    // @param new_speed: New volatility adjustment speed
     fn set_pool_volatility_adjustment_speed(lptoken_address: LPTAddress, new_speed: Fixed) {
         new_speed.assert_nn_not_zero('Pool vol adjspd cant <= 0');
 
@@ -252,6 +324,9 @@ mod State {
         state.new_pool_volatility_adjustment_speed.write(lptoken_address, new_speed);
     }
 
+    // @notice Retrieves pool volatility adjustment speed
+    // @param lptoken_addres: Address of a liquidity pool
+    // @returns pool volatility adjustment speed: Pool adjustment speed
     fn get_pool_volatility_adjustment_speed(lptoken_address: LPTAddress) -> Fixed {
         let mut state = AMM::unsafe_new_contract_state();
 
@@ -282,34 +357,41 @@ mod State {
         return res;
     }
 
-    fn get_max_option_size_percent_of_voladjspd() -> Int {
-        AMM::unsafe_new_contract_state().max_option_size_percent_of_voladjspd.read()
-    }
 
+
+    // @notice Sets max option size as a percentage of pool volatility adjustment speed
+    // @param value: percentage, ie 20
     fn set_max_option_size_percent_of_voladjspd(value: Int) {
         assert_admin_only();
         let mut state = AMM::unsafe_new_contract_state();
         state.max_option_size_percent_of_voladjspd.write(value)
     }
 
+    // @notice Returns maximal option size as a percentage of pool volatility adjustment speed
+    // @returns max option size as percentage of pool volatility adjustment speed
+    fn get_max_option_size_percent_of_voladjspd() -> Int {
+        AMM::unsafe_new_contract_state().max_option_size_percent_of_voladjspd.read()
+    }
+
+    // @notice Returns pool definition for given lptoken address
+    // @param lptoken_address: Liquidity pool token address
+    // @returns pool: Pool struct containg the definition
     fn get_pool_definition_from_lptoken_address(lptoken_address: LPTAddress) -> Pool {
         let state = AMM::unsafe_new_contract_state();
         let pool = state.pool_definition_from_lptoken_address.read(lptoken_address);
 
         assert(
-            contract_address_to_felt252(pool.quote_token_address) != 0, 'Quote addr doesnt exist'
+           !pool.quote_token_address.is_zero(), 'Quote addr doesnt exist'
         );
-        assert(contract_address_to_felt252(pool.base_token_address) != 0, 'Base addr doesnt exist');
+        assert(!pool.base_token_address.is_zero(), 'Base addr doesnt exist');
         assert_option_type_exists(pool.option_type.into(), 'Unknown option type');
 
         return pool;
     }
 
-    fn get_lpool_balance(lptoken_address: LPTAddress) -> u256 {
-        let state = AMM::unsafe_new_contract_state();
-        state.lpool_balance_.read(lptoken_address)
-    }
-
+    // @notice Sets liquidity pool balance
+    // @param lptoken_address: Address of liquidity pool token under which the balance is stored
+    // @param balance: New lpool balance in u256
     fn set_lpool_balance(lptoken_address: LPTAddress, balance: u256) {
         assert(balance >= 0, 'lpool_balance negative');
 
@@ -317,6 +399,20 @@ mod State {
         state.lpool_balance_.write(lptoken_address, balance)
     }
 
+    // @notice Returns liquidity pool balance
+    // @param lptoken_address: Address of liquidity pool token under which the balance is stored
+    // @returns balance: New lpool balance in u256
+    fn get_lpool_balance(lptoken_address: LPTAddress) -> u256 {
+        let state = AMM::unsafe_new_contract_state();
+        state.lpool_balance_.read(lptoken_address)
+    }
+
+    // @notice Returns the given liqpool's position in a given option
+    // @param lptoken_address: Address of given liqpool
+    // @param option_side: Side of the given option
+    // @param maturity: Maturity of the given option 
+    // @param strike_price: Strike price of the given option
+    // @return option_position: Int. Has same amount of decimals as base token.
     fn get_option_position(
         lptoken_address: LPTAddress,
         option_side: OptionSide,
@@ -355,7 +451,12 @@ mod State {
         state.new_option_position.read((lptoken_address, option_side, maturity, strike_price.mag))
     }
 
-    use debug::PrintTrait;
+    // @notice Sets the given liqpool's position in a given option
+    // @param lptoken_address: Address of given liqpool
+    // @param option_side: Side of the given option
+    // @param maturity: Maturity of the given option 
+    // @param strike_price: Strike price of the given option
+    // @param option_position: Int. Has same amount of decimals as base token.
     fn set_option_position(
         lptoken_address: LPTAddress,
         option_side: OptionSide,
@@ -380,11 +481,18 @@ mod State {
             .write((lptoken_address, option_side, maturity, strike_price.mag), position)
     }
 
+    // @notice Returns pool's locked capital
+    // @param  lptoken_address: Address of liquidity pool token that corresponds to the pool
+    // @retuns locked_capital: Amount of locked pooled tokens in u256
     fn get_pool_locked_capital(lptoken_address: LPTAddress) -> u256 {
         let state = AMM::unsafe_new_contract_state();
         state.pool_locked_capital_.read(lptoken_address)
     }
 
+    // @notice Returns pool's unlocked capital
+    // @dev Unlocked capital is calculated as lpool_balance - locked_capital
+    // @param  lptoken_address: Address of liquidity pool token that corresponds to the pool
+    // @retuns unlocked_capital: Amount of unlocked pooled tokens in u256
     fn get_unlocked_capital(lptoken_address: LPTAddress) -> u256 {
         let state = AMM::unsafe_new_contract_state();
 
@@ -397,6 +505,9 @@ mod State {
         return contract_balance - locked_capital;
     }
 
+    // @notice Sets pool's locked capital
+    // @param  lptoken_address: Address of liquidity pool token that corresponds to the pool
+    // @param  balance: New amount of locked pooled tokens in u256
     fn set_pool_locked_capital(lptoken_address: LPTAddress, balance: u256) {
         assert(balance >= 0, 'Balance negative in set locked');
 
@@ -404,10 +515,17 @@ mod State {
         state.pool_locked_capital_.write(lptoken_address, balance)
     }
 
+
+    // @notice Returns the current maximum total balance of the pooled token for given pool
+    // @param lpt_addr: Address of liquidity pool token for given liqpool
+    // @returns max balance: Maximum balance of pooled token for given pool
     fn get_max_lpool_balance(lpt_addr: LPTAddress) -> u256 {
         AMM::unsafe_new_contract_state().max_lpool_balance.read(lpt_addr)
     }
 
+    // @notice Sets the maximum total balance of the pooled token for given pool
+    // @param lpt_addr: Address of liquidity pool token for given liqpool
+    // @param max bal: Maximum balance of pooled token for given pool
     fn set_max_lpool_balance(lpt_addr: LPTAddress, max_bal: u256) {
         let mut state = AMM::unsafe_new_contract_state();
         assert_admin_only();
@@ -417,6 +535,11 @@ mod State {
         state.max_lpool_balance.write(lpt_addr, max_bal);
     }
 
+    // @notice Returns lptoken address based on some option parameters
+    // @param quote_token_address: Option's quote token's address
+    // @param base_token_address: Option's base token's address
+    // @param option_type: Option type
+    // @returns lptoken_address: Address of corresponding lp token
     fn get_lptoken_address_for_given_option(
         quote_token_address: ContractAddress,
         base_token_address: ContractAddress,
@@ -432,6 +555,11 @@ mod State {
         lpt_address
     }
 
+    // @notice Sets lptoken address based on some option parameters
+    // @param quote_token_address: Option's quote token's address
+    // @param base_token_address: Option's base token's address
+    // @param option_type: Option type
+    // @param lptoken_address: Address of corresponding lp token
     fn set_lptoken_address_for_given_option(
         quote_token_address: ContractAddress,
         base_token_address: ContractAddress,
@@ -450,10 +578,14 @@ mod State {
             .write((quote_token_address, base_token_address, option_type), lpt_address);
     }
 
+    // @notice Returns trading halt status
+    // @returns trading_halted: true if trading is halted, false otherwise
     fn get_trading_halt() -> bool {
         AMM::unsafe_new_contract_state().trading_halted.read()
     }
 
+    // @notice Sets trading halt status
+    // @param new_status: true if trading is halted, false otherwise
     fn set_trading_halt(new_status: bool) {
         // assert_trading_halt_allowed();
         assert_admin_only();
@@ -464,6 +596,7 @@ mod State {
         state.trading_halted.write(new_status)
     }
 
+    // TODO: Use/remove this
     fn assert_trading_halt_allowed() {
         let caller_addr = get_caller_address();
 
@@ -482,12 +615,14 @@ mod State {
             .unwrap() {
             return; // Marek
         }
-    // TODO: Add david
-    // Todo: enable this
-    // assert(1 == 0, 'Caller cant halt trading');
+        // TODO: Add david
+        // Todo: enable this
+        // assert(1 == 0, 'Caller cant halt trading');
     }
 
-    // @notice Returns the token that's underlying the given liquidity pool.
+    // @notice  Returns the token that's underlying the given liquidity pool.
+    // @param   lptoken_address: Address of given liquidity pool token
+    // @returns Underlying token address
     fn get_underlying_token_address(lptoken_address: LPTAddress) -> ContractAddress {
         let state = AMM::unsafe_new_contract_state();
         let underlying_token_address_ = state.underlying_token_address.read(lptoken_address);
@@ -495,6 +630,9 @@ mod State {
         return underlying_token_address_;
     }
 
+    // @notice Sets the token that's underlying the given liquidity pool.
+    // @param lptoken_address: Address of given liquidity pool token
+    // @param underlying_addr: Underlying token address
     fn set_underlying_token_address(lptoken_address: LPTAddress, underlying_addr: ContractAddress) {
         assert_address_not_zero(underlying_addr, 'Underlying addr is zero');
         assert_address_not_zero(lptoken_address, 'LPT addr is zero');
@@ -504,10 +642,15 @@ mod State {
         state.underlying_token_address.write(lptoken_address, underlying_addr);
     }
 
+    // @notice Reads lptoken address at given index. Useful for e.g. retrieving all lptokens.
+    // @param idx: Index
+    // @returns lptoken address stored under provided index
     fn get_available_lptoken_addresses(idx: felt252) -> LPTAddress {
         AMM::unsafe_new_contract_state().available_lptoken_adresses.read(idx)
     }
 
+    // @notice Appends lptoken address to corresponding storage var
+    // @param lptoken_addr: Address of lptoken to be stored
     fn append_to_available_lptoken_addresses(lptoken_addr: LPTAddress) {
         let usable_idx = get_available_lptoken_addresses_usable_index(0);
         let mut state = AMM::unsafe_new_contract_state();
@@ -515,14 +658,22 @@ mod State {
         state.available_lptoken_adresses.write(usable_idx, lptoken_addr)
     }
 
+    // @notice Returns available index in available_lptoken_address storage var
+    // @returns idx: Available index
     fn get_available_lptoken_addresses_usable_index(idx: felt252) -> felt252 {
         let addr = get_available_lptoken_addresses(idx);
-        if contract_address_to_felt252(addr) == 0 { // TODO: Does this check work?
+        if addr.is_zero() { // TODO: Does this check work?
             return idx;
         }
         get_available_lptoken_addresses_usable_index(idx + 1)
     }
 
+    // @notice Checks if AMM is aware of an option based on it's definition
+    // @param lptoken_address: Address of liquidity pool that corresponds to the option
+    // @param option_side: Option's side
+    // @param strike_price: Option's strike price
+    // @param maturity: Options's maturity
+    // @returns bool: True if option is available, false otherwise
     fn is_option_available(
         lptoken_address: ContractAddress,
         option_side: OptionSide,
@@ -533,25 +684,32 @@ mod State {
             lptoken_address, option_side, maturity, strike_price
         );
 
-        if contract_address_to_felt252(option_addr) == 0 {
+        if option_addr.is_zero() {
             false
         } else {
             true
         }
     }
 
+    // @notice Fails if pool definition is already stored in the amm
+    // @dev Used in set_pool_definition_from_lptoken_address to prevent overwritting
+    // @dev already existing definition
+    // @param lpt_addr: LP token address
     fn fail_if_existing_pool_definition_from_lptoken_address(lpt_addr: LPTAddress) {
         let state = AMM::unsafe_new_contract_state();
         let pool = state.pool_definition_from_lptoken_address.read(lpt_addr);
 
         assert(
-            contract_address_to_felt252(pool.quote_token_address) == 0, 'Given lpt registered - 0'
+            pool.quote_token_address.is_zero(), 'Given lpt registered - 0'
         );
         assert(
-            contract_address_to_felt252(pool.base_token_address) == 0, 'Given lpt registered - 1'
+            pool.base_token_address.is_zero(), 'Given lpt registered - 1'
         );
     }
 
+    // @notice Sets pool definition for the given LP token address
+    // @param lptoken_address: LP token address
+    // @param pool: Pool struct containing pool information
     fn set_pool_definition_from_lptoken_address(lptoken_address: LPTAddress, pool: Pool) {
         fail_if_existing_pool_definition_from_lptoken_address(lptoken_address);
 
@@ -559,6 +717,12 @@ mod State {
         let pool = state.pool_definition_from_lptoken_address.write(lptoken_address, pool);
     }
 
+    // @notice Returns Option struct with addition info based on several option parameters
+    // @param lptoken_address: Address of liquidity pool that corresponds to the option
+    // @param option_side: Option's side
+    // @param strike_price: Option's strike price
+    // @param maturity: Options's maturity
+    // @return option: Option struct containing addition info
     fn get_option_info(
         lptoken_address: ContractAddress,
         option_side: OptionSide,
