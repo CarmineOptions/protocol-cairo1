@@ -172,6 +172,12 @@ mod ILHedge {
                         ); // difference between converted and premia amounts is how much one should be hedging against
                         //assert((notional_fixed - portf_val_calls) > already_hedged, "amounttohedge neg??"); // can't compile with it for some reason??
                         let amount_to_hedge = (notional_fixed - portf_val_calls) - already_hedged;
+                        'hedging, at tobuy:'.print();
+                        tobuy.mag.print();
+                        'at hedge:'.print();
+                        tohedge.mag.print();
+                        'amount to hedge:'.print();
+                        convert_from_Fixed_to_int(amount_to_hedge, 18).print();
                         already_hedged += amount_to_hedge;
                         cost_base +=
                             price_options_at_strike_to_hedge_at(
@@ -187,7 +193,6 @@ mod ILHedge {
                 match strikes_puts.pop_front() {
                     Option::Some(strike_pair) => {
                         let (tobuy, tohedge) = *strike_pair;
-                        'tobuy(in puts):'.print();
                         tobuy.print();
                         // compute how much portf value would be at each hedged strike
                         // converts the excess to the hedge result asset (calls -> convert to eth)
@@ -202,11 +207,13 @@ mod ILHedge {
                             'some loss expected'
                         ); // portf_val_puts is in USDC
                         assert(portf_val_puts.sign == false, 'portf val neg??');
-                        let notional_fixed = convert_from_int_to_Fixed(
-                            notional, 6
+                        let notional_fixed_eth = convert_from_int_to_Fixed( // THIS IS BULLSHIT!!!
+                            notional, 18
                         ); // difference between converted and premia amounts is how much one should be hedging against
+                        let notional_fixed = notional_fixed_eth * curr_price;
                         let amount_to_hedge = notional_fixed
                             - portf_val_puts; // in USDC, with decimals
+                        'pricing!'.print();
                         cost_quote +=
                             price_options_at_strike_to_hedge_at(
                                 tobuy, tohedge, amount_to_hedge, expiry, self.amm_address.read(), quote_token_addr, base_token_addr, false

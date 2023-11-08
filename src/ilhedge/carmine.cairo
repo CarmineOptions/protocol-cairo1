@@ -48,14 +48,6 @@ fn price_option(strike: Fixed, notional: u128, expiry: u64, calls: bool, amm_add
     } else {
         0x30fe5d12635ed696483a824eca301392b3f529e06133b42784750503a24972
     };
-    'pricing option, maturity:'.print();
-    expiry.print();
-    'notional:'.print();
-    notional.print();
-    'strike:'.print();
-    strike.print();
-    'calls?:'.print();
-    calls.print();
     let option = Option_ {
         option_side: 0,
         maturity: expiry.into(),
@@ -68,7 +60,6 @@ fn price_option(strike: Fixed, notional: u128, expiry: u64, calls: bool, amm_add
         contract_address: amm_address
     }
         .get_total_premia(option, notional.into(), false);
-    'call to get_total_premia fin'.print();
     after_fees.try_into().unwrap()
 }
 
@@ -81,11 +72,9 @@ fn available_strikes(
         res.append(FixedTrait::from_unscaled_felt(1700));
         res.append(FixedTrait::from_unscaled_felt(1800));
         res.append(FixedTrait::from_unscaled_felt(1900));
-        res.append(FixedTrait::from_unscaled_felt(2000));
         res
     } else {
         let mut res = ArrayTrait::<Fixed>::new();
-        res.append(FixedTrait::from_unscaled_felt(1300));
         res.append(FixedTrait::from_unscaled_felt(1400));
         res.append(FixedTrait::from_unscaled_felt(1500));
         res.append(FixedTrait::from_unscaled_felt(1600));

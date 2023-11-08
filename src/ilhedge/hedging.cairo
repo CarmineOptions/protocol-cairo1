@@ -122,7 +122,12 @@ fn how_many_options_at_strike_to_hedge_at(
         convert_from_Fixed_to_int(res, 18)
     } else {
         assert(to_hedge_strike < to_buy_strike, 'tohedge>=tobuy');
+        'right here!'.print();
+        'payoff:'.print();
+        payoff.print();
         let res = payoff / (to_buy_strike - to_hedge_strike);
+        'boom:'.print();
+        res.print();
         convert_from_Fixed_to_int(res, 18)
     }
 }

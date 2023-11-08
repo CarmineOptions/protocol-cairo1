@@ -24,7 +24,8 @@ fn test_ilhedge() {
             expiration_timestamp: Option::None(())
         }
     );
-    add_needed_options(ctx, dsps);
+    let expiry = 1000000000 + 7 * 60 * 60 * 24; // current time plus 7 * 24 hours
+    add_needed_options(ctx, dsps, expiry);
     'hello'.print();
 
     let ilhedge_contract = declare('ILHedge');
@@ -35,7 +36,6 @@ fn test_ilhedge() {
     let ilhedge_address = ilhedge_contract.deploy(@ilhedge_constructor_data).unwrap();
     assert(ilhedge_address.into() != 0, 'ilhedge addr 0');
     let ilhedge = IILHedgeDispatcher { contract_address: ilhedge_address };
-    let expiry = 1000000000 + 60 * 60 * 24; // current time plus 24 hours, taken from setup
     let (pricecalls, priceputs) = ilhedge.price_hedge(1000000000000000000, ctx.usdc_address, ctx.eth_address, expiry);
     'pricecalls:'.print();
     pricecalls.print();
@@ -45,22 +45,19 @@ fn test_ilhedge() {
     assert(priceputs == 42, 'priceputs wut');
 }
 
-fn add_needed_options(ctx: Ctx, dsps: Dispatchers) {
+fn add_needed_options(ctx: Ctx, dsps: Dispatchers, expiry: u64) {
     let CALL = 0;
     let PUT = 1;
-    add_option_to_amm(ctx, dsps, 1600, PUT);
-    add_option_to_amm(ctx, dsps, 1700, CALL);
-    add_option_to_amm(ctx, dsps, 1800, CALL);
-    add_option_to_amm(ctx, dsps, 1900, CALL);
-    add_option_to_amm(ctx, dsps, 2000, CALL);
-    add_option_to_amm(ctx, dsps, 1300, PUT);
-    add_option_to_amm(ctx, dsps, 1400, PUT);
-    // add_option_to_amm(ctx, dsps, 1500, PUT); // already added
+    add_option_to_amm(ctx, dsps, 1700, CALL, expiry);
+    add_option_to_amm(ctx, dsps, 1800, CALL, expiry);
+    add_option_to_amm(ctx, dsps, 1900, CALL, expiry);
+    add_option_to_amm(ctx, dsps, 1400, PUT, expiry);
+    add_option_to_amm(ctx, dsps, 1500, PUT, expiry);
+    add_option_to_amm(ctx, dsps, 1600, PUT, expiry);
 }
 
-fn add_option_to_amm(ctx: Ctx, dsps: Dispatchers, strike: u128, option_type: u8) {
+fn add_option_to_amm(ctx: Ctx, dsps: Dispatchers, strike: u128, option_type: u8, expiry: u64) {
     start_prank(ctx.amm_address, ctx.admin_address);
-    let expiry: u64 = 1000000000 + 60 * 60 * 24; // current time plus 24 hours
     let LONG = 0;
     let SHORT = 1;
     let hundred = FixedTrait::from_unscaled_felt(100);
