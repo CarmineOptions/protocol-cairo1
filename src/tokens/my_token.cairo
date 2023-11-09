@@ -8,7 +8,6 @@ mod LPToken {
     use openzeppelin::access::ownable::OwnableComponent;
     
     component!(path: ERC20Component, storage: erc20, event: ERC20Event);
-    component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
 
     // ERC20 Component
     #[abi(embed_v0)]
@@ -22,23 +21,12 @@ mod LPToken {
 
     impl ERC20InternalImpl = ERC20Component::InternalImpl<ContractState>;
 
-    // Ownable Component
-    #[abi(embed_v0)]
-    impl OwnableImpl = OwnableComponent::OwnableImpl<ContractState>;
-
-    #[abi(embed_v0)]
-    impl OwnableCamelOnlyImpl = OwnableComponent::OwnableCamelOnlyImpl<ContractState>;
-
-    impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
-
 
     #[storage]
     struct Storage {
         #[substorage(v0)]
         erc20: ERC20Component::Storage,
-
-        #[substorage(v0)]
-        ownable:  OwnableComponent::Storage,
+        decimals: u8,
     }
 
     #[event]
@@ -49,27 +37,26 @@ mod LPToken {
         #[flat]
         ERC20Event: ERC20Component::Event,
 
-        #[flat]
-        OwnableEvent: OwnableComponent::Event
     }
 
     #[derive(Drop, starknet::Event)]
     struct Upgraded {
         class_hash: ClassHash
     }
+    
 
     #[constructor]
     fn constructor(
         ref self: ContractState, 
         name: felt252, 
         symbol: felt252, 
-        owner: ContractAddress,
+        decimals: u8,
         initial_supply: u256,
         recipient: ContractAddress
     ) {
         self.erc20.initializer(name, symbol);
         self.erc20._mint(recipient, initial_supply);
-        self.ownable.initializer(owner);
+        self.decimals.write(decimals)
     }
 
     #[external(v0)]
@@ -87,12 +74,11 @@ mod LPToken {
         }
 
         fn decimals(self: @ContractState) -> u8 {
-            18
+            self.decimals.read()
         }
 
         // Minting/Burning
         fn mint(ref self: ContractState, recipient: ContractAddress, amount: u256) {
-            self.ownable.assert_only_owner();
             self.erc20._mint(recipient, amount);
         }
 
@@ -103,7 +89,6 @@ mod LPToken {
 
         // Upgrades
         fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
-            self.ownable.assert_only_owner();
             assert(!new_class_hash.is_zero(), 'Class hash cannot be zero');
             starknet::replace_class_syscall(new_class_hash).unwrap();
             self.emit(Upgraded { class_hash: new_class_hash });
