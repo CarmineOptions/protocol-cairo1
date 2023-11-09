@@ -49,11 +49,15 @@ const TOKEN_WBTC_ADDRESS: felt252 =
     0x012d537dc323c439dc65c976fad242d5610d27cfb5f31689a0a319b8be7f3d56; // testnet
 
 // Tests --------------------------------------------------------------------------------------------------------------
-#[test]
-fn test_get_opposite_side() {
-    let res_1 = get_opposite_side(TRADE_SIDE_LONG);
-    let res_2 = get_opposite_side(TRADE_SIDE_SHORT);
 
-    assert(res_1 == TRADE_SIDE_SHORT, 'res1');
-    assert(res_2 == TRADE_SIDE_LONG, 'res1');
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_get_opposite_side() {
+        let res_1 = super::get_opposite_side(super::TRADE_SIDE_LONG);
+        let res_2 = super::get_opposite_side(super::TRADE_SIDE_SHORT);
+
+        assert(res_1 == super::TRADE_SIDE_SHORT, 'res1');
+        assert(res_2 == super::TRADE_SIDE_LONG, 'res1');
+    }
 }

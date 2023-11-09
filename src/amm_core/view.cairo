@@ -114,7 +114,7 @@ mod View {
 
         loop {
             let lptoken_addr = get_available_lptoken_addresses(pool_idx);
-            if contract_address_to_felt252(lptoken_addr) == 0 {
+            if lptoken_addr.is_zero() {
                 break;
             }
 
@@ -158,7 +158,7 @@ mod View {
         loop {
             let lpt_addr = get_available_lptoken_addresses(i);
 
-            if contract_address_to_felt252(lpt_addr) == 0 {
+            if lpt_addr.is_zero() {
                 break;
             }
 

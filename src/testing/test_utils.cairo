@@ -1,6 +1,6 @@
 use starknet::ContractAddress;
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
-use carmine_protocol::testing::setup::{Ctx, Dispatchers};
+use carmine_protocol::testing::setup::tests::{Ctx, Dispatchers};
 use debug::PrintTrait;
 use carmine_protocol::tokens::my_token::{MyToken, IMyTokenDispatcher, IMyTokenDispatcherTrait};
 use carmine_protocol::tokens::option_token::{
