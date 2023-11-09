@@ -313,7 +313,6 @@ mod LiquidityPool {
         option_type: OptionType,
         amount: u256
     ) {
-        // TODO: ReentrancyGuard.start()
 
         assert(amount > 0, 'Amount <= 0');
         assert_address_not_zero(pooled_token_address, 'pooled_token_addr is zero');
@@ -360,7 +359,6 @@ mod LiquidityPool {
 
         IERC20Dispatcher { contract_address: pooled_token_address }
             .transferFrom(caller_addr, own_addr, amount);
-    // TODO: reentrancyGuard.end()
     }
 
     // @notice Withdraw liquidity from the LP
@@ -379,7 +377,6 @@ mod LiquidityPool {
         option_type: OptionType,
         lp_token_amount: u256
     ) {
-        // TODO: ReentrancyGuard.start();
 
         let caller_addr = get_caller_address();
 
@@ -421,7 +418,6 @@ mod LiquidityPool {
             .transfer(caller_addr, underlying_amount);
 
         IERC20Dispatcher { contract_address: lptoken_address }.burn(caller_addr, lp_token_amount);
-    // TODO: ReentrancyGuard.end();
     }
 
 
