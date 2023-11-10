@@ -1,37 +1,60 @@
-// use starknet::ContractAddress;
-// use starknet::ClassHash;
-// use cubit::f128::types::Fixed;
+use starknet::ContractAddress;
+use starknet::ClassHash;
+use cubit::f128::types::Fixed;
 
-// #[starknet::interface]
-// trait IOptionToken<TState> {
-//     // fn set_owner_admin(ref self: TState, owner: ContractAddress);
-//     fn upgrade(ref self: TState, new_class_hash: ClassHash);
+#[starknet::interface]
+trait IOptionToken<TState> {
+    // IERC20
+    fn total_supply(self: @TState) -> u256;
+    fn balance_of(self: @TState, account: ContractAddress) -> u256;
+    fn allowance(self: @TState, owner: ContractAddress, spender: ContractAddress) -> u256;
+    fn transfer(ref self: TState, recipient: ContractAddress, amount: u256) -> bool;
+    fn transfer_from(
+        ref self: TState, sender: ContractAddress, recipient: ContractAddress, amount: u256
+    ) -> bool;
+    fn approve(ref self: TState, spender: ContractAddress, amount: u256) -> bool;
 
-//     fn name(self: @TState) -> felt252;
-//     fn symbol(self: @TState) -> felt252;
-//     fn decimals(self: @TState) -> u8;
-//     fn totalSupply(self: @TState) -> u256;
-//     fn balanceOf(self: @TState, account: ContractAddress) -> u256;
-//     fn balance_of(self: @TState, account: ContractAddress) -> u256;
-//     fn allowance(self: @TState, owner: ContractAddress, spender: ContractAddress) -> u256;
+    // IERC20Metadata
+    fn name(self: @TState) -> felt252;
+    fn symbol(self: @TState) -> felt252;
+    fn decimals(self: @TState) -> u8;
 
-//     fn owner(self: @TState) -> ContractAddress;
-//     fn quote_token_address(self: @TState) -> ContractAddress;
-//     fn base_token_address(self: @TState) -> ContractAddress;
-//     fn option_type(self: @TState) -> u8;
-//     fn strike_price(self: @TState) -> Fixed;
-//     fn maturity(self: @TState) -> u64;
-//     fn side(self: @TState) -> u8;
+    // IERC20SafeAllowance
+    fn increase_allowance(ref self: TState, spender: ContractAddress, added_value: u256) -> bool;
+    fn decrease_allowance(
+        ref self: TState, spender: ContractAddress, subtracted_value: u256
+    ) -> bool;
 
-//     fn transfer(ref self: TState, recipient: ContractAddress, amount: u256) -> bool;
-//     fn transferFrom(
-//         ref self: TState, sender: ContractAddress, recipient: ContractAddress, amount: u256
-//     ) -> bool;
-//     fn approve(ref self: TState, spender: ContractAddress, amount: u256) -> bool;
+    // IERC20CamelOnly
+    fn totalSupply(self: @TState) -> u256;
+    fn balanceOf(self: @TState, account: ContractAddress) -> u256;
+    fn transferFrom(ref self: TState, sender: ContractAddress, recipient: ContractAddress, amount: u256) -> bool;
 
-//     fn mint(ref self: TState, recipient: ContractAddress, amount: u256);
-//     fn burn(ref self: TState, account: ContractAddress, amount: u256);
-// }
+    // IERC20CamelSafeAllowance
+    fn increaseAllowance(ref self: TState, spender: ContractAddress, addedValue: u256) -> bool;
+    fn decreaseAllowance(ref self: TState, spender: ContractAddress, subtractedValue: u256) -> bool;
+
+    // Custom Functions
+    fn mint(ref self: TState, recipient: ContractAddress, amount: u256);
+    fn burn(ref self: TState, account: ContractAddress, amount: u256);
+    fn upgrade(ref self: TState, new_class_hash: ClassHash);
+
+    // Ownable Functions
+    fn transferOwnership(ref self: TState, newOwner: ContractAddress);
+    fn renounceOwnership(ref self: TState);
+    fn owner(self: @TState) -> ContractAddress;
+    fn transfer_ownership(ref self: TState, new_owner: ContractAddress);
+    fn renounce_ownership(ref self: TState);
+
+    // Option data
+    fn quote_token_address(self: @TState) -> ContractAddress;
+    fn base_token_address(self: @TState) -> ContractAddress;
+    fn option_type(self: @TState) -> u8;
+    fn strike_price(self: @TState) -> Fixed;
+    fn maturity(self: @TState) -> u64;
+    fn side(self: @TState) -> u8;
+}
+
 
 
 #[starknet::contract]
