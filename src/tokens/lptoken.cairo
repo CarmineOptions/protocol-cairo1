@@ -142,7 +142,7 @@ mod LPToken {
         }
 
         fn burn(ref self: ContractState, account: ContractAddress, amount: u256) {
-            // Should assert owner be here as well?
+            self.ownable.assert_only_owner();
             self.erc20._burn(account, amount);
         }
 

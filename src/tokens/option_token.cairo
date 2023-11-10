@@ -133,11 +133,10 @@ mod OptionToken {
         quote_token_address: ContractAddress,
         base_token_address: ContractAddress,
         option_type: u8,
-        strike_price: felt252,
+        strike_price: Fixed,
         maturity: u64,
         side: u8,
     ) {
-        let strike = FixedTrait::from_felt(strike_price);
 
         self.erc20.initializer(name, symbol);
         self.ownable.initializer(owner);
@@ -147,7 +146,7 @@ mod OptionToken {
         self._option_token_option_type.write(option_type);
         self._option_token_maturity.write(maturity);
         self._option_token_side.write(side);
-        self._option_token_strike_price.write(strike);
+        self._option_token_strike_price.write(strike_price);
     }
 
     //
@@ -179,7 +178,7 @@ mod OptionToken {
         }
 
         fn burn(ref self: ContractState, account: ContractAddress, amount: u256) {
-            // Should assert owner be here as well?
+            self.ownable.assert_only_owner();
             self.erc20._burn(account, amount);
         }
 
