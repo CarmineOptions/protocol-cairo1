@@ -30,8 +30,8 @@ mod tokens {
     mod lptoken;
     mod option_token;
 }
-// mod testing { // TODO: Fix pls
-//     mod setup;
-//     mod test_utils;
-// }
+mod testing { 
+    mod setup;
+    mod test_utils;
+}
 mod utils;
