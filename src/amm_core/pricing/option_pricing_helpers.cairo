@@ -184,11 +184,10 @@ fn add_premia_fees(side: OptionSide, total_premia_before_fees: Fixed, total_fees
 // Tests --------------------------------------------------------------------------------------------------------------
 #[cfg(test)]
 mod tests {
-
     use debug::PrintTrait;
     use carmine_protocol::testing::test_utils::is_close;
     use array::ArrayTrait;
-    
+
     use cubit::f128::types::fixed::Fixed;
     use cubit::f128::types::fixed::FixedTrait;
 
@@ -282,7 +281,12 @@ mod tests {
                     );
 
                     let (vol1, _) = get_new_volatility(
-                        volatility, half_opt_size, option_type, option_side, strike_price, vol_adj_spd
+                        volatility,
+                        half_opt_size,
+                        option_type,
+                        option_side,
+                        strike_price,
+                        vol_adj_spd
                     );
 
                     let (vol2, _) = get_new_volatility(
@@ -296,9 +300,7 @@ mod tests {
 
                     assert(is_close(desired_vol, vol2, rel_tol), 'Fail');
                 },
-                Option::None(()) => {
-                    break;
-                }
+                Option::None(()) => { break; }
             };
         }
     }
@@ -349,7 +351,9 @@ mod tests {
         assert(res1 == FixedTrait::ONE(), 'res1');
         assert(res2 == FixedTrait::ONE() / FixedTrait::from_unscaled_felt(2), 'res2');
         assert(res3 == FixedTrait::ONE() / FixedTrait::from_unscaled_felt(12), 'res3');
-        assert(res4 == FixedTrait::from_felt(354744763371574339), 'res4'); // Very small rounding here
+        assert(
+            res4 == FixedTrait::from_felt(354744763371574339), 'res4'
+        ); // Very small rounding here
         assert(res5 == FixedTrait::ONE() / FixedTrait::from_unscaled_felt(365), 'res5');
     }
 

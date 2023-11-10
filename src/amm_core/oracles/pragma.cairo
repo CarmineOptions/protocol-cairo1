@@ -203,9 +203,7 @@ mod Pragma {
                 return price / stable_coin_price;
             },
             // If key is zero, it means that quote_token isn't stablecoin(or at least one we use)
-            Option::None(_) => {
-                return price;
-            }
+            Option::None(_) => { return price; }
         }
     }
 

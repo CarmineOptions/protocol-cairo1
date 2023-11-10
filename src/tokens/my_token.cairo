@@ -25,7 +25,7 @@ mod MyToken {
     use starknet::get_caller_address;
     use openzeppelin::token::erc20::ERC20Component;
     use openzeppelin::access::ownable::OwnableComponent;
-    
+
     component!(path: ERC20Component, storage: erc20, event: ERC20Event);
 
     // ERC20 Component
@@ -52,23 +52,21 @@ mod MyToken {
     #[derive(Drop, starknet::Event)]
     enum Event {
         Upgraded: Upgraded,
-
         #[flat]
         ERC20Event: ERC20Component::Event,
-
     }
 
     #[derive(Drop, starknet::Event)]
     struct Upgraded {
         class_hash: ClassHash
     }
-    
+
 
     #[constructor]
     fn constructor(
-        ref self: ContractState, 
-        name: felt252, 
-        symbol: felt252, 
+        ref self: ContractState,
+        name: felt252,
+        symbol: felt252,
         decimals: u8,
         initial_supply: u256,
         recipient: ContractAddress
@@ -81,7 +79,6 @@ mod MyToken {
     #[external(v0)]
     #[generate_trait]
     impl LPTokenImpl of ILPToken {
-
         // Did not import Erc20MetaData, so we can change decimals
         // so we need to define name, symbol and decimals ourselves
         fn name(self: @ContractState) -> felt252 {
@@ -112,11 +109,6 @@ mod MyToken {
             starknet::replace_class_syscall(new_class_hash).unwrap();
             self.emit(Upgraded { class_hash: new_class_hash });
         }
-
     }
-
 }
-
-
-
 

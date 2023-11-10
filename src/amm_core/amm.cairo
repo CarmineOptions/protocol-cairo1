@@ -271,26 +271,28 @@ mod AMM {
 
     #[storage]
     struct Storage {
-
         #[substorage(v0)]
-        re_guard:  ReentrancyGuardComponent::Storage,
-        
-        
+        re_guard: ReentrancyGuardComponent::Storage,
         // Storage vars with new types
 
         pool_volatility_adjustment_speed: LegacyMap<LPTAddress, Math64x61_>,
         new_pool_volatility_adjustment_speed: LegacyMap<LPTAddress, Fixed>,
-        pool_volatility_separate: LegacyMap::<(LPTAddress, Maturity, LegacyStrike),
-        LegacyVolatility>,
-        option_volatility: LegacyMap::<(ContractAddress, u64, u128),
-        Volatility>, // This is actually options vol, not pools // TODO: last key value should be Fixed, not u128(or it's mag)
+        pool_volatility_separate: LegacyMap::<
+            (LPTAddress, Maturity, LegacyStrike), LegacyVolatility
+        >,
+        option_volatility: LegacyMap::<
+            (ContractAddress, u64, u128), Volatility
+        >, // This is actually options vol, not pools // TODO: last key value should be Fixed, not u128(or it's mag)
         option_position_: LegacyMap<(LPTAddress, OptionSide, Maturity, LegacyStrike), felt252>,
-        new_option_position: LegacyMap<(LPTAddress, OptionSide, Timestamp, u128),
-        Int>, // TODO: last key value should be Fixed, not u128(or it's mag)
-        option_token_address: LegacyMap::<(LPTAddress, OptionSide, Maturity, LegacyStrike),
-        ContractAddress>,
-        new_option_token_address: LegacyMap::<(LPTAddress, OptionSide, Timestamp, u128),
-        ContractAddress>, // TODO: last key value should be Fixed, not u128(or it's mag)
+        new_option_position: LegacyMap<
+            (LPTAddress, OptionSide, Timestamp, u128), Int
+        >, // TODO: last key value should be Fixed, not u128(or it's mag)
+        option_token_address: LegacyMap::<
+            (LPTAddress, OptionSide, Maturity, LegacyStrike), ContractAddress
+        >,
+        new_option_token_address: LegacyMap::<
+            (LPTAddress, OptionSide, Timestamp, u128), ContractAddress
+        >, // TODO: last key value should be Fixed, not u128(or it's mag)
         available_options: LegacyMap::<(LPTAddress, felt252), LegacyOption>,
         new_available_options: LegacyMap::<(LPTAddress, u32), Option_>,
         new_available_options_usable_index: LegacyMap::<LPTAddress, u32>,
@@ -304,10 +306,9 @@ mod AMM {
         trading_halted: bool, // Make this bool if they can be interchanged
         available_lptoken_adresses: LegacyMap<felt252, LPTAddress>,
         // (quote_token_addr, base_token_address, option_type) -> LpToken address
-        lptoken_addr_for_given_pooled_token: LegacyMap::<(
-            ContractAddress, ContractAddress, OptionType
-        ),
-        LPTAddress>,
+        lptoken_addr_for_given_pooled_token: LegacyMap::<
+            (ContractAddress, ContractAddress, OptionType), LPTAddress
+        >,
         pool_definition_from_lptoken_address: LegacyMap<LPTAddress, Pool>,
     }
 
@@ -371,10 +372,8 @@ mod AMM {
     #[derive(starknet::Event, Drop)]
     #[event]
     enum Event {
-
         #[flat]
         ReentrancyGuardEvent: ReentrancyGuardComponent::Event,
-        
         TradeOpen: TradeOpen,
         TradeClose: TradeClose,
         TradeSettle: TradeSettle,
@@ -403,7 +402,6 @@ mod AMM {
 
     use carmine_protocol::utils::assert_admin_only; //  Just Dummy admin assert
 
-    
 
     #[external(v0)]
     impl Amm of super::IAMM<ContractState> {
@@ -450,7 +448,6 @@ mod AMM {
             limit_total_premia: Fixed,
             tx_deadline: u64,
         ) -> Fixed {
-
             self.re_guard.start();
 
             let premia = Trading::trade_close(
@@ -680,7 +677,7 @@ mod AMM {
             amount: u256,
         ) {
             self.re_guard.start();
-            
+
             LiquidityPool::deposit_liquidity(
                 pooled_token_addr, quote_token_address, base_token_address, option_type, amount,
             );
@@ -707,7 +704,6 @@ mod AMM {
             );
 
             self.re_guard.end();
-
         }
 
         fn get_unlocked_capital(self: @ContractState, lptoken_address: ContractAddress) -> u256 {
@@ -722,7 +718,7 @@ mod AMM {
             maturity: u64,
         ) {
             self.re_guard.start();
-            
+
             LiquidityPool::expire_option_token_for_pool(
                 lptoken_address, option_side, strike_price, maturity,
             );

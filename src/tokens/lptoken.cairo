@@ -1,4 +1,3 @@
-
 use starknet::ContractAddress;
 use starknet::ClassHash;
 
@@ -28,7 +27,9 @@ trait ILPToken<TState> {
     // IERC20CamelOnly
     fn totalSupply(self: @TState) -> u256;
     fn balanceOf(self: @TState, account: ContractAddress) -> u256;
-    fn transferFrom(ref self: TState, sender: ContractAddress, recipient: ContractAddress, amount: u256) -> bool;
+    fn transferFrom(
+        ref self: TState, sender: ContractAddress, recipient: ContractAddress, amount: u256
+    ) -> bool;
 
     // IERC20CamelSafeAllowance
     fn increaseAllowance(ref self: TState, spender: ContractAddress, addedValue: u256) -> bool;
@@ -55,7 +56,7 @@ mod LPToken {
     use starknet::get_caller_address;
     use openzeppelin::token::erc20::ERC20Component;
     use openzeppelin::access::ownable::OwnableComponent;
-    
+
     component!(path: ERC20Component, storage: erc20, event: ERC20Event);
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
 
@@ -67,7 +68,8 @@ mod LPToken {
     impl SafeAllowanceImpl = ERC20Component::SafeAllowanceImpl<ContractState>;
 
     #[abi(embed_v0)]
-    impl SafeAllowanceCamelImpl = ERC20Component::SafeAllowanceCamelImpl<ContractState>;
+    impl SafeAllowanceCamelImpl =
+        ERC20Component::SafeAllowanceCamelImpl<ContractState>;
 
     #[abi(embed_v0)]
     impl ERC20CamelOnlyImpl = ERC20Component::ERC20CamelOnlyImpl<ContractState>;
@@ -79,7 +81,8 @@ mod LPToken {
     impl OwnableImpl = OwnableComponent::OwnableImpl<ContractState>;
 
     #[abi(embed_v0)]
-    impl OwnableCamelOnlyImpl = OwnableComponent::OwnableCamelOnlyImpl<ContractState>;
+    impl OwnableCamelOnlyImpl =
+        OwnableComponent::OwnableCamelOnlyImpl<ContractState>;
 
     impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
 
@@ -88,19 +91,16 @@ mod LPToken {
     struct Storage {
         #[substorage(v0)]
         erc20: ERC20Component::Storage,
-
         #[substorage(v0)]
-        ownable:  OwnableComponent::Storage,
+        ownable: OwnableComponent::Storage,
     }
 
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {
         Upgraded: Upgraded,
-
         #[flat]
         ERC20Event: ERC20Component::Event,
-
         #[flat]
         OwnableEvent: OwnableComponent::Event
     }
@@ -112,10 +112,7 @@ mod LPToken {
 
     #[constructor]
     fn constructor(
-        ref self: ContractState, 
-        name: felt252, 
-        symbol: felt252, 
-        owner: ContractAddress
+        ref self: ContractState, name: felt252, symbol: felt252, owner: ContractAddress
     ) {
         self.erc20.initializer(name, symbol);
         self.ownable.initializer(owner);
@@ -124,7 +121,6 @@ mod LPToken {
     #[external(v0)]
     #[generate_trait]
     impl LPTokenImpl of ILPToken {
-
         // Did not import Erc20MetaData, so we can change decimals
         // so we need to define name, symbol and decimals ourselves
         fn name(self: @ContractState) -> felt252 {
@@ -157,7 +153,5 @@ mod LPToken {
             starknet::replace_class_syscall(new_class_hash).unwrap();
             self.emit(Upgraded { class_hash: new_class_hash });
         }
-
     }
-
 }

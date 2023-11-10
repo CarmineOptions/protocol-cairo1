@@ -936,7 +936,6 @@ mod Options {
         // EXPIRES OPTIONS ONLY FOR USERS (OPTION TOKEN HOLDERS) NOT FOR POOL.
         // terminal price is price at which option is being settled
 
-
         let option_token_address = get_option_token_address(
             lptoken_address, option_side, maturity, strike_price
         );
@@ -1027,6 +1026,5 @@ mod Options {
                 }
             );
         }
-
     }
 }

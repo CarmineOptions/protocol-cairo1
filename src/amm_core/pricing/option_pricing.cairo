@@ -327,7 +327,9 @@ mod tests {
             FixedTrait::from_felt(0),
             true
         );
-        assert(call_premia == FixedTrait::new(1979598933257199867170, false), 'Call Premia 2 wrong');
+        assert(
+            call_premia == FixedTrait::new(1979598933257199867170, false), 'Call Premia 2 wrong'
+        );
         assert(put_premia == FixedTrait::new(5882635375527910186234, false), 'Put Premia 2 wrong');
     }
 
@@ -343,7 +345,9 @@ mod tests {
             false
         );
 
-        assert(call_premia_1 == FixedTrait::from_felt(184467440737095520), 'Should be a cent'); // cent
+        assert(
+            call_premia_1 == FixedTrait::from_felt(184467440737095520), 'Should be a cent'
+        ); // cent
         assert(
             put_premia_1 == FixedTrait::from_felt(9223556504295512903520), 'Should be 500 + cent'
         ); // 500 + cent
@@ -361,7 +365,9 @@ mod tests {
         assert(
             call_premia_2 == FixedTrait::from_felt(9223556504295512903520), 'Should be 500 + cent'
         ); // 500 + cent
-        assert(put_premia_2 == FixedTrait::from_felt(184467440737095520), 'Should be a cent'); // cent
+        assert(
+            put_premia_2 == FixedTrait::from_felt(184467440737095520), 'Should be a cent'
+        ); // cent
         assert(!is_usable_2, 'Should not be usable');
 
         let (call_premia, put_premia, _) = super::OptionPricing::black_scholes(
@@ -387,9 +393,7 @@ mod tests {
                     let res_our = super::OptionPricing::std_normal_cdf(x);
                     assert(is_close(res_our, res, rel_tol), x.mag.into());
                 },
-                Option::None(()) => {
-                    break;
-                }
+                Option::None(()) => { break; }
             };
         }
     }
@@ -439,7 +443,10 @@ mod tests {
             );
         arr
             .append(
-                (FixedTrait::from_felt(-48184060197361451008), FixedTrait::from_felt(83008164005589360))
+                (
+                    FixedTrait::from_felt(-48184060197361451008),
+                    FixedTrait::from_felt(83008164005589360)
+                )
             );
         arr
             .append(
@@ -457,7 +464,10 @@ mod tests {
             );
         arr
             .append(
-                (FixedTrait::from_felt(-63083991958638624768), FixedTrait::from_felt(5780239419541288))
+                (
+                    FixedTrait::from_felt(-63083991958638624768),
+                    FixedTrait::from_felt(5780239419541288)
+                )
             );
         arr
             .append(
@@ -468,11 +478,17 @@ mod tests {
             );
         arr
             .append(
-                (FixedTrait::from_felt(-88192507920352870400), FixedTrait::from_felt(16093869139577))
+                (
+                    FixedTrait::from_felt(-88192507920352870400),
+                    FixedTrait::from_felt(16093869139577)
+                )
             );
         arr
             .append(
-                (FixedTrait::from_felt(-78468888490706239488), FixedTrait::from_felt(193844374173112))
+                (
+                    FixedTrait::from_felt(-78468888490706239488),
+                    FixedTrait::from_felt(193844374173112)
+                )
             );
         arr
             .append(
@@ -497,7 +513,10 @@ mod tests {
             );
         arr
             .append(
-                (FixedTrait::from_felt(-62372937558596583424), FixedTrait::from_felt(6655447769788865))
+                (
+                    FixedTrait::from_felt(-62372937558596583424),
+                    FixedTrait::from_felt(6655447769788865)
+                )
             );
         arr
             .append(
@@ -521,7 +540,10 @@ mod tests {
                     FixedTrait::from_felt(18446743783650828288)
                 )
             );
-        arr.append((FixedTrait::from_felt(-116572351975961001984), FixedTrait::from_felt(2421882545)));
+        arr
+            .append(
+                (FixedTrait::from_felt(-116572351975961001984), FixedTrait::from_felt(2421882545))
+            );
         arr
             .append(
                 (
@@ -579,7 +601,10 @@ mod tests {
                     FixedTrait::from_felt(5502268911090464768)
                 )
             );
-        arr.append((FixedTrait::from_felt(-119286720412122939392), FixedTrait::from_felt(924811531)));
+        arr
+            .append(
+                (FixedTrait::from_felt(-119286720412122939392), FixedTrait::from_felt(924811531))
+            );
         arr.append((FixedTrait::from_felt(-144946379936525058048), FixedTrait::from_felt(36127)));
         arr
             .append(
@@ -590,7 +615,10 @@ mod tests {
             );
         arr
             .append(
-                (FixedTrait::from_felt(-69939943924746911744), FixedTrait::from_felt(1381376337987086))
+                (
+                    FixedTrait::from_felt(-69939943924746911744),
+                    FixedTrait::from_felt(1381376337987086)
+                )
             );
         arr
             .append(
@@ -635,7 +663,10 @@ mod tests {
                     FixedTrait::from_felt(18070987088780298240)
                 )
             );
-        arr.append((FixedTrait::from_felt(-109187138174932615168), FixedTrait::from_felt(29866493772)));
+        arr
+            .append(
+                (FixedTrait::from_felt(-109187138174932615168), FixedTrait::from_felt(29866493772))
+            );
         arr
             .append(
                 (
@@ -659,11 +690,17 @@ mod tests {
             );
         arr
             .append(
-                (FixedTrait::from_felt(-82090144194716205056), FixedTrait::from_felt(79158729738176))
+                (
+                    FixedTrait::from_felt(-82090144194716205056),
+                    FixedTrait::from_felt(79158729738176)
+                )
             );
         arr
             .append(
-                (FixedTrait::from_felt(-67283806607978299392), FixedTrait::from_felt(2442745391761175))
+                (
+                    FixedTrait::from_felt(-67283806607978299392),
+                    FixedTrait::from_felt(2442745391761175)
+                )
             );
         arr
             .append(
@@ -679,7 +716,10 @@ mod tests {
                     FixedTrait::from_felt(18446743994829830144)
                 )
             );
-        arr.append((FixedTrait::from_felt(-123177416101368102912), FixedTrait::from_felt(224235946)));
+        arr
+            .append(
+                (FixedTrait::from_felt(-123177416101368102912), FixedTrait::from_felt(224235946))
+            );
         arr
             .append(
                 (
@@ -693,7 +733,10 @@ mod tests {
             );
         arr
             .append(
-                (FixedTrait::from_felt(-82300887755675107328), FixedTrait::from_felt(75053094784167))
+                (
+                    FixedTrait::from_felt(-82300887755675107328),
+                    FixedTrait::from_felt(75053094784167)
+                )
             );
         arr
             .append(
@@ -718,7 +761,10 @@ mod tests {
             );
         arr
             .append(
-                (FixedTrait::from_felt(-73554699430984318976), FixedTrait::from_felt(616112261109368))
+                (
+                    FixedTrait::from_felt(-73554699430984318976),
+                    FixedTrait::from_felt(616112261109368)
+                )
             );
         arr
             .append(
@@ -729,7 +775,10 @@ mod tests {
             );
         arr
             .append(
-                (FixedTrait::from_felt(-54538667119184510976), FixedTrait::from_felt(28694347940898116))
+                (
+                    FixedTrait::from_felt(-54538667119184510976),
+                    FixedTrait::from_felt(28694347940898116)
+                )
             );
         arr
             .append(
@@ -740,7 +789,10 @@ mod tests {
             );
         arr
             .append(
-                (FixedTrait::from_felt(-74168657830972653568), FixedTrait::from_felt(535210877145306))
+                (
+                    FixedTrait::from_felt(-74168657830972653568),
+                    FixedTrait::from_felt(535210877145306)
+                )
             );
         arr
             .append(
@@ -765,7 +817,10 @@ mod tests {
             );
         arr
             .append(
-                (FixedTrait::from_felt(-88621271341219479552), FixedTrait::from_felt(14332726720611))
+                (
+                    FixedTrait::from_felt(-88621271341219479552),
+                    FixedTrait::from_felt(14332726720611)
+                )
             );
         arr
             .append(
@@ -776,11 +831,17 @@ mod tests {
             );
         arr
             .append(
-                (FixedTrait::from_felt(-85170498709129953280), FixedTrait::from_felt(35891466119948))
+                (
+                    FixedTrait::from_felt(-85170498709129953280),
+                    FixedTrait::from_felt(35891466119948)
+                )
             );
         arr
             .append(
-                (FixedTrait::from_felt(-70940007271893762048), FixedTrait::from_felt(1108886206865101))
+                (
+                    FixedTrait::from_felt(-70940007271893762048),
+                    FixedTrait::from_felt(1108886206865101)
+                )
             );
         arr
             .append(
@@ -790,10 +851,16 @@ mod tests {
                 )
             );
         arr.append((FixedTrait::from_felt(-147002255679679627264), FixedTrait::from_felt(14753)));
-        arr.append((FixedTrait::from_felt(-112194865682493538304), FixedTrait::from_felt(10940912510)));
+        arr
+            .append(
+                (FixedTrait::from_felt(-112194865682493538304), FixedTrait::from_felt(10940912510))
+            );
         arr.append((FixedTrait::from_felt(-136090849467228160000), FixedTrait::from_felt(1487634)));
         arr.append((FixedTrait::from_felt(-142125378469688475648), FixedTrait::from_felt(121029)));
-        arr.append((FixedTrait::from_felt(-118512179115981996032), FixedTrait::from_felt(1219819908)));
+        arr
+            .append(
+                (FixedTrait::from_felt(-118512179115981996032), FixedTrait::from_felt(1219819908))
+            );
         arr
             .append(
                 (
@@ -801,7 +868,10 @@ mod tests {
                     FixedTrait::from_felt(260230580704680672)
                 )
             );
-        arr.append((FixedTrait::from_felt(-126212382742498312192), FixedTrait::from_felt(72036555)));
+        arr
+            .append(
+                (FixedTrait::from_felt(-126212382742498312192), FixedTrait::from_felt(72036555))
+            );
         arr
             .append(
                 (
@@ -823,13 +893,25 @@ mod tests {
                     FixedTrait::from_felt(18446743846064775168)
                 )
             );
-        arr.append((FixedTrait::from_felt(-116320858887964426240), FixedTrait::from_felt(2644998313)));
         arr
             .append(
-                (FixedTrait::from_felt(-81236826171553710080), FixedTrait::from_felt(98084078694961))
+                (FixedTrait::from_felt(-116320858887964426240), FixedTrait::from_felt(2644998313))
             );
-        arr.append((FixedTrait::from_felt(-127114391232700252160), FixedTrait::from_felt(51140246)));
-        arr.append((FixedTrait::from_felt(-116248040182797598720), FixedTrait::from_felt(2713265177)));
+        arr
+            .append(
+                (
+                    FixedTrait::from_felt(-81236826171553710080),
+                    FixedTrait::from_felt(98084078694961)
+                )
+            );
+        arr
+            .append(
+                (FixedTrait::from_felt(-127114391232700252160), FixedTrait::from_felt(51140246))
+            );
+        arr
+            .append(
+                (FixedTrait::from_felt(-116248040182797598720), FixedTrait::from_felt(2713265177))
+            );
         arr
             .append(
                 (
@@ -853,9 +935,15 @@ mod tests {
             );
         arr
             .append(
-                (FixedTrait::from_felt(-71250753459369213952), FixedTrait::from_felt(1035115721417319))
+                (
+                    FixedTrait::from_felt(-71250753459369213952),
+                    FixedTrait::from_felt(1035115721417319)
+                )
             );
-        arr.append((FixedTrait::from_felt(-107074528678609387520), FixedTrait::from_felt(59536820837)));
+        arr
+            .append(
+                (FixedTrait::from_felt(-107074528678609387520), FixedTrait::from_felt(59536820837))
+            );
         arr
             .append(
                 (
@@ -865,11 +953,17 @@ mod tests {
             );
         arr
             .append(
-                (FixedTrait::from_felt(-59271559794651824128), FixedTrait::from_felt(12110515485909394))
+                (
+                    FixedTrait::from_felt(-59271559794651824128),
+                    FixedTrait::from_felt(12110515485909394)
+                )
             );
         arr
             .append(
-                (FixedTrait::from_felt(-56802152671586189312), FixedTrait::from_felt(19140512788039108))
+                (
+                    FixedTrait::from_felt(-56802152671586189312),
+                    FixedTrait::from_felt(19140512788039108)
+                )
             );
         arr
             .append(
@@ -878,10 +972,16 @@ mod tests {
                     FixedTrait::from_felt(18286656456710088704)
                 )
             );
-        arr.append((FixedTrait::from_felt(-123881970537218867200), FixedTrait::from_felt(172682911)));
         arr
             .append(
-                (FixedTrait::from_felt(-49952225762593144832), FixedTrait::from_felt(62448907905773512))
+                (FixedTrait::from_felt(-123881970537218867200), FixedTrait::from_felt(172682911))
+            );
+        arr
+            .append(
+                (
+                    FixedTrait::from_felt(-49952225762593144832),
+                    FixedTrait::from_felt(62448907905773512)
+                )
             );
         arr
             .append(
@@ -906,7 +1006,10 @@ mod tests {
             );
         arr
             .append(
-                (FixedTrait::from_felt(-60765693305346424832), FixedTrait::from_felt(9106433841723674))
+                (
+                    FixedTrait::from_felt(-60765693305346424832),
+                    FixedTrait::from_felt(9106433841723674)
+                )
             );
         arr
             .append(
@@ -922,7 +1025,10 @@ mod tests {
                     FixedTrait::from_felt(753947928578102912)
                 )
             );
-        arr.append((FixedTrait::from_felt(-112559089078395502592), FixedTrait::from_felt(9671076244)));
+        arr
+            .append(
+                (FixedTrait::from_felt(-112559089078395502592), FixedTrait::from_felt(9671076244))
+            );
         arr.append((FixedTrait::from_felt(-134363697784829313024), FixedTrait::from_felt(2991840)));
         arr
             .append(
@@ -1253,9 +1359,13 @@ mod tests {
         // arr.append((FixedTrait::from_felt(18446744073709560), FixedTrait::from_felt(18446744073709552), FixedTrait::from_felt(94465776401466613825536), FixedTrait::from_felt(18723445234815194890240)));
 
         target
-            .append((FixedTrait::from_felt(291668633435675), FixedTrait::from_felt(-291668633435675)));
+            .append(
+                (FixedTrait::from_felt(291668633435675), FixedTrait::from_felt(-291668633435675))
+            );
         target
-            .append((FixedTrait::from_felt(291668633435675), FixedTrait::from_felt(-291668633435675)));
+            .append(
+                (FixedTrait::from_felt(291668633435675), FixedTrait::from_felt(-291668633435675))
+            );
         target
             .append(
                 (
@@ -1264,7 +1374,9 @@ mod tests {
                 )
             );
         target
-            .append((FixedTrait::from_felt(291668633435675), FixedTrait::from_felt(-291668633435675)));
+            .append(
+                (FixedTrait::from_felt(291668633435675), FixedTrait::from_felt(-291668633435675))
+            );
         target
             .append(
                 (
@@ -1273,7 +1385,9 @@ mod tests {
                 )
             );
         target
-            .append((FixedTrait::from_felt(291668633435675), FixedTrait::from_felt(-291668633435675)));
+            .append(
+                (FixedTrait::from_felt(291668633435675), FixedTrait::from_felt(-291668633435675))
+            );
         target
             .append(
                 (
@@ -1282,7 +1396,9 @@ mod tests {
                 )
             );
         target
-            .append((FixedTrait::from_felt(291668633435675), FixedTrait::from_felt(-291668633435675)));
+            .append(
+                (FixedTrait::from_felt(291668633435675), FixedTrait::from_felt(-291668633435675))
+            );
         target
             .append(
                 (
@@ -1291,7 +1407,9 @@ mod tests {
                 )
             );
         target
-            .append((FixedTrait::from_felt(291668633435675), FixedTrait::from_felt(-291668633435675)));
+            .append(
+                (FixedTrait::from_felt(291668633435675), FixedTrait::from_felt(-291668633435675))
+            );
         target
             .append(
                 (
@@ -1342,7 +1460,9 @@ mod tests {
                 )
             );
         target
-            .append((FixedTrait::from_felt(291668633435675), FixedTrait::from_felt(-291668633435675)));
+            .append(
+                (FixedTrait::from_felt(291668633435675), FixedTrait::from_felt(-291668633435675))
+            );
         target
             .append(
                 (
@@ -1373,11 +1493,17 @@ mod tests {
             );
         target
             .append(
-                (FixedTrait::from_felt(318489059747761088), FixedTrait::from_felt(-318489059747761088))
+                (
+                    FixedTrait::from_felt(318489059747761088),
+                    FixedTrait::from_felt(-318489059747761088)
+                )
             );
         target
             .append(
-                (FixedTrait::from_felt(318489059747761088), FixedTrait::from_felt(-318489059747761088))
+                (
+                    FixedTrait::from_felt(318489059747761088),
+                    FixedTrait::from_felt(-318489059747761088)
+                )
             );
         target
             .append(
@@ -1416,7 +1542,10 @@ mod tests {
             );
         target
             .append(
-                (FixedTrait::from_felt(1134271019703585408), FixedTrait::from_felt(-869017189822206592))
+                (
+                    FixedTrait::from_felt(1134271019703585408),
+                    FixedTrait::from_felt(-869017189822206592)
+                )
             );
         target
             .append(

@@ -317,14 +317,13 @@ fn get_decimal(token_address: ContractAddress) -> Option<u8> {
 // Tests --------------------------------------------------------------------------------------------------------------
 #[cfg(test)]
 mod tests {
-
     use starknet::ContractAddress;
 
     use cubit::f128::types::fixed::Fixed;
     use cubit::f128::types::fixed::FixedTrait;
     use cubit::f128::types::fixed::MAX_u128;
     use cubit::f128::types::fixed::FixedInto;
-    
+
     use super::get_underlying_from_option_data;
     use super::assert_option_side_exists;
     use super::assert_option_type_exists;
@@ -332,7 +331,7 @@ mod tests {
     use super::pow;
     use super::_fromU256_balance;
     use super::_toU256_balance;
-    
+
 
     #[test]
     fn test_get_underlying_from_option_data() {
@@ -342,8 +341,12 @@ mod tests {
         let base_token_addr: ContractAddress = 0.try_into().unwrap();
         let quote_token_addr: ContractAddress = 1.try_into().unwrap();
 
-        let res_1 = get_underlying_from_option_data(opt_type_call, base_token_addr, quote_token_addr);
-        let res_2 = get_underlying_from_option_data(opt_type_put, base_token_addr, quote_token_addr);
+        let res_1 = get_underlying_from_option_data(
+            opt_type_call, base_token_addr, quote_token_addr
+        );
+        let res_2 = get_underlying_from_option_data(
+            opt_type_put, base_token_addr, quote_token_addr
+        );
 
         assert(res_1 == base_token_addr, 'res1');
         assert(res_2 == quote_token_addr, 'res1');
@@ -474,5 +477,4 @@ mod tests {
         assert(res5 == 1124235699999, 'res5'); // also
         assert(res6 == 100183369999, 'res6'); // also
     }
-
 }

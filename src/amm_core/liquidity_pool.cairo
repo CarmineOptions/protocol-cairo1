@@ -313,7 +313,6 @@ mod LiquidityPool {
         option_type: OptionType,
         amount: u256
     ) {
-
         assert(amount > 0, 'Amount <= 0');
         assert_address_not_zero(pooled_token_address, 'pooled_token_addr is zero');
         assert_address_not_zero(base_token_address, 'base_token_addr is zero');
@@ -377,7 +376,6 @@ mod LiquidityPool {
         option_type: OptionType,
         lp_token_amount: u256
     ) {
-
         let caller_addr = get_caller_address();
 
         assert_address_not_zero(caller_addr, 'Caller address is zero');

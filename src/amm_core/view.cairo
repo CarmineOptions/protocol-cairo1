@@ -7,7 +7,7 @@ mod View {
 
     use cubit::f128::types::fixed::Fixed;
     use cubit::f128::types::fixed::FixedTrait;
-    
+
 
     use carmine_protocol::amm_core::helpers::pow;
 
@@ -183,9 +183,7 @@ mod View {
                     let user_pool_info = pool_info.to_UserPoolInfo(user);
                     user_pool_infos.append(user_pool_info);
                 },
-                Option::None(()) => {
-                    break ();
-                },
+                Option::None(()) => { break (); },
             };
         };
         user_pool_infos
@@ -204,9 +202,7 @@ mod View {
 
                     pool_infos.append(pool.to_PoolInfo());
                 },
-                Option::None(()) => {
-                    break ();
-                },
+                Option::None(()) => { break (); },
             };
         };
 

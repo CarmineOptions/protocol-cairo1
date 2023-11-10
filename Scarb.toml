@@ -17,4 +17,4 @@ sierra = true
 casm = true
 
 [scripts]
-test = 'snforge' # This does not preserve terminal colors :(( better to use make
+test = 'snforge test' # This does not preserve terminal colors :(( better to use make

@@ -28,7 +28,9 @@ trait IOptionToken<TState> {
     // IERC20CamelOnly
     fn totalSupply(self: @TState) -> u256;
     fn balanceOf(self: @TState, account: ContractAddress) -> u256;
-    fn transferFrom(ref self: TState, sender: ContractAddress, recipient: ContractAddress, amount: u256) -> bool;
+    fn transferFrom(
+        ref self: TState, sender: ContractAddress, recipient: ContractAddress, amount: u256
+    ) -> bool;
 
     // IERC20CamelSafeAllowance
     fn increaseAllowance(ref self: TState, spender: ContractAddress, addedValue: u256) -> bool;
@@ -56,10 +58,8 @@ trait IOptionToken<TState> {
 }
 
 
-
 #[starknet::contract]
 mod OptionToken {
-
     use starknet::ContractAddress;
     use starknet::ClassHash;
     use starknet::get_caller_address;
@@ -68,10 +68,10 @@ mod OptionToken {
     use openzeppelin::access::ownable::OwnableComponent;
     use cubit::f128::types::FixedTrait;
     use cubit::f128::types::Fixed;
-    
+
     component!(path: ERC20Component, storage: erc20, event: ERC20Event);
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
-    
+
     // ERC20 Component
     #[abi(embed_v0)]
     impl ERC20Impl = ERC20Component::ERC20Impl<ContractState>;
@@ -89,20 +89,18 @@ mod OptionToken {
     impl OwnableImpl = OwnableComponent::OwnableImpl<ContractState>;
 
     #[abi(embed_v0)]
-    impl OwnableCamelOnlyImpl = OwnableComponent::OwnableCamelOnlyImpl<ContractState>;
+    impl OwnableCamelOnlyImpl =
+        OwnableComponent::OwnableCamelOnlyImpl<ContractState>;
 
     impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
-    
-    
+
+
     #[storage]
     struct Storage {
-
         #[substorage(v0)]
         erc20: ERC20Component::Storage,
-
         #[substorage(v0)]
-        ownable:  OwnableComponent::Storage,
-        
+        ownable: OwnableComponent::Storage,
         _option_token_quote_token_address: ContractAddress,
         _option_token_base_token_address: ContractAddress,
         _option_token_option_type: u8,
@@ -115,10 +113,8 @@ mod OptionToken {
     #[derive(Drop, starknet::Event)]
     enum Event {
         Upgraded: Upgraded,
-
         #[flat]
         ERC20Event: ERC20Component::Event,
-
         #[flat]
         OwnableEvent: OwnableComponent::Event
     }
@@ -141,7 +137,6 @@ mod OptionToken {
         maturity: u64,
         side: u8,
     ) {
-
         let strike = FixedTrait::from_felt(strike_price);
 
         self.erc20.initializer(name, symbol);
@@ -163,7 +158,6 @@ mod OptionToken {
     #[external(v0)]
     #[generate_trait]
     impl OptionTokenImpl of IOptionToken {
-
         // Did not import Erc20MetaData, so we can change decimals
         // so we need to define name, symbol and decimals ourselves
         fn name(self: @ContractState) -> felt252 {
@@ -221,5 +215,4 @@ mod OptionToken {
             self._option_token_side.read()
         }
     }
-
 }
