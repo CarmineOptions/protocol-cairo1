@@ -137,7 +137,6 @@ mod OptionToken {
         maturity: u64,
         side: u8,
     ) {
-
         self.erc20.initializer(name, symbol);
         self.ownable.initializer(owner);
 
