@@ -1,10 +1,20 @@
 # protocol-cairo1
-Temporary repo for porting carmine protocol to cairo 1
+This repo contains Carmine Options AMM written in C1, version `2.3.0`.
 
 
+The contracts are build using Scarb `2.3.0.` Install with:
+`curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | sh -s -- -v 2.3.0`
 
+Then build by running `scarb build` command.
 
-### List of files to be audited:
+Tests can be run with Starknet foundry `0.10.1.` Install by first installing `snfoundryup`:
+`curl -L https://raw.githubusercontent.com/foundry-rs/starknet-foundry/master/scripts/install.sh | sh`
+
+And then install the correct version: `snfoundryup -v 0.10.1`
+
+Now you can run tests with `snforge test`.
+
+## List of files to be audited:
 - src/amm_core/oracles/agg
 - src/amm_core/oracles/oracle_helpers
 - src/amm_core/oracles/pragma

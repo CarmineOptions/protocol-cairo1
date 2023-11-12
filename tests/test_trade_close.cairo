@@ -13,7 +13,8 @@ use snforge_std::{
     start_mock_call, stop_mock_call
 };
 use carmine_protocol::amm_core::helpers::{FixedHelpersTrait, toU256_balance};
-use carmine_protocol::amm_core::amm::{AMM, IAMMDispatcher, IAMMDispatcherTrait};
+use carmine_protocol::amm_core::amm::AMM;
+use carmine_protocol::amm_core::amm_interface::{IAMMDispatcher, IAMMDispatcherTrait};
 use carmine_protocol::testing::setup::{Ctx, Dispatchers};
 
 use carmine_protocol::tokens::my_token::{MyToken, IMyTokenDispatcher, IMyTokenDispatcherTrait};
