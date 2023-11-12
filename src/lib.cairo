@@ -19,7 +19,7 @@ mod amm_core {
     mod trading;
     mod helpers;
     mod liquidity_pool;
-    mod periferies {
+    mod peripheries {
         mod view;
     }
 }

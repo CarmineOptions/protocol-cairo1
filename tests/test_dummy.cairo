@@ -1,5 +1,5 @@
 use starknet::ContractAddress;
-use carmine_protocol::amm_core::periferies::view::View;
+use carmine_protocol::amm_core::peripheries::view::View;
 use carmine_protocol::testing::setup::{deploy_setup, _add_expired_option};
 use array::ArrayTrait;
 use debug::PrintTrait;

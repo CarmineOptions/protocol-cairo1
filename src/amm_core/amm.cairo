@@ -138,7 +138,7 @@ mod AMM {
     use carmine_protocol::amm_core::state::State;
     use carmine_protocol::amm_core::liquidity_pool::LiquidityPool;
     use carmine_protocol::amm_core::options::Options;
-    use carmine_protocol::amm_core::periferies::view::View;
+    use carmine_protocol::amm_core::peripheries::view::View;
     use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing;
     use carmine_protocol::amm_core::oracles::agg::OracleAgg;
     use carmine_protocol::amm_core::oracles::pragma::Pragma;

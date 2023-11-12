@@ -273,7 +273,6 @@ impl Option_Impl of Option_Trait {
             }
         }
 
-        // TODO: is this correct?
         // Value of an option should be value that user would be able to get 
         // if they were to close the position, so we need to pretend we're closing the position
         self.correct_side(true).premia_with_fees(position_size)

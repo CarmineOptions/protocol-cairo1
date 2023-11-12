@@ -5,7 +5,6 @@ description = "Code for Carmine Option AMM"
 cairo-version = "2.3.0"
 homepage = "https://github.com/CarmineOptions/protocol-cairo1"
 
-
 [dependencies]
 # openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", commit = "841a073" }
 cubit = { git = "https://github.com/influenceth/cubit.git", commit = "b4590530d5aeae9aabd36740cc2a3d9e6adc5fde" }
