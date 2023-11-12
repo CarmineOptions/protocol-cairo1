@@ -124,11 +124,6 @@ mod LiquidityPool {
         return pool_pos;
     }
 
-    // Since we store usable index of available options, we can start with it and then
-    // walk the index backwards like two weeks, instead of iterating over all options
-    // from the begining
-    // TODO: use this func
-
     // @notice Retrieves the value of the expired position within the pool
     // @dev Returns a total value of pools non expired position.
     // @dev Walks backwards (iteration starts from last index) all options in storage var "available_options" 
@@ -263,7 +258,6 @@ mod LiquidityPool {
         volatility_adjustment_speed: Fixed,
         max_lpool_bal: u256
     ) {
-        // TODO: Proxy.assrt_only_admin()
         assert_option_type_exists(option_type.into(), 'Unknown option type');
 
         fail_if_existing_pool_definition_from_lptoken_address(lptoken_address);

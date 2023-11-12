@@ -359,13 +359,13 @@ mod State {
     fn set_max_option_size_percent_of_voladjspd(value: Int) {
         assert_admin_only();
         let mut state = AMM::unsafe_new_contract_state();
-        state.max_option_size_percent_of_voladjspd.write(value)
+        state.max_option_size_percent_of_voladjspd.write(value.into())
     }
 
     // @notice Returns maximal option size as a percentage of pool volatility adjustment speed
     // @returns max option size as percentage of pool volatility adjustment speed
     fn get_max_option_size_percent_of_voladjspd() -> Int {
-        AMM::unsafe_new_contract_state().max_option_size_percent_of_voladjspd.read()
+        AMM::unsafe_new_contract_state().max_option_size_percent_of_voladjspd.read().try_into().unwrap()
     }
 
     // @notice Returns pool definition for given lptoken address

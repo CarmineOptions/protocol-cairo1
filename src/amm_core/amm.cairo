@@ -18,8 +18,6 @@ mod AMM {
     component!(path: ReentrancyGuardComponent, storage: re_guard, event: ReentrancyGuardEvent);
     impl ReentrancyGuardInternalImpl = ReentrancyGuardComponent::InternalImpl<ContractState>;
 
-    // TODO: Constructor
-
     #[storage]
     struct Storage {
         #[substorage(v0)]
@@ -33,11 +31,11 @@ mod AMM {
         >,
         option_volatility: LegacyMap::<
             (ContractAddress, u64, u128), Volatility
-        >, // This is actually options vol, not pools // TODO: last key value should be Fixed, not u128(or it's mag)
+        >, 
         option_position_: LegacyMap<(LPTAddress, OptionSide, Maturity, LegacyStrike), felt252>,
         new_option_position: LegacyMap<
             (LPTAddress, OptionSide, Timestamp, u128), Int
-        >, // TODO: last key value should be Fixed, not u128(or it's mag)
+        >, 
         option_token_address: LegacyMap::<
             (LPTAddress, OptionSide, Maturity, LegacyStrike), ContractAddress
         >,
@@ -53,7 +51,7 @@ mod AMM {
         max_lpool_balance: LegacyMap::<LPTAddress, u256>,
         pool_locked_capital_: LegacyMap<LPTAddress, u256>,
         lpool_balance_: LegacyMap<LPTAddress, u256>,
-        max_option_size_percent_of_voladjspd: Int, // TODO: This was felt252 in old amm
+        max_option_size_percent_of_voladjspd: felt252,
         trading_halted: bool, // Make this bool if they can be interchanged
         available_lptoken_adresses: LegacyMap<felt252, LPTAddress>,
         // (quote_token_addr, base_token_address, option_type) -> LpToken address
