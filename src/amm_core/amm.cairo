@@ -259,7 +259,7 @@ mod AMM {
         Timestamp, OptionType, Maturity, Int
     };
 
-    use openzeppelin::security::reentrancyguard::ReentrancyGuardComponent;
+    use carmine_protocol::oz::security::reentrancyguard::ReentrancyGuardComponent;
     use carmine_protocol::types::pool::Pool;
     use carmine_protocol::types::option_::{LegacyOption, Option_};
 

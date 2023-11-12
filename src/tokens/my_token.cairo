@@ -23,8 +23,8 @@ mod MyToken {
     use starknet::ContractAddress;
     use starknet::ClassHash;
     use starknet::get_caller_address;
-    use openzeppelin::token::erc20::ERC20Component;
-    use openzeppelin::access::ownable::OwnableComponent;
+    use carmine_protocol::oz::token::erc20::ERC20Component;
+    use carmine_protocol::oz::access::ownable::OwnableComponent;
 
     component!(path: ERC20Component, storage: erc20, event: ERC20Event);
 

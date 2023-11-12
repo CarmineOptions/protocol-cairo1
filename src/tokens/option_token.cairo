@@ -64,8 +64,8 @@ mod OptionToken {
     use starknet::ClassHash;
     use starknet::get_caller_address;
 
-    use openzeppelin::token::erc20::ERC20Component;
-    use openzeppelin::access::ownable::OwnableComponent;
+    use carmine_protocol::oz::token::erc20::ERC20Component;
+    use carmine_protocol::oz::access::ownable::OwnableComponent;
     use cubit::f128::types::FixedTrait;
     use cubit::f128::types::Fixed;
 

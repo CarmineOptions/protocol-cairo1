@@ -182,6 +182,25 @@ fn add_premia_fees(side: OptionSide, total_premia_before_fees: Fixed, total_fees
 
 
 // Tests --------------------------------------------------------------------------------------------------------------
+
+#[starknet::contract]
+mod TestCon {
+    #[storage]
+    struct Storage {}
+
+
+    use cubit::f128::types::fixed::{Fixed, FixedTrait};
+    use super::get_time_till_maturity;
+
+    #[external(v0)]
+    #[generate_trait]
+    impl TestCon of ITestCon {
+        fn get_ttm(self: @ContractState, maturity: u64) -> Fixed {
+            get_time_till_maturity(maturity)
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use debug::PrintTrait;
@@ -305,33 +324,17 @@ mod tests {
         }
     }
 
-    // Test contract
-    #[starknet::interface]
-    trait ITestCon<TContractState> {
-        fn get_ttm(self: @TContractState, maturity: super::Timestamp) -> Fixed;
-    }
-
-    #[starknet::contract]
-    mod TestCon {
-        #[storage]
-        struct Storage {}
-
-
-        use cubit::f128::types::fixed::{Fixed, FixedTrait};
-        use super::get_time_till_maturity;
-
-        #[external(v0)]
-        impl TestCon of super::ITestCon<ContractState> {
-            fn get_ttm(self: @ContractState, maturity: u64) -> Fixed {
-                get_time_till_maturity(maturity)
-            }
-        }
-    }
 
 
     use snforge_std::{start_warp, stop_warp, declare, ContractClassTrait};
     use result::Result;
     use result::ResultTrait;
+
+    #[starknet::interface]
+    trait ITestCon<TContractState> {
+        fn get_ttm(self: @TContractState, maturity: super::Timestamp) -> Fixed;
+    }
+    
 
     #[test]
     fn test_get_time_till_maturity() {
@@ -344,9 +347,9 @@ mod tests {
         start_warp(contract_address, 0);
         let res1 = dispatcher.get_ttm(31536000); // 1 year ttm -> 365 * 24 * 3600
         let res2 = dispatcher.get_ttm(15768000); // 0.5 year ttm -> 365 * 24 * 3600 / 2
-        let res3 = dispatcher.get_ttm(2628000); // 1 month ttm -> 365 * 24 * 3600 / 12
-        let res4 = dispatcher.get_ttm(606461); // 1 week ttm -> 365 * 24 * 3600 / 52
-        let res5 = dispatcher.get_ttm(86400); // 1 day ttm -> 24 * 3600 
+        let res3 = dispatcher.get_ttm(2628000);  // 1 month ttm -> 365 * 24 * 3600 / 12
+        let res4 = dispatcher.get_ttm(606461);   // 1 week ttm -> 365 * 24 * 3600 / 52
+        let res5 = dispatcher.get_ttm(86400);    // 1 day ttm -> 24 * 3600 
 
         assert(res1 == FixedTrait::ONE(), 'res1');
         assert(res2 == FixedTrait::ONE() / FixedTrait::from_unscaled_felt(2), 'res2');

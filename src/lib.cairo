@@ -34,4 +34,21 @@ mod testing {
     mod setup;
     mod test_utils;
 }
+
+mod oz {
+    mod token {
+        mod erc20;
+        mod interface;
+    }
+
+    mod access {
+        mod ownable;
+        mod interface;
+    }
+
+    mod security {
+        mod reentrancyguard;
+    }
+}
+
 mod utils;
