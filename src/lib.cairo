@@ -24,7 +24,6 @@ mod amm_core {
 }
 mod types {
     mod basic;
-    mod fixed_balance;
     mod option_;
     mod pool;
 }
