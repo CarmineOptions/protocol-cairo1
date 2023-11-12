@@ -60,7 +60,7 @@ fn convert_amount_to_option_currency_from_base_uint256(
             adj_amount, dec.try_into().expect('Div by zero in CATOCFBU')
         );
         assert(quot >= 0, 'CATOCFBU: Opt size too low');
-        assert(rem == 0, 'CATOCFBU: Value rounded'); 
+        assert(rem == 0, 'CATOCFBU: Value rounded');
 
         return quot;
     }

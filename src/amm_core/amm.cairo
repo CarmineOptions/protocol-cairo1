@@ -29,13 +29,9 @@ mod AMM {
         pool_volatility_separate: LegacyMap::<
             (LPTAddress, Maturity, LegacyStrike), LegacyVolatility
         >,
-        option_volatility: LegacyMap::<
-            (ContractAddress, u64, u128), Volatility
-        >, 
+        option_volatility: LegacyMap::<(ContractAddress, u64, u128), Volatility>,
         option_position_: LegacyMap<(LPTAddress, OptionSide, Maturity, LegacyStrike), felt252>,
-        new_option_position: LegacyMap<
-            (LPTAddress, OptionSide, Timestamp, u128), Int
-        >, 
+        new_option_position: LegacyMap<(LPTAddress, OptionSide, Timestamp, u128), Int>,
         option_token_address: LegacyMap::<
             (LPTAddress, OptionSide, Maturity, LegacyStrike), ContractAddress
         >,
