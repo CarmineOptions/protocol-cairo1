@@ -14,6 +14,8 @@ And then install the correct version: `snfoundryup -v 0.10.1`
 
 Now you can run tests with `snforge test`.
 
+Alternatively you can open this folder in VSCode Devcontainer, which comes with all the tooling installed.
+
 ## List of files to be audited:
 - src/amm_core/oracles/agg
 - src/amm_core/oracles/oracle_helpers
