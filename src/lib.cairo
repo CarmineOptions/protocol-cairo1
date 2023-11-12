@@ -1,4 +1,5 @@
 mod traits;
+mod utils;
 mod amm_core {
     mod oracles {
         mod agg;
@@ -17,7 +18,9 @@ mod amm_core {
     mod trading;
     mod helpers;
     mod liquidity_pool;
-    mod view;
+    mod periferies {
+        mod view;
+    }
 }
 mod types {
     mod basic;
@@ -40,15 +43,11 @@ mod oz {
         mod erc20;
         mod interface;
     }
-
     mod access {
         mod ownable;
         mod interface;
     }
-
     mod security {
         mod reentrancyguard;
     }
 }
-
-mod utils;
