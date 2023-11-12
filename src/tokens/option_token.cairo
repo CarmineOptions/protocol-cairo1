@@ -145,7 +145,7 @@ mod OptionToken {
         self._option_token_option_type.write(option_type);
         self._option_token_maturity.write(maturity);
         self._option_token_side.write(side);
-        self._option_token_strike_price.write(FixedTrait::from_felt(strike_price)); 
+        self._option_token_strike_price.write(FixedTrait::from_felt(strike_price));
     }
 
     //

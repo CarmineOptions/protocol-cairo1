@@ -13,7 +13,6 @@ mod AMM {
     use carmine_protocol::types::option_::{LegacyOption, Option_};
     use carmine_protocol::amm_core::amm_interface::IAMM;
 
-    
 
     // Reentrancy Component
     component!(path: ReentrancyGuardComponent, storage: re_guard, event: ReentrancyGuardEvent);
@@ -152,7 +151,7 @@ mod AMM {
     use carmine_protocol::types::pool::{PoolInfo, UserPoolInfo};
     use starknet::ClassHash;
 
-    use carmine_protocol::utils::assert_admin_only; 
+    use carmine_protocol::utils::assert_admin_only;
 
     #[external(v0)]
     impl Amm of IAMM<ContractState> {
@@ -630,6 +629,5 @@ mod AMM {
         ) -> (Fixed, Fixed) {
             View::get_total_premia(option, position_size, is_closing)
         }
-        
     }
 }

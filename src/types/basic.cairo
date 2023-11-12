@@ -3,8 +3,8 @@ use starknet::ContractAddress;
 use core::option::OptionTrait;
 
 type LPTAddress = ContractAddress;
-type OptionSide = u8; 
-type OptionType = u8; 
+type OptionSide = u8;
+type OptionType = u8;
 type Timestamp = u64; // In seconds, Block timestamps are also u64
 
 type Int = u128;

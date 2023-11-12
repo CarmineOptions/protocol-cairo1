@@ -6,7 +6,7 @@ mod Pragma {
     use option::OptionTrait;
 
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
-    
+
     use super::PragmaUtils;
     use super::PragmaUtils::IOracleABIDispatcher;
     use super::PragmaUtils::IOracleABIDispatcherTrait;
@@ -114,7 +114,6 @@ mod Pragma {
     // @param maturity: Timestamp for which to get the terminal price
     // @return median_price: Pragma terminal median price in Fixed
     fn _get_pragma_terminal_price(key: felt252, maturity: Timestamp) -> Fixed {
-
         let (res, _) = IOracleABIDispatcher {
             contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
         }

@@ -1,4 +1,3 @@
-
 use starknet::ContractAddress;
 use carmine_protocol::types::basic::{OptionType, OptionSide};
 
@@ -230,7 +229,7 @@ trait IAMM<TContractState> {
     // TODO: Functions below
     // fn initializer(ref self: TContractState, proxy_admin: ContractAddress);
     fn upgrade(ref self: TContractState, new_implementation: ClassHash); // TODO: this is just temp
-    // fn setAdmin(ref self: TContractState, address: felt252);
-    // fn getImplementationHash(self: @TContractState, ) -> felt252;
-    // fn getAdmin(self: @TContractState); // TODO
+// fn setAdmin(ref self: TContractState, address: felt252);
+// fn getImplementationHash(self: @TContractState, ) -> felt252;
+// fn getAdmin(self: @TContractState); // TODO
 }

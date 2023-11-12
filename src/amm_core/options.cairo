@@ -785,7 +785,7 @@ mod Options {
         assert(!lptoken_address.is_zero(), 'MOTL - lpt addr is zero');
         assert(!curr_contract_address.is_zero(), 'MOTL - curr addr is zero');
         assert(!user_address.is_zero(), 'MOTL - user addr is zero');
-               
+
         let option_size_u256: u256 = option_size.into();
         let premia_including_fees_u256 = toU256_balance(premia_including_fees, currency_address);
 
