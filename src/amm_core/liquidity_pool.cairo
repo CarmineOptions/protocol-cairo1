@@ -57,7 +57,6 @@ mod LiquidityPool {
 
     use carmine_protocol::amm_core::helpers::toU256_balance;
     use carmine_protocol::amm_core::helpers::assert_option_type_exists;
-    use carmine_protocol::amm_core::helpers::assert_address_not_zero;
     use carmine_protocol::amm_core::helpers::get_underlying_from_option_data;
     use carmine_protocol::amm_core::helpers::fromU256_balance;
     use carmine_protocol::amm_core::helpers::split_option_locked_capital;
@@ -314,15 +313,15 @@ mod LiquidityPool {
         amount: u256
     ) {
         assert(amount > 0, 'Amount <= 0');
-        assert_address_not_zero(pooled_token_address, 'pooled_token_addr is zero');
-        assert_address_not_zero(base_token_address, 'base_token_addr is zero');
-        assert_address_not_zero(quote_token_address, 'quote_token_addr is zero');
+        assert(!pooled_token_address.is_zero(), 'pooled_token_addr is zero');
+        assert(!base_token_address.is_zero(), 'base_token_addr is zero');
+        assert(!quote_token_address.is_zero(), 'quote_token_addr is zero');
 
         let caller_addr = get_caller_address();
         let own_addr = get_contract_address();
 
-        assert_address_not_zero(caller_addr, 'Caller address is zero');
-        assert_address_not_zero(own_addr, 'Own address is zero');
+        assert(!caller_addr.is_zero(), 'Caller address is zero');
+        assert(!own_addr.is_zero(), 'Own address is zero');
 
         let lptoken_address = get_lptoken_address_for_given_option(
             quote_token_address, base_token_address, option_type
@@ -378,7 +377,7 @@ mod LiquidityPool {
     ) {
         let caller_addr = get_caller_address();
 
-        assert_address_not_zero(caller_addr, 'Caller address is zero');
+        assert(!caller_addr.is_zero(), 'Caller address is zero');
 
         let lptoken_address = get_lptoken_address_for_given_option(
             quote_token_address, base_token_address, option_type

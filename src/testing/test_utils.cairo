@@ -8,11 +8,10 @@ use carmine_protocol::tokens::option_token::{
 };
 use carmine_protocol::tokens::lptoken::{LPToken, ILPTokenDispatcher, ILPTokenDispatcherTrait};
 
-use carmine_protocol::amm_core::amm::{IAMMDispatcher, IAMMDispatcherTrait};
 
+use carmine_protocol::amm_core::amm_interface::{IAMMDispatcher, IAMMDispatcherTrait};
 
 // Helper function for relative comparison of two numbers
-// TODO: Is this correct?
 fn is_close(a: Fixed, b: Fixed, rel_tol: Fixed) -> bool {
     let tmp = (a - b).abs() / b;
 

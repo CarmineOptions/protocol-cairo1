@@ -3,8 +3,6 @@ use array::ArrayTrait;
 
 use carmine_protocol::types::basic::{OptionType, Math64x61_, OptionSide};
 
-use carmine_protocol::amm_core::oracles::pragma::Pragma::PragmaCheckpoint;
-
 #[starknet::interface]
 trait IERC20<TContractState> {
     fn name(self: @TContractState) -> felt252;
@@ -89,14 +87,4 @@ trait IOptionToken<TContractState> {
     fn burn(ref self: TContractState, account: ContractAddress, amount: u256);
     fn transferOwnership(ref self: TContractState, newOwner: ContractAddress);
     fn renounceOwnership(ref self: TContractState);
-}
-
-#[starknet::interface]
-trait IPragmaOracle<TContractState> {
-    fn get_spot_median(
-        self: @TContractState, pair_id: felt252
-    ) -> (felt252, felt252, felt252, felt252);
-    fn get_last_spot_checkpoint_before(
-        self: @TContractState, key: felt252, timestamp: felt252
-    ) -> (PragmaCheckpoint, felt252);
 }

@@ -12,9 +12,9 @@ dependencies = [
 [[package]]
 name = "cubit"
 version = "1.2.0"
-source = "git+https://github.com/influenceth/cubit.git?branch=main#b4590530d5aeae9aabd36740cc2a3d9e6adc5fde"
+source = "git+https://github.com/influenceth/cubit.git#b4590530d5aeae9aabd36740cc2a3d9e6adc5fde"
 
 [[package]]
 name = "snforge_std"
 version = "0.1.0"
-source = "git+https://github.com/foundry-rs/starknet-foundry.git?branch=master#fb18cdd9ae335677ea12a2448dc86533d3df2052"
+source = "git+https://github.com/foundry-rs/starknet-foundry.git#fbc8d7c4085f238f2b7e9a2b84e5feb8bff15d53"

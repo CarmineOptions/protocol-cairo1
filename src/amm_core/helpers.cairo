@@ -99,11 +99,6 @@ fn assert_option_type_exists(option_type: felt252, msg: felt252) {
     assert((option_type - OPTION_CALL.into()) * (option_type - OPTION_PUT.into()) == 0, msg);
 }
 
-// TODO: This function can be deleted, addresses have .is_zero() method (so use sth like assert(!addr.is_zero(), ''))
-fn assert_address_not_zero(addr: ContractAddress, msg: felt252) {
-    assert(!addr.is_zero(), msg);
-}
-
 // @notice Asserts that current timestamp is less or equal to tx deadline
 // @param deadline:  Deadline timestamp of tx
 fn check_deadline(deadline: Timestamp) {
@@ -301,7 +296,7 @@ fn get_decimal(token_address: ContractAddress) -> Option<u8> {
         return Option::Some(6);
     }
 
-    assert_address_not_zero(token_address, 'Token address is zero');
+    assert(!token_address.is_zero(), 'Token address is zero');
 
     let decimals = IERC20Dispatcher { contract_address: token_address }.decimals();
     assert(decimals != 0, 'Token has decimals = 0');

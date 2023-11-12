@@ -36,7 +36,6 @@ mod Options {
     use carmine_protocol::amm_core::helpers::split_option_locked_capital;
     use carmine_protocol::amm_core::helpers::assert_option_type_exists;
     use carmine_protocol::amm_core::helpers::assert_option_side_exists;
-    use carmine_protocol::amm_core::helpers::assert_address_not_zero;
 
     use carmine_protocol::amm_core::pricing::option_pricing_helpers::convert_amount_to_option_currency_from_base_uint256;
 
@@ -66,8 +65,6 @@ mod Options {
 
     use carmine_protocol::tokens::option_token::IOptionTokenDispatcher;
     use carmine_protocol::tokens::option_token::IOptionTokenDispatcherTrait;
-    // TODO: What about new options that are written in c2?
-
     // @notice Adds option both long and short into the AMM. Requires all the options definition.
     // @notice Basically just calls "add_option" function twice with different option sides
     // @param maturity: Maturity as unix timestamp.
@@ -315,10 +312,10 @@ mod Options {
         let base_address = pool_definition.base_token_address;
         let quote_address = pool_definition.quote_token_address;
 
-        assert_address_not_zero(option_token_address, 'MOTL - opt addr is zero');
-        assert_address_not_zero(lptoken_address, 'MOTL - lpt addr is zero');
-        assert_address_not_zero(curr_contract_address, 'MOTL - curr addr is zero');
-        assert_address_not_zero(user_address, 'MOTL - user addr is zero');
+        assert(!option_token_address.is_zero(), 'MOTL - opt addr is zero');
+        assert(!lptoken_address.is_zero(), 'MOTL - lpt addr is zero');
+        assert(!curr_contract_address.is_zero(), 'MOTL - curr addr is zero');
+        assert(!user_address.is_zero(), 'MOTL - user addr is zero');
 
         // Move premia from user to the pool
         let premia_including_fees_u256 = toU256_balance(premia_including_fees, currency_address);
@@ -438,10 +435,10 @@ mod Options {
         let base_address = pool_definition.base_token_address;
         let quote_address = pool_definition.quote_token_address;
 
-        assert_address_not_zero(option_token_address, 'MOTS - opt addr is zero');
-        assert_address_not_zero(lptoken_address, 'MOTS - lpt addr is zero');
-        assert_address_not_zero(curr_contract_address, 'MOTS - curr addr is zero');
-        assert_address_not_zero(user_address, 'MOTS - user addr is zero');
+        assert(!option_token_address.is_zero(), 'MOTS - opt addr is zero');
+        assert(!lptoken_address.is_zero(), 'MOTS - lpt addr is zero');
+        assert(!curr_contract_address.is_zero(), 'MOTS - curr addr is zero');
+        assert(!user_address.is_zero(), 'MOTS - user addr is zero');
 
         // let option_size_u256: u256 = option_size.into();
         let premia_including_fees_u256 = toU256_balance(premia_including_fees, currency_address);
@@ -644,10 +641,10 @@ mod Options {
         let base_address = pool_definition.base_token_address;
         let quote_address = pool_definition.quote_token_address;
 
-        assert_address_not_zero(option_token_address, 'MOTL - opt addr is zero');
-        assert_address_not_zero(lptoken_address, 'MOTL - lpt addr is zero');
-        assert_address_not_zero(curr_contract_address, 'MOTL - curr addr is zero');
-        assert_address_not_zero(user_address, 'MOTL - user addr is zero');
+        assert(!option_token_address.is_zero(), 'MOTL - opt addr is zero');
+        assert(!lptoken_address.is_zero(), 'MOTL - lpt addr is zero');
+        assert(!curr_contract_address.is_zero(), 'MOTL - curr addr is zero');
+        assert(!user_address.is_zero(), 'MOTL - user addr is zero');
 
         let option_size_u256: u256 = option_size.into();
         let premia_including_fees_u256 = toU256_balance(premia_including_fees, currency_address);
@@ -784,11 +781,11 @@ mod Options {
         let base_address = pool_definition.base_token_address;
         let quote_address = pool_definition.quote_token_address;
 
-        assert_address_not_zero(option_token_address, 'MOTL - opt addr is zero');
-        assert_address_not_zero(lptoken_address, 'MOTL - lpt addr is zero');
-        assert_address_not_zero(curr_contract_address, 'MOTL - curr addr is zero');
-        assert_address_not_zero(user_address, 'MOTL - user addr is zero');
-
+        assert(!option_token_address.is_zero(), 'MOTL - opt addr is zero');
+        assert(!lptoken_address.is_zero(), 'MOTL - lpt addr is zero');
+        assert(!curr_contract_address.is_zero(), 'MOTL - curr addr is zero');
+        assert(!user_address.is_zero(), 'MOTL - user addr is zero');
+               
         let option_size_u256: u256 = option_size.into();
         let premia_including_fees_u256 = toU256_balance(premia_including_fees, currency_address);
 

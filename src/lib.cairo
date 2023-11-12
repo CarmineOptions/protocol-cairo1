@@ -15,6 +15,7 @@ mod amm_core {
     mod options;
     mod state;
     mod amm;
+    mod amm_interface;
     mod trading;
     mod helpers;
     mod liquidity_pool;

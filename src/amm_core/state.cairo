@@ -9,7 +9,6 @@ mod State {
 
     use carmine_protocol::amm_core::helpers::assert_option_side_exists;
     use carmine_protocol::amm_core::helpers::assert_option_type_exists;
-    use carmine_protocol::amm_core::helpers::assert_address_not_zero;
     use carmine_protocol::amm_core::helpers::FixedHelpersTrait;
 
     use carmine_protocol::utils::assert_admin_only;
@@ -544,7 +543,7 @@ mod State {
             .lptoken_addr_for_given_pooled_token
             .read((quote_token_address, base_token_address, option_type));
 
-        assert_address_not_zero(lpt_address, 'GLAFGO - pool non existent');
+        assert(!lpt_address.is_zero(), 'GLAFGO - pool non existent');
 
         lpt_address
     }
@@ -560,9 +559,9 @@ mod State {
         option_type: OptionType,
         lpt_address: LPTAddress
     ) {
-        assert_address_not_zero(quote_token_address, 'SLAFGO - Quote addr zero');
-        assert_address_not_zero(base_token_address, 'SLAFGO - Base addr zero');
-        assert_address_not_zero(lpt_address, 'SLAFGO - LPT addr zero');
+        assert(!quote_token_address.is_zero(), 'SLAFGO - Quote addr zero');
+        assert(!base_token_address.is_zero(), 'SLAFGO - Base addr zero');
+        assert(!lpt_address.is_zero(), 'SLAFGO - LPT addr zero');
         assert_option_type_exists(option_type.into(), 'SLAFGO - Unknown opt type');
 
         let mut state = AMM::unsafe_new_contract_state();
@@ -620,7 +619,7 @@ mod State {
     fn get_underlying_token_address(lptoken_address: LPTAddress) -> ContractAddress {
         let state = AMM::unsafe_new_contract_state();
         let underlying_token_address_ = state.underlying_token_address.read(lptoken_address);
-        assert_address_not_zero(underlying_token_address_, 'Underlying addr is zero');
+        assert(!underlying_token_address_.is_zero(), 'Underlying addr is zero');
         return underlying_token_address_;
     }
 
@@ -628,8 +627,8 @@ mod State {
     // @param lptoken_address: Address of given liquidity pool token
     // @param underlying_addr: Underlying token address
     fn set_underlying_token_address(lptoken_address: LPTAddress, underlying_addr: ContractAddress) {
-        assert_address_not_zero(underlying_addr, 'Underlying addr is zero');
-        assert_address_not_zero(lptoken_address, 'LPT addr is zero');
+        assert(!underlying_addr.is_zero(), 'Underlying addr is zero');
+        assert(!lptoken_address.is_zero(), 'LPT addr is zero');
 
         let mut state = AMM::unsafe_new_contract_state();
 

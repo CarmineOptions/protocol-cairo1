@@ -1,5 +1,5 @@
 use starknet::ContractAddress;
-use carmine_protocol::amm_core::view::View;
+use carmine_protocol::amm_core::periferies::view::View;
 use carmine_protocol::testing::setup::{deploy_setup, _add_expired_option};
 use array::ArrayTrait;
 use debug::PrintTrait;
@@ -14,7 +14,6 @@ use carmine_protocol::amm_core::oracles::pragma::Pragma::PRAGMA_ORACLE_ADDRESS;
 use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{
     PragmaPricesResponse, Checkpoint, AggregationMode
 };
-
 
 #[test]
 fn test_dummy() {

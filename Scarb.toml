@@ -7,9 +7,9 @@ homepage = "https://github.com/CarmineOptions/protocol-cairo1"
 
 
 [dependencies]
-cubit = { git = "https://github.com/influenceth/cubit.git", branch = "main" }
-snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry.git", branch = "master"}
 # openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", commit = "841a073" }
+cubit = { git = "https://github.com/influenceth/cubit.git", commit = "b4590530d5aeae9aabd36740cc2a3d9e6adc5fde" }
+snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry.git", tah = "0.10.1"}
 starknet = "=2.3.0"
 
 [[target.starknet-contract]]

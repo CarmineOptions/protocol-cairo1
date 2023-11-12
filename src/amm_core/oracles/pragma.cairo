@@ -1,21 +1,23 @@
 mod Pragma {
     use starknet::get_block_timestamp;
-
-    use carmine_protocol::traits::{IPragmaOracleDispatcher, IPragmaOracleDispatcherTrait};
-    use super::PragmaUtils::{
-        IOracleABIDispatcher, IOracleABIDispatcherTrait, DataType, PragmaPricesResponse,
-        AggregationMode, Checkpoint
-    };
-
-    use carmine_protocol::amm_core::oracles::oracle_helpers::{convert_from_int_to_Fixed};
-    use carmine_protocol::types::basic::{Timestamp};
-
     use starknet::ContractAddress;
     use starknet::contract_address::contract_address_const;
     use traits::{TryInto, Into};
     use option::OptionTrait;
 
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
+    
+    use super::PragmaUtils;
+    use super::PragmaUtils::IOracleABIDispatcher;
+    use super::PragmaUtils::IOracleABIDispatcherTrait;
+    use super::PragmaUtils::DataType;
+    use super::PragmaUtils::PragmaPricesResponse;
+    use super::PragmaUtils::AggregationMode;
+    use super::PragmaUtils::Checkpoint;
+
+    use carmine_protocol::amm_core::oracles::oracle_helpers::{convert_from_int_to_Fixed};
+    use carmine_protocol::types::basic::{Timestamp};
+
 
     use carmine_protocol::amm_core::constants::{
         TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, TOKEN_WBTC_ADDRESS
@@ -24,58 +26,40 @@ mod Pragma {
     // Mainnet
     // Testnet TODO: Check before mainnet launch
     const PRAGMA_ORACLE_ADDRESS: felt252 =
-        // TODO: Add storage var for addr
         0x620a609f88f612eb5773a6f4084f7b33be06a6fed7943445aebce80d6a146ba; // C1 version
 
-    // const PRAGMA_AGGREGATION_MODE: felt252 = 0; // 0 is default for median
-
-    const PRAGMA_WBTC_USD_KEY: felt252 = 6287680677296296772;
-    const PRAGMA_ETH_USD_KEY: felt252 = 19514442401534788;
-    const PRAGMA_SOL_USD_KEY: felt252 = 23449611697214276;
-    const PRAGMA_AVAX_USD_KEY: felt252 = 4708022307469480772;
-    const PRAGMA_DOGE_USD_KEY: felt252 = 4922231280211678020;
-    const PRAGMA_SHIB_USD_KEY: felt252 = 6001127052081976132;
-    const PRAGMA_BNB_USD_KEY: felt252 = 18663394631832388;
-    const PRAGMA_ADA_USD_KEY: felt252 = 18370920243876676;
-    const PRAGMA_XRP_USD_KEY: felt252 = 24860302295520068;
-    const PRAGMA_MATIC_USD_KEY: felt252 = 1425106761739050242884;
-
-    // Stablecoins
-    const PRAGMA_USDT_USD_KEY: felt252 = 6148333044652921668;
-    const PRAGMA_DAI_USD_KEY: felt252 = 19212080998863684;
-    const PRAGMA_USDC_USD_KEY: felt252 = 6148332971638477636;
-
-    #[derive(Copy, Drop, Serde)]
-    struct PragmaCheckpoint {
-        timestamp: felt252,
-        value: felt252,
-        aggregation_mode: felt252,
-        num_sources_aggregated: felt252,
-    }
 
     // TODO: ANNOTATE THIS
+
+    // @notice Returns Pragma key identifier for stablecoins
+    // @param quote_token_addr: Address of given stablecoin 
+    // @return stablecoin_key: Stablecoin key identifier
     fn _get_stablecoin_key(quote_token_addr: ContractAddress) -> Option<felt252> {
         if quote_token_addr == TOKEN_USDC_ADDRESS
             .try_into()
             .expect('Pragma/GSK - Failed to convert') {
-            Option::Some(PRAGMA_USDC_USD_KEY)
+            Option::Some(PragmaUtils::PRAGMA_USDC_USD_KEY)
         } else {
             Option::None(())
         }
     }
 
+    // @notice Returns Pragma key identifier for spot pairs
+    // @param quote_token_addr: Address of quote token in given ticker
+    // @param base_token_addr: Address of base token in given ticker
+    // @return stablecoin_key: Spot pair key identifier
     fn _get_ticker_key(
         quote_token_addr: ContractAddress, base_token_addr: ContractAddress
     ) -> felt252 {
         if base_token_addr.into() == TOKEN_ETH_ADDRESS {
             if quote_token_addr.into() == TOKEN_USDC_ADDRESS {
-                PRAGMA_ETH_USD_KEY
+                PragmaUtils::PRAGMA_ETH_USD_KEY
             } else {
                 0
             }
         } else if base_token_addr.into() == TOKEN_WBTC_ADDRESS {
             if quote_token_addr.into() == TOKEN_USDC_ADDRESS {
-                PRAGMA_WBTC_USD_KEY
+                PragmaUtils::PRAGMA_WBTC_USD_KEY
             } else {
                 0
             }
@@ -84,23 +68,10 @@ mod Pragma {
         }
     }
 
-    use debug::PrintTrait;
-
-    fn _get_pragma(key: felt252) -> PragmaPricesResponse {
-        IOracleABIDispatcher {
-            contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
-        }
-            .get_data(DataType::SpotEntry(key), AggregationMode::Median(()))
-    }
-
-    fn get_pragma(
-        quote_token_addr: ContractAddress, base_token_addr: ContractAddress,
-    ) -> PragmaPricesResponse {
-        let key = _get_ticker_key(quote_token_addr, base_token_addr);
-        _get_pragma(key)
-    }
-
-
+    // @notice Returns current Pragma median price for given key
+    // @dev This function does not account for stablecoin divergence
+    // @param key: Pragma key identifier
+    // @return median_price: Pragma current median price in Fixed
     fn _get_pragma_median_price(key: felt252) -> Fixed {
         let res: PragmaPricesResponse = IOracleABIDispatcher {
             contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
@@ -122,6 +93,11 @@ mod Pragma {
         )
     }
 
+    // @notice Returns current Pragma median price for given key
+    // @dev This function accounts for stablecoin divergence
+    // @param quote_token_addr: Address of quote token in given ticker
+    // @param base_token_addr: Address of base token in given ticker
+    // @return median_price: Pragma current median price in Fixed
     fn get_pragma_median_price(
         quote_token_addr: ContractAddress, base_token_addr: ContractAddress,
     ) -> Fixed {
@@ -131,11 +107,13 @@ mod Pragma {
         account_for_stablecoin_divergence(res, quote_token_addr, 0)
     }
 
-    // TODO Check that checkpoint is not after expiry
+
+    // @notice Returns terminal Pragma median price for given key
+    // @dev This function does not account for stablecoin divergence
+    // @param key: Pragma key identifier
+    // @param maturity: Timestamp for which to get the terminal price
+    // @return median_price: Pragma terminal median price in Fixed
     fn _get_pragma_terminal_price(key: felt252, maturity: Timestamp) -> Fixed {
-        if maturity == 1695119670 {
-            return FixedTrait::from_felt(1600); // TODO: remove this
-        }
 
         let (res, _) = IOracleABIDispatcher {
             contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
@@ -159,35 +137,26 @@ mod Pragma {
         convert_from_int_to_Fixed(res.value, decs.try_into().unwrap())
     }
 
+
+    // @notice Returns terminal Pragma median price for given key
+    // @dev This function accounts for stablecoin divergence
+    // @param quote_token_addr: Address of quote token in given ticker
+    // @param base_token_addr: Address of base token in given ticker
+    // @param maturity: Timestamp for which to get the terminal price
+    // @return median_price: Pragma terminal median price in Fixed
     fn get_pragma_terminal_price(
         quote_token_addr: ContractAddress, base_token_addr: ContractAddress, maturity: Timestamp
     ) -> Fixed {
-        // TODO: REMOVE THIS
-        if base_token_addr.into() == TOKEN_ETH_ADDRESS {
-            if maturity == 1696377599 {
-                return FixedTrait::from_felt(30405583789254716162048);
-            }
-
-            if maturity == 1696463999 {
-                return FixedTrait::from_felt(30405583789254716162048);
-            }
-        }
-
-        if base_token_addr.into() == TOKEN_WBTC_ADDRESS {
-            if maturity == 1696377599 {
-                return FixedTrait::from_felt(512480803027932216819712);
-            }
-
-            if maturity == 1696463999 {
-                return FixedTrait::from_felt(512480803027932216819712);
-            }
-        }
-
         let key = _get_ticker_key(quote_token_addr, base_token_addr);
         let res = _get_pragma_terminal_price(key, maturity);
         account_for_stablecoin_divergence(res, quote_token_addr, maturity)
     }
 
+    // @notice Takes in current or terminal price and returns it after accounting for stablecoin divergence
+    // @param price: Current or terminal price, Fixed
+    // @param quote_token_addr: Address of quote token in given ticker
+    // @param maturity: Timestamp for which to get the terminal price if its used, "0" for spot price
+    // @return price: Price, accounted for stablecoin divergence
     fn account_for_stablecoin_divergence(
         price: Fixed, quote_token_addr: ContractAddress, maturity: Timestamp
     ) -> Fixed {
@@ -207,6 +176,8 @@ mod Pragma {
         }
     }
 
+    // @notice Calls Pragma to set checkpoint
+    // @param key: Pragma key identifier
     fn set_pragma_checkpoint(key: felt252) {
         IOracleABIDispatcher {
             contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
@@ -214,20 +185,12 @@ mod Pragma {
             .set_checkpoint(DataType::SpotEntry(key), AggregationMode::Median(()))
     }
 
+    // @notice Calls Pragma to set checkpoints we use
     fn set_pragma_required_checkpoints() {
         // Just add needed checkpoints here
-        set_pragma_checkpoint(PRAGMA_ETH_USD_KEY);
-        set_pragma_checkpoint(PRAGMA_USDC_USD_KEY);
-        set_pragma_checkpoint(PRAGMA_WBTC_USD_KEY);
-    }
-
-    fn get_pragma_checkpoint(key: felt252, before: u64) -> (Checkpoint, u64) {
-        IOracleABIDispatcher {
-            contract_address: PRAGMA_ORACLE_ADDRESS.try_into().expect('Pragma/_GPMP - Cant convert')
-        }
-            .get_last_checkpoint_before(
-                DataType::SpotEntry(key), before, AggregationMode::Median(())
-            )
+        set_pragma_checkpoint(PragmaUtils::PRAGMA_ETH_USD_KEY);
+        set_pragma_checkpoint(PragmaUtils::PRAGMA_USDC_USD_KEY);
+        set_pragma_checkpoint(PragmaUtils::PRAGMA_WBTC_USD_KEY);
     }
 }
 
@@ -283,4 +246,22 @@ mod PragmaUtils {
         Mean: (),
         Error: (),
     }
+
+    // Pragma keys
+    // Spot
+    const PRAGMA_WBTC_USD_KEY: felt252 = 6287680677296296772;
+    const PRAGMA_ETH_USD_KEY: felt252 = 19514442401534788;
+    const PRAGMA_SOL_USD_KEY: felt252 = 23449611697214276;
+    const PRAGMA_AVAX_USD_KEY: felt252 = 4708022307469480772;
+    const PRAGMA_DOGE_USD_KEY: felt252 = 4922231280211678020;
+    const PRAGMA_SHIB_USD_KEY: felt252 = 6001127052081976132;
+    const PRAGMA_BNB_USD_KEY: felt252 = 18663394631832388;
+    const PRAGMA_ADA_USD_KEY: felt252 = 18370920243876676;
+    const PRAGMA_XRP_USD_KEY: felt252 = 24860302295520068;
+    const PRAGMA_MATIC_USD_KEY: felt252 = 1425106761739050242884;
+
+    // Stablecoins
+    const PRAGMA_USDT_USD_KEY: felt252 = 6148333044652921668;
+    const PRAGMA_DAI_USD_KEY: felt252 = 19212080998863684;
+    const PRAGMA_USDC_USD_KEY: felt252 = 6148332971638477636;
 }
