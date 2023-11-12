@@ -22,7 +22,7 @@ jobs:
       - name: Check formatting
         run: scarb fmt --check
 
-      Commented because snforge lib is installed locally
+      # Commented because snforge lib is installed locally
       - name: Build 
         run: scarb build
 
