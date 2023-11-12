@@ -53,7 +53,7 @@ mod Pragma {
         num_sources_aggregated: felt252,
     }
 
-
+    // TODO: ANNOTATE THIS
     fn _get_stablecoin_key(quote_token_addr: ContractAddress) -> Option<felt252> {
         if quote_token_addr == TOKEN_USDC_ADDRESS
             .try_into()
@@ -203,9 +203,7 @@ mod Pragma {
                 return price / stable_coin_price;
             },
             // If key is zero, it means that quote_token isn't stablecoin(or at least one we use)
-            Option::None(_) => {
-                return price;
-            }
+            Option::None(_) => { return price; }
         }
     }
 

@@ -259,28 +259,40 @@ mod AMM {
         Timestamp, OptionType, Maturity, Int
     };
 
+    use openzeppelin::security::reentrancyguard::ReentrancyGuardComponent;
     use carmine_protocol::types::pool::Pool;
     use carmine_protocol::types::option_::{LegacyOption, Option_};
+
+    // Reentrancy Component
+    component!(path: ReentrancyGuardComponent, storage: re_guard, event: ReentrancyGuardEvent);
+    impl ReentrancyGuardInternalImpl = ReentrancyGuardComponent::InternalImpl<ContractState>;
 
     // TODO: Constructor
 
     #[storage]
     struct Storage {
+        #[substorage(v0)]
+        re_guard: ReentrancyGuardComponent::Storage,
         // Storage vars with new types
 
         pool_volatility_adjustment_speed: LegacyMap<LPTAddress, Math64x61_>,
         new_pool_volatility_adjustment_speed: LegacyMap<LPTAddress, Fixed>,
-        pool_volatility_separate: LegacyMap::<(LPTAddress, Maturity, LegacyStrike),
-        LegacyVolatility>,
-        option_volatility: LegacyMap::<(ContractAddress, u64, u128),
-        Volatility>, // This is actually options vol, not pools // TODO: last key value should be Fixed, not u128(or it's mag)
+        pool_volatility_separate: LegacyMap::<
+            (LPTAddress, Maturity, LegacyStrike), LegacyVolatility
+        >,
+        option_volatility: LegacyMap::<
+            (ContractAddress, u64, u128), Volatility
+        >, // This is actually options vol, not pools // TODO: last key value should be Fixed, not u128(or it's mag)
         option_position_: LegacyMap<(LPTAddress, OptionSide, Maturity, LegacyStrike), felt252>,
-        new_option_position: LegacyMap<(LPTAddress, OptionSide, Timestamp, u128),
-        Int>, // TODO: last key value should be Fixed, not u128(or it's mag)
-        option_token_address: LegacyMap::<(LPTAddress, OptionSide, Maturity, LegacyStrike),
-        ContractAddress>,
-        new_option_token_address: LegacyMap::<(LPTAddress, OptionSide, Timestamp, u128),
-        ContractAddress>, // TODO: last key value should be Fixed, not u128(or it's mag)
+        new_option_position: LegacyMap<
+            (LPTAddress, OptionSide, Timestamp, u128), Int
+        >, // TODO: last key value should be Fixed, not u128(or it's mag)
+        option_token_address: LegacyMap::<
+            (LPTAddress, OptionSide, Maturity, LegacyStrike), ContractAddress
+        >,
+        new_option_token_address: LegacyMap::<
+            (LPTAddress, OptionSide, Timestamp, u128), ContractAddress
+        >, // TODO: last key value should be Fixed, not u128(or it's mag)
         available_options: LegacyMap::<(LPTAddress, felt252), LegacyOption>,
         new_available_options: LegacyMap::<(LPTAddress, u32), Option_>,
         new_available_options_usable_index: LegacyMap::<LPTAddress, u32>,
@@ -294,10 +306,9 @@ mod AMM {
         trading_halted: bool, // Make this bool if they can be interchanged
         available_lptoken_adresses: LegacyMap<felt252, LPTAddress>,
         // (quote_token_addr, base_token_address, option_type) -> LpToken address
-        lptoken_addr_for_given_pooled_token: LegacyMap::<(
-            ContractAddress, ContractAddress, OptionType
-        ),
-        LPTAddress>,
+        lptoken_addr_for_given_pooled_token: LegacyMap::<
+            (ContractAddress, ContractAddress, OptionType), LPTAddress
+        >,
         pool_definition_from_lptoken_address: LegacyMap<LPTAddress, Pool>,
     }
 
@@ -361,6 +372,8 @@ mod AMM {
     #[derive(starknet::Event, Drop)]
     #[event]
     enum Event {
+        #[flat]
+        ReentrancyGuardEvent: ReentrancyGuardComponent::Event,
         TradeOpen: TradeOpen,
         TradeClose: TradeClose,
         TradeSettle: TradeSettle,
@@ -388,7 +401,7 @@ mod AMM {
     use starknet::ClassHash;
 
     use carmine_protocol::utils::assert_admin_only; //  Just Dummy admin assert
-    use openzeppelin::security::reentrancyguard::ReentrancyGuard;
+
 
     #[external(v0)]
     impl Amm of super::IAMM<ContractState> {
@@ -404,8 +417,7 @@ mod AMM {
             limit_total_premia: Fixed,
             tx_deadline: u64,
         ) -> Fixed {
-            let mut re_guard_unsafe_state = ReentrancyGuard::unsafe_new_contract_state();
-            ReentrancyGuard::InternalImpl::start(ref re_guard_unsafe_state);
+            self.re_guard.start();
 
             let premia = Trading::trade_open(
                 option_type,
@@ -419,7 +431,7 @@ mod AMM {
                 tx_deadline,
             );
 
-            ReentrancyGuard::InternalImpl::end(ref re_guard_unsafe_state);
+            self.re_guard.end();
 
             premia
         }
@@ -436,8 +448,7 @@ mod AMM {
             limit_total_premia: Fixed,
             tx_deadline: u64,
         ) -> Fixed {
-            let mut re_guard_unsafe_state = ReentrancyGuard::unsafe_new_contract_state();
-            ReentrancyGuard::InternalImpl::start(ref re_guard_unsafe_state);
+            self.re_guard.start();
 
             let premia = Trading::trade_close(
                 option_type,
@@ -451,7 +462,7 @@ mod AMM {
                 tx_deadline,
             );
 
-            ReentrancyGuard::InternalImpl::end(ref re_guard_unsafe_state);
+            self.re_guard.end();
             premia
         }
 
@@ -465,6 +476,7 @@ mod AMM {
             quote_token_address: ContractAddress,
             base_token_address: ContractAddress,
         ) {
+            self.re_guard.start();
             Trading::trade_settle(
                 option_type,
                 strike_price,
@@ -473,7 +485,8 @@ mod AMM {
                 option_size,
                 quote_token_address,
                 base_token_address,
-            )
+            );
+            self.re_guard.end();
         }
 
         fn is_option_available(
@@ -663,14 +676,13 @@ mod AMM {
             option_type: OptionType,
             amount: u256,
         ) {
-            let mut re_guard_unsafe_state = ReentrancyGuard::unsafe_new_contract_state();
-            ReentrancyGuard::InternalImpl::start(ref re_guard_unsafe_state);
+            self.re_guard.start();
 
             LiquidityPool::deposit_liquidity(
                 pooled_token_addr, quote_token_address, base_token_address, option_type, amount,
             );
 
-            ReentrancyGuard::InternalImpl::end(ref re_guard_unsafe_state);
+            self.re_guard.end();
         }
 
         fn withdraw_liquidity(
@@ -681,8 +693,7 @@ mod AMM {
             option_type: OptionType,
             lp_token_amount: u256,
         ) {
-            let mut re_guard_unsafe_state = ReentrancyGuard::unsafe_new_contract_state();
-            ReentrancyGuard::InternalImpl::start(ref re_guard_unsafe_state);
+            self.re_guard.start();
 
             LiquidityPool::withdraw_liquidity(
                 pooled_token_addr,
@@ -692,7 +703,7 @@ mod AMM {
                 lp_token_amount,
             );
 
-            ReentrancyGuard::InternalImpl::end(ref re_guard_unsafe_state);
+            self.re_guard.end();
         }
 
         fn get_unlocked_capital(self: @ContractState, lptoken_address: ContractAddress) -> u256 {
@@ -706,14 +717,13 @@ mod AMM {
             strike_price: Fixed,
             maturity: u64,
         ) {
-            let mut re_guard_unsafe_state = ReentrancyGuard::unsafe_new_contract_state();
-            ReentrancyGuard::InternalImpl::start(ref re_guard_unsafe_state);
+            self.re_guard.start();
 
             LiquidityPool::expire_option_token_for_pool(
                 lptoken_address, option_side, strike_price, maturity,
             );
 
-            ReentrancyGuard::InternalImpl::end(ref re_guard_unsafe_state);
+            self.re_guard.end();
         }
 
         fn set_max_option_size_percent_of_voladjspd(

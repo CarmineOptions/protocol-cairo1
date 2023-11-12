@@ -392,10 +392,6 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     (ctx, disp)
 }
 
-#[test]
-fn test_deploy_setup() {
-    let (ctx, dsps) = deploy_setup();
-}
 
 fn _add_expired_option(ctx: Ctx, dsps: Dispatchers) {
     let mut long_call_data = ArrayTrait::<felt252>::new();
@@ -437,6 +433,14 @@ fn _add_expired_option(ctx: Ctx, dsps: Dispatchers) {
 //     start_mock_call(PRAGMA_ORACLE_ADDRESS.try_into().unwrap(), 'get_spot_median', (140000000000, 8, 1000000000 + 60*60*12, 0));
 
 //     let one = 1000000000000000000;
+// }
+
+// #[cfg(test)]
+// mod tests {
+//     #[test]
+//     fn test_deploy_setup() {
+//         let (ctx, dsps) = super::deploy_setup();
+//     }
 // }
 
 

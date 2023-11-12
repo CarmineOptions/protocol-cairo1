@@ -315,143 +315,166 @@ fn get_decimal(token_address: ContractAddress) -> Option<u8> {
 }
 
 // Tests --------------------------------------------------------------------------------------------------------------
-#[test]
-fn test_get_underlying_from_option_data() {
-    let opt_type_call = 0;
-    let opt_type_put = 1;
+#[cfg(test)]
+mod tests {
+    use starknet::ContractAddress;
 
-    let base_token_addr: ContractAddress = 0.try_into().unwrap();
-    let quote_token_addr: ContractAddress = 1.try_into().unwrap();
+    use cubit::f128::types::fixed::Fixed;
+    use cubit::f128::types::fixed::FixedTrait;
+    use cubit::f128::types::fixed::MAX_u128;
+    use cubit::f128::types::fixed::FixedInto;
 
-    let res_1 = get_underlying_from_option_data(opt_type_call, base_token_addr, quote_token_addr);
-    let res_2 = get_underlying_from_option_data(opt_type_put, base_token_addr, quote_token_addr);
-
-    assert(res_1 == base_token_addr, 'res1');
-    assert(res_2 == quote_token_addr, 'res1');
-}
-
-// assert_option_side_exists
-#[test]
-fn test_assert_option_side_exists() {
-    assert_option_side_exists(1, '1');
-    assert_option_side_exists(0, '0');
-}
-
-#[test]
-#[should_panic]
-fn test_assert_option_side_exists_failing() {
-    assert_option_side_exists(2, 'Unknown option side')
-}
+    use super::get_underlying_from_option_data;
+    use super::assert_option_side_exists;
+    use super::assert_option_type_exists;
+    use super::split_option_locked_capital;
+    use super::pow;
+    use super::_fromU256_balance;
+    use super::_toU256_balance;
 
 
-#[test]
-fn test_assert_option_type_exists() {
-    assert_option_type_exists(1, '1');
-    assert_option_type_exists(0, '0');
-}
+    #[test]
+    fn test_get_underlying_from_option_data() {
+        let opt_type_call = 0;
+        let opt_type_put = 1;
 
-#[test]
-#[should_panic]
-fn test_assert_option_type_exists_failing() {
-    assert_option_type_exists(2, 'Unknown option type')
-}
+        let base_token_addr: ContractAddress = 0.try_into().unwrap();
+        let quote_token_addr: ContractAddress = 1.try_into().unwrap();
 
-use debug::PrintTrait;
+        let res_1 = get_underlying_from_option_data(
+            opt_type_call, base_token_addr, quote_token_addr
+        );
+        let res_2 = get_underlying_from_option_data(
+            opt_type_put, base_token_addr, quote_token_addr
+        );
 
-#[test]
-fn test_split_option_locked_capital() {
-    let opt_call = 0;
-    let opt_put = 1;
+        assert(res_1 == base_token_addr, 'res1');
+        assert(res_2 == quote_token_addr, 'res1');
+    }
 
-    let opt_size = FixedTrait::ONE();
-    let strike_price = FixedTrait::from_unscaled_felt(1_000);
+    // assert_option_side_exists
+    #[test]
+    fn test_assert_option_side_exists() {
+        assert_option_side_exists(1, '1');
+        assert_option_side_exists(0, '0');
+    }
 
-    let terminal_price_higher = FixedTrait::from_unscaled_felt(1_500);
-    let terminal_price_lower = FixedTrait::from_unscaled_felt(500);
+    #[test]
+    #[should_panic]
+    fn test_assert_option_side_exists_failing() {
+        assert_option_side_exists(2, 'Unknown option side')
+    }
 
-    let (long1, short1) = split_option_locked_capital(
-        opt_call, opt_size, strike_price, terminal_price_higher
-    );
-    let (long2, short2) = split_option_locked_capital(
-        opt_call, opt_size, strike_price, terminal_price_lower
-    );
 
-    assert(long1 == FixedTrait::from_felt(6148914691236517205), 'long1'); // 0.33...
-    assert(short1 == FixedTrait::from_felt(12297829382473034411), 'short1'); // 0.66...
+    #[test]
+    fn test_assert_option_type_exists() {
+        assert_option_type_exists(1, '1');
+        assert_option_type_exists(0, '0');
+    }
 
-    assert(long2 == FixedTrait::ZERO(), 'long2'); // 0
-    assert(short2 == FixedTrait::ONE(), 'short2'); // 1
+    #[test]
+    #[should_panic]
+    fn test_assert_option_type_exists_failing() {
+        assert_option_type_exists(2, 'Unknown option type')
+    }
 
-    let (long3, short3) = split_option_locked_capital(
-        opt_put, opt_size, strike_price, terminal_price_higher
-    );
-    let (long4, short4) = split_option_locked_capital(
-        opt_put, opt_size, strike_price, terminal_price_lower
-    );
+    use debug::PrintTrait;
 
-    assert(long3 == FixedTrait::ZERO(), 'long3'); // 0
-    assert(short3 == FixedTrait::from_unscaled_felt(1_000), 'long3'); // 1_000
+    #[test]
+    fn test_split_option_locked_capital() {
+        let opt_call = 0;
+        let opt_put = 1;
 
-    assert(long4 == FixedTrait::from_unscaled_felt(500), 'long4'); // 500
-    assert(short4 == FixedTrait::from_unscaled_felt(500), 'short4'); // 500
-}
+        let opt_size = FixedTrait::ONE();
+        let strike_price = FixedTrait::from_unscaled_felt(1_000);
 
-#[test]
-fn test__pow() {
-    assert(pow(10, 10) == 10000000000, '1');
-    assert(pow(10, 5) == 100000, '2');
-    assert(pow(10, 2) == 100, '3');
+        let terminal_price_higher = FixedTrait::from_unscaled_felt(1_500);
+        let terminal_price_lower = FixedTrait::from_unscaled_felt(500);
 
-    assert(pow(2, 8) == 256, '4');
-    assert(pow(2, 16) == 65536, '5');
-    assert(pow(2, 32) == 4294967296, '6');
-    assert(pow(2, 56) == 72057594037927936, '7');
-    assert(pow(2, 64) == 18446744073709551616, '8');
+        let (long1, short1) = split_option_locked_capital(
+            opt_call, opt_size, strike_price, terminal_price_higher
+        );
+        let (long2, short2) = split_option_locked_capital(
+            opt_call, opt_size, strike_price, terminal_price_lower
+        );
 
-    assert(pow(17, 21) == 69091933913008732880827217, '9');
-    assert(pow(34, 13) == 81138303245565435904, '10');
-}
+        assert(long1 == FixedTrait::from_felt(6148914691236517205), 'long1'); // 0.33...
+        assert(short1 == FixedTrait::from_felt(12297829382473034411), 'short1'); // 0.66...
 
-#[test]
-#[should_panic]
-fn test__pow_failing() {
-    pow(69, 69); // Should overflow
-}
+        assert(long2 == FixedTrait::ZERO(), 'long2'); // 0
+        assert(short2 == FixedTrait::ONE(), 'short2'); // 1
 
-#[test]
-fn test__fromU256_balance() {
-    let res1 = _fromU256_balance(1000000000000000000, 18); // ie 1 eth
-    let res2 = _fromU256_balance(50000000000000, 12); // 50 of something
-    let res3 = _fromU256_balance(1000000000, 6); // ie 1k usdc
+        let (long3, short3) = split_option_locked_capital(
+            opt_put, opt_size, strike_price, terminal_price_higher
+        );
+        let (long4, short4) = split_option_locked_capital(
+            opt_put, opt_size, strike_price, terminal_price_lower
+        );
 
-    assert(res1 == FixedTrait::ONE(), 'res1');
-    assert(res2 == FixedTrait::from_unscaled_felt(50), 'res2');
-    assert(res3 == FixedTrait::from_unscaled_felt(1_000), 'res3');
+        assert(long3 == FixedTrait::ZERO(), 'long3'); // 0
+        assert(short3 == FixedTrait::from_unscaled_felt(1_000), 'long3'); // 1_000
 
-    let res4 = _fromU256_balance(54128590000000000000, 18);
-    let res5 = _fromU256_balance(1124235700000, 12);
-    let res6 = _fromU256_balance(100183370000, 6);
+        assert(long4 == FixedTrait::from_unscaled_felt(500), 'long4'); // 500
+        assert(short4 == FixedTrait::from_unscaled_felt(500), 'short4'); // 500
+    }
 
-    assert(res4 == FixedTrait::from_felt(998496246800754098506), 'res4');
-    assert(res5 == FixedTrait::from_felt(20738488236427709357), 'res5');
-    assert(res6 == FixedTrait::from_felt(1848056986831751282079825), 'res6');
-}
+    #[test]
+    fn test__pow() {
+        assert(pow(10, 10) == 10000000000, '1');
+        assert(pow(10, 5) == 100000, '2');
+        assert(pow(10, 2) == 100, '3');
 
-#[test]
-fn test__toU256_balance() {
-    let res1 = _toU256_balance(FixedTrait::ONE(), 18);
-    let res2 = _toU256_balance(FixedTrait::from_unscaled_felt(50), 12);
-    let res3 = _toU256_balance(FixedTrait::from_unscaled_felt(1_000), 6);
+        assert(pow(2, 8) == 256, '4');
+        assert(pow(2, 16) == 65536, '5');
+        assert(pow(2, 32) == 4294967296, '6');
+        assert(pow(2, 56) == 72057594037927936, '7');
+        assert(pow(2, 64) == 18446744073709551616, '8');
 
-    assert(res1 == 1000000000000000000, 'res1');
-    assert(res2 == 50000000000000, 'res2');
-    assert(res3 == 1000000000, 'res3');
+        assert(pow(17, 21) == 69091933913008732880827217, '9');
+        assert(pow(34, 13) == 81138303245565435904, '10');
+    }
 
-    let res4 = _toU256_balance(FixedTrait::from_felt(998496246800754098506), 18);
-    let res5 = _toU256_balance(FixedTrait::from_felt(20738488236427709357), 12);
-    let res6 = _toU256_balance(FixedTrait::from_felt(1848056986831751282079825), 6);
+    #[test]
+    #[should_panic]
+    fn test__pow_failing() {
+        pow(69, 69); // Should overflow
+    }
 
-    assert(res4 == 54128589999999999999, 'res4'); // 1 gwei rounding error
-    assert(res5 == 1124235699999, 'res5'); // also
-    assert(res6 == 100183369999, 'res6'); // also
+    #[test]
+    fn test__fromU256_balance() {
+        let res1 = _fromU256_balance(1000000000000000000, 18); // ie 1 eth
+        let res2 = _fromU256_balance(50000000000000, 12); // 50 of something
+        let res3 = _fromU256_balance(1000000000, 6); // ie 1k usdc
+
+        assert(res1 == FixedTrait::ONE(), 'res1');
+        assert(res2 == FixedTrait::from_unscaled_felt(50), 'res2');
+        assert(res3 == FixedTrait::from_unscaled_felt(1_000), 'res3');
+
+        let res4 = _fromU256_balance(54128590000000000000, 18);
+        let res5 = _fromU256_balance(1124235700000, 12);
+        let res6 = _fromU256_balance(100183370000, 6);
+
+        assert(res4 == FixedTrait::from_felt(998496246800754098506), 'res4');
+        assert(res5 == FixedTrait::from_felt(20738488236427709357), 'res5');
+        assert(res6 == FixedTrait::from_felt(1848056986831751282079825), 'res6');
+    }
+
+    #[test]
+    fn test__toU256_balance() {
+        let res1 = _toU256_balance(FixedTrait::ONE(), 18);
+        let res2 = _toU256_balance(FixedTrait::from_unscaled_felt(50), 12);
+        let res3 = _toU256_balance(FixedTrait::from_unscaled_felt(1_000), 6);
+
+        assert(res1 == 1000000000000000000, 'res1');
+        assert(res2 == 50000000000000, 'res2');
+        assert(res3 == 1000000000, 'res3');
+
+        let res4 = _toU256_balance(FixedTrait::from_felt(998496246800754098506), 18);
+        let res5 = _toU256_balance(FixedTrait::from_felt(20738488236427709357), 12);
+        let res6 = _toU256_balance(FixedTrait::from_felt(1848056986831751282079825), 6);
+
+        assert(res4 == 54128589999999999999, 'res4'); // 1 gwei rounding error
+        assert(res5 == 1124235699999, 'res5'); // also
+        assert(res6 == 100183369999, 'res6'); // also
+    }
 }

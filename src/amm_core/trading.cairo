@@ -151,7 +151,6 @@ mod Trading {
             underlying_price,
         );
 
-        // TODO: ReentrancyGuard.end()
         return premia;
     }
 
@@ -180,7 +179,6 @@ mod Trading {
         lptoken_address: LPTAddress,
         limit_total_premia: Fixed,
     ) -> Fixed {
-        // TODO: ReentrancyGuard.start()
         let opposite_side = get_opposite_side(side);
 
         // Helper Values
@@ -260,7 +258,6 @@ mod Trading {
             underlying_price
         );
 
-        // TODO: ReentrancyGuard.end()
         return premia;
     }
 
