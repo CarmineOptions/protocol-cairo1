@@ -17,7 +17,7 @@ jobs:
         run: curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v $SCARB_VERSION
 
       - name: Install SnFoundryUp
-        run: curl -L https://raw.githubusercontent.com/foundry-rs/starknet-foundry/master/scripts/install.sh | sh -s -- -v $FOUNDRY_VERSION
+        run: curl -L https://raw.githubusercontent.com/foundry-rs/starknet-foundry/master/scripts/install.sh | sh 
         
       - name: Install SnFoundry
         run: snfoundryup -v 0.10.1
@@ -25,7 +25,6 @@ jobs:
       - name: Check formatting
         run: scarb fmt --check
 
-      # Commented because snforge lib is installed locally
       - name: Build 
         run: scarb build
 
