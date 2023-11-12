@@ -113,9 +113,9 @@ mod OptionToken {
     #[derive(Drop, starknet::Event)]
     enum Event {
         Upgraded: Upgraded,
-        #[flat]
+        // #[flat]
         ERC20Event: ERC20Component::Event,
-        #[flat]
+        // #[flat]
         OwnableEvent: OwnableComponent::Event
     }
 
@@ -133,7 +133,7 @@ mod OptionToken {
         quote_token_address: ContractAddress,
         base_token_address: ContractAddress,
         option_type: u8,
-        strike_price: Fixed,
+        strike_price: felt252,
         maturity: u64,
         side: u8,
     ) {
@@ -145,7 +145,7 @@ mod OptionToken {
         self._option_token_option_type.write(option_type);
         self._option_token_maturity.write(maturity);
         self._option_token_side.write(side);
-        self._option_token_strike_price.write(strike_price);
+        self._option_token_strike_price.write(FixedTrait::from_felt(strike_price)); 
     }
 
     //

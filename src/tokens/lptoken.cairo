@@ -99,9 +99,9 @@ mod LPToken {
     #[derive(Drop, starknet::Event)]
     enum Event {
         Upgraded: Upgraded,
-        #[flat]
+        // #[flat]
         ERC20Event: ERC20Component::Event,
-        #[flat]
+        // #[flat]
         OwnableEvent: OwnableComponent::Event
     }
 

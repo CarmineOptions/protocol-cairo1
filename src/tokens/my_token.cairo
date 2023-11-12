@@ -52,7 +52,7 @@ mod MyToken {
     #[derive(Drop, starknet::Event)]
     enum Event {
         Upgraded: Upgraded,
-        #[flat]
+        // #[flat]
         ERC20Event: ERC20Component::Event,
     }
 

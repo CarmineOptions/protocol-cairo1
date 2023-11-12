@@ -372,7 +372,7 @@ mod AMM {
     #[derive(starknet::Event, Drop)]
     #[event]
     enum Event {
-        #[flat]
+        // #[flat]
         ReentrancyGuardEvent: ReentrancyGuardComponent::Event,
         TradeOpen: TradeOpen,
         TradeClose: TradeClose,
