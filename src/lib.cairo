@@ -2,6 +2,13 @@ mod erc20_interface;
 mod amm_interface;
 mod utils;
 mod amm_core {
+    mod constants;
+    mod options;
+    mod state;
+    mod amm;
+    mod trading;
+    mod helpers;
+    mod liquidity_pool;
     mod oracles {
         mod agg;
         mod pragma;
@@ -12,13 +19,6 @@ mod amm_core {
         mod option_pricing;
         mod option_pricing_helpers;
     }
-    mod constants;
-    mod options;
-    mod state;
-    mod amm;
-    mod trading;
-    mod helpers;
-    mod liquidity_pool;
     mod peripheries {
         mod view;
     }
