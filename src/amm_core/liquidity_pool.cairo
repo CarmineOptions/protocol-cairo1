@@ -12,8 +12,8 @@ mod LiquidityPool {
     use cubit::f128::types::fixed::Fixed;
     use cubit::f128::types::fixed::FixedTrait;
 
-    use carmine_protocol::traits::IERC20Dispatcher;
-    use carmine_protocol::traits::IERC20DispatcherTrait;
+    use carmine_protocol::erc20_interface::IERC20Dispatcher;
+    use carmine_protocol::erc20_interface::IERC20DispatcherTrait;
 
     use carmine_protocol::types::basic::LPTAddress;
     use carmine_protocol::types::basic::OptionType;

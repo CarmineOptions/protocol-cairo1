@@ -1,4 +1,5 @@
-mod traits;
+mod erc20_interface;
+mod amm_interface;
 mod utils;
 mod amm_core {
     mod oracles {
@@ -15,7 +16,6 @@ mod amm_core {
     mod options;
     mod state;
     mod amm;
-    mod amm_interface;
     mod trading;
     mod helpers;
     mod liquidity_pool;

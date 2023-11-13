@@ -11,7 +11,7 @@ mod AMM {
     use carmine_protocol::oz::security::reentrancyguard::ReentrancyGuardComponent;
     use carmine_protocol::types::pool::Pool;
     use carmine_protocol::types::option_::{LegacyOption, Option_};
-    use carmine_protocol::amm_core::amm_interface::IAMM;
+    use carmine_protocol::amm_interface::IAMM;
 
 
     // Reentrancy Component

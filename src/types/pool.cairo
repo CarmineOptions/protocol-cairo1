@@ -1,4 +1,4 @@
-use carmine_protocol::traits::{IERC20Dispatcher, IERC20DispatcherTrait};
+use carmine_protocol::erc20_interface::{IERC20Dispatcher, IERC20DispatcherTrait};
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 use starknet::ContractAddress;
 use carmine_protocol::types::basic::OptionType;

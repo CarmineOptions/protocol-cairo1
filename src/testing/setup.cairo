@@ -8,7 +8,7 @@ use debug::PrintTrait;
 use traits::{Into, TryInto};
 
 use carmine_protocol::amm_core::amm::AMM;
-use carmine_protocol::amm_core::amm_interface::{IAMMDispatcher, IAMMDispatcherTrait};
+use carmine_protocol::amm_interface::{IAMMDispatcher, IAMMDispatcherTrait};
 use snforge_std::{
     declare, ContractClassTrait, start_prank, stop_prank, start_warp, stop_warp, ContractClass,
     start_mock_call, stop_mock_call

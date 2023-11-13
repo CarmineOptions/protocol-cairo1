@@ -9,7 +9,7 @@ use carmine_protocol::tokens::option_token::{
 use carmine_protocol::tokens::lptoken::{LPToken, ILPTokenDispatcher, ILPTokenDispatcherTrait};
 
 
-use carmine_protocol::amm_core::amm_interface::{IAMMDispatcher, IAMMDispatcherTrait};
+use carmine_protocol::amm_interface::{IAMMDispatcher, IAMMDispatcherTrait};
 
 // Helper function for relative comparison of two numbers
 fn is_close(a: Fixed, b: Fixed, rel_tol: Fixed) -> bool {

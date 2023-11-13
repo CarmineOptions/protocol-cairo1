@@ -30,9 +30,8 @@ use carmine_protocol::amm_core::pricing::option_pricing::OptionPricing::black_sc
 
 use carmine_protocol::amm_core::oracles::agg::OracleAgg::{get_current_price, get_terminal_price};
 
-use carmine_protocol::traits::{
-    IOptionTokenDispatcher, IOptionTokenDispatcherTrait, IERC20Dispatcher, IERC20DispatcherTrait
-};
+use carmine_protocol::erc20_interface::{IERC20Dispatcher, IERC20DispatcherTrait};
+use carmine_protocol::tokens::option_token::{IOptionTokenDispatcher, IOptionTokenDispatcherTrait};
 
 
 // Option used in c0 AMM

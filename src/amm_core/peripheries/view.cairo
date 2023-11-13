@@ -11,8 +11,8 @@ mod View {
 
     use carmine_protocol::amm_core::helpers::pow;
 
-    use carmine_protocol::traits::IERC20Dispatcher;
-    use carmine_protocol::traits::IERC20DispatcherTrait;
+    use carmine_protocol::erc20_interface::IERC20Dispatcher;
+    use carmine_protocol::erc20_interface::IERC20DispatcherTrait;
 
     use carmine_protocol::tokens::option_token::IOptionTokenDispatcher;
     use carmine_protocol::tokens::option_token::IOptionTokenDispatcherTrait;

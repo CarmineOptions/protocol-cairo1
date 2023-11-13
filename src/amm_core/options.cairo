@@ -60,8 +60,8 @@ mod Options {
     use carmine_protocol::amm_core::state::State::get_unlocked_capital;
     use carmine_protocol::amm_core::state::State::set_option_token_address;
 
-    use carmine_protocol::traits::IERC20Dispatcher;
-    use carmine_protocol::traits::IERC20DispatcherTrait;
+    use carmine_protocol::erc20_interface::IERC20Dispatcher;
+    use carmine_protocol::erc20_interface::IERC20DispatcherTrait;
 
     use carmine_protocol::tokens::option_token::IOptionTokenDispatcher;
     use carmine_protocol::tokens::option_token::IOptionTokenDispatcherTrait;

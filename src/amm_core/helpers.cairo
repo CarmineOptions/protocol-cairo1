@@ -44,8 +44,8 @@ use carmine_protocol::amm_core::constants::RISK_FREE_RATE;
 use carmine_protocol::amm_core::constants::TOKEN_ETH_ADDRESS;
 use carmine_protocol::amm_core::constants::TOKEN_USDC_ADDRESS;
 
-use carmine_protocol::traits::IERC20Dispatcher;
-use carmine_protocol::traits::IERC20DispatcherTrait;
+use carmine_protocol::erc20_interface::IERC20Dispatcher;
+use carmine_protocol::erc20_interface::IERC20DispatcherTrait;
 
 // Some helpful functions for Fixed type
 #[generate_trait]

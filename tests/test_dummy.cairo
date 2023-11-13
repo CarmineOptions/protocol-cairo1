@@ -3,7 +3,7 @@ use carmine_protocol::amm_core::peripheries::view::View;
 use carmine_protocol::testing::setup::{deploy_setup, _add_expired_option};
 use array::ArrayTrait;
 use debug::PrintTrait;
-use carmine_protocol::amm_core::amm_interface::{IAMMDispatcher, IAMMDispatcherTrait};
+use carmine_protocol::amm_interface::{IAMMDispatcher, IAMMDispatcherTrait};
 use carmine_protocol::types::option_::{Option_Trait, Option_};
 use cubit::f128::types::{Fixed, FixedTrait};
 use snforge_std::{start_prank, stop_prank, start_warp, stop_warp, start_mock_call, stop_mock_call};
