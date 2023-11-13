@@ -284,7 +284,9 @@ mod LiquidityPool {
             set_underlying_token_address(lptoken_address, quote_token_address);
         }
 
-        // TODO: This doesnt check if the provided lptoken address even is a lptoken address lol pls fix
+        // Assert that the tokens has not been minted yet - it should be brand new one
+        let supply_lpt = IERC20Dispatcher { contract_address: lptoken_address }.totalSupply();
+        assert(supply_lpt == 0, 'LPT minted != 0');
 
         set_pool_volatility_adjustment_speed(lptoken_address, volatility_adjustment_speed);
         set_max_lpool_balance(lptoken_address, max_lpool_bal);
