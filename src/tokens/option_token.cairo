@@ -75,14 +75,16 @@ mod OptionToken {
     // ERC20 Component
     #[abi(embed_v0)]
     impl ERC20Impl = ERC20Component::ERC20Impl<ContractState>;
-
     #[abi(embed_v0)]
     impl SafeAllowanceImpl = ERC20Component::SafeAllowanceImpl<ContractState>;
-
     #[abi(embed_v0)]
     impl ERC20CamelOnlyImpl = ERC20Component::ERC20CamelOnlyImpl<ContractState>;
 
+    #[abi(embed_v0)]
+    impl ERC20MetadataImpl = ERC20Component::ERC20MetadataImpl<ContractState>;
+
     impl ERC20InternalImpl = ERC20Component::InternalImpl<ContractState>;
+
 
     // Ownable Component
     #[abi(embed_v0)]
@@ -156,20 +158,6 @@ mod OptionToken {
     #[external(v0)]
     #[generate_trait]
     impl OptionTokenImpl of IOptionToken {
-        // Did not import Erc20MetaData, so we can change decimals
-        // so we need to define name, symbol and decimals ourselves
-        fn name(self: @ContractState) -> felt252 {
-            self.erc20.ERC20_name.read()
-        }
-
-        fn symbol(self: @ContractState) -> felt252 {
-            self.erc20.ERC20_symbol.read()
-        }
-
-        fn decimals(self: @ContractState) -> u8 {
-            18
-        }
-
         // Minting/Burning
         fn mint(ref self: ContractState, recipient: ContractAddress, amount: u256) {
             self.ownable.assert_only_owner();
