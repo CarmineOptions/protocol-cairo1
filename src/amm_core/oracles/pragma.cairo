@@ -26,7 +26,7 @@ mod Pragma {
     // Mainnet
     // Testnet TODO: Check before mainnet launch
     const PRAGMA_ORACLE_ADDRESS: felt252 =
-        0x620a609f88f612eb5773a6f4084f7b33be06a6fed7943445aebce80d6a146ba; // C1 version
+        0x6df335982dddce41008e4c03f2546fa27276567b5274c7d0c1262f3c2b5d167; // C1 version
 
 
     // TODO: ANNOTATE THIS
