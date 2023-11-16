@@ -1341,22 +1341,6 @@ mod tests {
                     FixedTrait::from_felt(18446744073709551616)
                 )
             );
-        // arr.append((FixedTrait::from_felt(18446744073709560), FixedTrait::from_felt(18446744073709552), FixedTrait::from_felt(94465776401466613825536), FixedTrait::from_felt(36893488147419103232)));
-        // arr.append((FixedTrait::from_felt(18446744073709560), FixedTrait::from_felt(18446744073709552), FixedTrait::from_felt(94465776401466613825536), FixedTrait::from_felt(18981699651847128612864)));
-        // arr.append((FixedTrait::from_felt(18446744073709560), FixedTrait::from_felt(18446744073709552), FixedTrait::from_felt(94465776401466613825536), FixedTrait::from_felt(2969925795867237810176)));
-        // arr.append((FixedTrait::from_felt(18446744073709560), FixedTrait::from_felt(18446744073709552), FixedTrait::from_felt(94465776401466613825536), FixedTrait::from_felt(92233720368547758080)));
-        // arr.append((FixedTrait::from_felt(18446744073709560), FixedTrait::from_felt(18446744073709552), FixedTrait::from_felt(94465776401466613825536), FixedTrait::from_felt(47279005060917580791808)));
-        // arr.append((FixedTrait::from_felt(18446744073709560), FixedTrait::from_felt(18446744073709552), FixedTrait::from_felt(94465776401466613825536), FixedTrait::from_felt(18944806163699709509632)));
-        // arr.append((FixedTrait::from_felt(18446744073709560), FixedTrait::from_felt(18446744073709552), FixedTrait::from_felt(94465776401466613825536), FixedTrait::from_felt(55340232221128654848)));
-        // arr.append((FixedTrait::from_felt(18446744073709560), FixedTrait::from_felt(18446744073709552), FixedTrait::from_felt(94465776401466613825536), FixedTrait::from_felt(47260558316843871240192)));
-        // arr.append((FixedTrait::from_felt(18446744073709560), FixedTrait::from_felt(18446744073709552), FixedTrait::from_felt(94465776401466613825536), FixedTrait::from_felt(94465776401466613825536)));
-        // arr.append((FixedTrait::from_felt(18446744073709560), FixedTrait::from_felt(18446744073709552), FixedTrait::from_felt(94465776401466613825536), FixedTrait::from_felt(5109748108417545797632)));
-        // arr.append((FixedTrait::from_felt(18446744073709560), FixedTrait::from_felt(18446744073709552), FixedTrait::from_felt(94465776401466613825536), FixedTrait::from_felt(18926359419625999958016)));
-        // arr.append((FixedTrait::from_felt(18446744073709560), FixedTrait::from_felt(18446744073709552), FixedTrait::from_felt(94465776401466613825536), FixedTrait::from_felt(47242111572770161688576)));
-        // arr.append((FixedTrait::from_felt(18446744073709560), FixedTrait::from_felt(18446744073709552), FixedTrait::from_felt(94465776401466613825536), FixedTrait::from_felt(94115288264066132344832)));
-        // arr.append((FixedTrait::from_felt(18446744073709560), FixedTrait::from_felt(18446744073709552), FixedTrait::from_felt(94465776401466613825536), FixedTrait::from_felt(94225968728508389654528)));
-        // arr.append((FixedTrait::from_felt(18446744073709560), FixedTrait::from_felt(18446744073709552), FixedTrait::from_felt(94465776401466613825536), FixedTrait::from_felt(94262862216655808757760)));
-        // arr.append((FixedTrait::from_felt(18446744073709560), FixedTrait::from_felt(18446744073709552), FixedTrait::from_felt(94465776401466613825536), FixedTrait::from_felt(18723445234815194890240)));
 
         target
             .append(
@@ -1568,22 +1552,6 @@ mod tests {
                     FixedTrait::from_felt(-4982344853739435703926784)
                 )
             );
-        // target.append((FixedTrait::from_felt(-4578006271308677089591296), FixedTrait::from_felt(-4578006271892014179024896)));
-        // target.append((FixedTrait::from_felt(-936117639551711413534720), FixedTrait::from_felt(-936117640135048637186048)));
-        // target.append((FixedTrait::from_felt(-2018172319017906728861696), FixedTrait::from_felt(-2018172319601244086730752)));
-        // target.append((FixedTrait::from_felt(-4043499740117657968443392), FixedTrait::from_felt(-4043499740700995057876992)));
-        // target.append((FixedTrait::from_felt(-403769305364509281484800), FixedTrait::from_felt(-403769305947846572244992)));
-        // target.append((FixedTrait::from_felt(-937252537316048214425600), FixedTrait::from_felt(-937252537899385438076928)));
-        // target.append((FixedTrait::from_felt(-4341483363333163729289216), FixedTrait::from_felt(-4341483363916500818722816)));
-        // target.append((FixedTrait::from_felt(-403996949178860175360000), FixedTrait::from_felt(-403996949762197466120192)));
-        // target.append((FixedTrait::from_felt(291668633435675), FixedTrait::from_felt(-291668633435675)));
-        // target.append((FixedTrait::from_felt(-1701645852260142667530240), FixedTrait::from_felt(-1701645852843480025399296)));
-        // target.append((FixedTrait::from_felt(-937820815263447390355456), FixedTrait::from_felt(-937820815846784614006784)));
-        // target.append((FixedTrait::from_felt(-404224681864505445056512), FixedTrait::from_felt(-404224682447842735816704)));
-        // target.append((FixedTrait::from_felt(-2168330106865334878208), FixedTrait::from_felt(-2168330690202601783296)));
-        // target.append((FixedTrait::from_felt(-1482723054146160427008), FixedTrait::from_felt(-1482723637483427332096)));
-        // target.append((FixedTrait::from_felt(-1254366321196091834368), FixedTrait::from_felt(-1254366904533358739456)));
-        // target.append((FixedTrait::from_felt(-944108685978897615945728), FixedTrait::from_felt(-944108686562234839597056)));
 
         (arr, target)
     }
