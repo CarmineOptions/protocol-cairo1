@@ -129,7 +129,10 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     let amm_contract = declare('AMM');
     let option_token_contract = declare('OptionToken');
 
-    let amm_address = amm_contract.deploy(@ArrayTrait::new()).unwrap();
+    let mut amm_depl_args = ArrayTrait::new();
+    amm_depl_args.append(admin_address);
+
+    let amm_address = amm_contract.deploy(@amm_depl_args).unwrap();
 
     start_prank(amm_address, admin_address.try_into().unwrap());
     // Deploy Pragma at given address

@@ -1,6 +1,5 @@
 mod erc20_interface;
 mod amm_interface;
-mod utils;
 mod amm_core {
     mod constants;
     mod options;

@@ -132,7 +132,7 @@ mod LPToken {
         }
 
         fn decimals(self: @ContractState) -> u8 {
-            18
+            6
         }
 
         // Minting/Burning

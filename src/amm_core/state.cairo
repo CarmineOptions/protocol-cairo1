@@ -11,8 +11,6 @@ mod State {
     use carmine_protocol::amm_core::helpers::assert_option_type_exists;
     use carmine_protocol::amm_core::helpers::FixedHelpersTrait;
 
-    use carmine_protocol::utils::assert_admin_only;
-
     use carmine_protocol::amm_core::constants::OPTION_CALL;
     use carmine_protocol::amm_core::constants::OPTION_PUT;
     use carmine_protocol::amm_core::constants::VOLATILITY_LOWER_BOUND;
@@ -357,7 +355,6 @@ mod State {
     // @notice Sets max option size as a percentage of pool volatility adjustment speed
     // @param value: percentage, ie 20
     fn set_max_option_size_percent_of_voladjspd(value: Int) {
-        assert_admin_only();
         let mut state = AMM::unsafe_new_contract_state();
         state.max_option_size_percent_of_voladjspd.write(value.into())
     }
@@ -525,8 +522,6 @@ mod State {
     // @param max bal: Maximum balance of pooled token for given pool
     fn set_max_lpool_balance(lpt_addr: LPTAddress, max_bal: u256) {
         let mut state = AMM::unsafe_new_contract_state();
-        assert_admin_only();
-
         assert(max_bal >= 0, 'Max lpool bal < 0'); // Kinda useless
 
         state.max_lpool_balance.write(lpt_addr, max_bal);
@@ -585,7 +580,6 @@ mod State {
     // @param new_status: true if trading is halted, false otherwise
     fn set_trading_halt(new_status: bool) {
         // assert_trading_halt_allowed();
-        assert_admin_only();
 
         assert_option_type_exists(new_status.into(), 'Unknown halt status');
         let mut state = AMM::unsafe_new_contract_state();
@@ -744,4 +738,3 @@ mod State {
         match_opt
     }
 }
-

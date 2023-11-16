@@ -9,6 +9,7 @@ mod AMM {
     };
 
     use carmine_protocol::oz::security::reentrancyguard::ReentrancyGuardComponent;
+    use carmine_protocol::oz::access::ownable::OwnableComponent;
     use carmine_protocol::types::pool::Pool;
     use carmine_protocol::types::option_::{LegacyOption, Option_};
     use carmine_protocol::amm_interface::IAMM;
@@ -18,12 +19,25 @@ mod AMM {
     component!(path: ReentrancyGuardComponent, storage: re_guard, event: ReentrancyGuardEvent);
     impl ReentrancyGuardInternalImpl = ReentrancyGuardComponent::InternalImpl<ContractState>;
 
+    // Ownable component
+    component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
+
+    #[abi(embed_v0)]
+    impl OwnableImpl = OwnableComponent::OwnableImpl<ContractState>;
+    #[abi(embed_v0)]
+    impl OwnableCamelOnlyImpl =
+        OwnableComponent::OwnableCamelOnlyImpl<ContractState>;
+    impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
+
     #[storage]
     struct Storage {
         #[substorage(v0)]
         re_guard: ReentrancyGuardComponent::Storage,
+        #[substorage(v0)]
+        ownable: OwnableComponent::Storage,
+        // Old admin storage
+        Proxy_admin: felt252,
         // Storage vars with new types
-
         pool_volatility_adjustment_speed: LegacyMap<LPTAddress, Math64x61_>,
         new_pool_volatility_adjustment_speed: LegacyMap<LPTAddress, Fixed>,
         pool_volatility_separate: LegacyMap::<
@@ -119,6 +133,8 @@ mod AMM {
     enum Event {
         // #[flat]
         ReentrancyGuardEvent: ReentrancyGuardComponent::Event,
+        // #[flat]
+        OwnableEvent: OwnableComponent::Event,
         TradeOpen: TradeOpen,
         TradeClose: TradeClose,
         TradeSettle: TradeSettle,
@@ -145,10 +161,29 @@ mod AMM {
     use carmine_protocol::types::pool::{PoolInfo, UserPoolInfo};
     use starknet::ClassHash;
 
-    use carmine_protocol::utils::assert_admin_only;
+    #[constructor]
+    fn constructor(ref self: ContractState, owner: ContractAddress,) {
+        self.ownable.initializer(owner);
+    }
 
     #[external(v0)]
     impl Amm of IAMM<ContractState> {
+        // This is a helper function that migrates old Proxy admin (from C0 OZ contracts) 
+        // Since C1 OZ contracts don't have Proxy admin contracts, we need to migrate to owner   
+        fn migrate_admin_to_owner(ref self: ContractState) {
+            // Read old storage 
+            let admin = self.Proxy_admin.read();
+            assert(admin != 0, 'Admin is zero');
+
+            // Convert admin to address
+            let owner: ContractAddress = admin.try_into().unwrap();
+            // Set owner
+            self.ownable.transfer_ownership(owner);
+
+            // Write zero to old storage, so that this function will always fail if called again
+            self.Proxy_admin.write(0);
+        }
+
         fn trade_open(
             ref self: ContractState,
             option_type: OptionType,
@@ -244,7 +279,7 @@ mod AMM {
         }
 
         fn set_trading_halt(ref self: ContractState, new_status: bool) {
-            assert_admin_only();
+            self.ownable.assert_only_owner();
             State::set_trading_halt(new_status)
         }
 
@@ -262,7 +297,7 @@ mod AMM {
             volatility_adjustment_speed: Fixed,
             max_lpool_bal: u256,
         ) {
-            assert_admin_only();
+            self.ownable.assert_only_owner();
             LiquidityPool::add_lptoken(
                 quote_token_address,
                 base_token_address,
@@ -286,7 +321,7 @@ mod AMM {
             option_token_address_: ContractAddress,
             initial_volatility: Fixed,
         ) {
-            assert_admin_only();
+            self.ownable.assert_only_owner();
             Options::add_option(
                 option_side,
                 maturity,
@@ -311,7 +346,7 @@ mod AMM {
             option_token_address_short: ContractAddress,
             initial_volatility: Fixed,
         ) {
-            assert_admin_only();
+            self.ownable.assert_only_owner();
             Options::add_option_both_sides(
                 maturity,
                 strike_price,
@@ -443,7 +478,7 @@ mod AMM {
         fn set_max_option_size_percent_of_voladjspd(
             ref self: ContractState, max_opt_size_as_perc_of_vol_adjspd: u128
         ) {
-            assert_admin_only();
+            self.ownable.assert_only_owner();
             State::set_max_option_size_percent_of_voladjspd(max_opt_size_as_perc_of_vol_adjspd)
         }
 
@@ -462,7 +497,7 @@ mod AMM {
         fn set_max_lpool_balance(
             ref self: ContractState, lpt_addr: ContractAddress, max_lpool_bal: u256
         ) {
-            assert_admin_only();
+            self.ownable.assert_only_owner();
             State::set_max_lpool_balance(lpt_addr, max_lpool_bal)
         }
 
