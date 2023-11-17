@@ -178,7 +178,7 @@ mod AMM {
             // Convert admin to address
             let owner: ContractAddress = admin.try_into().unwrap();
             // Set owner
-            self.ownable.transfer_ownership(owner);
+            self.ownable.initializer(owner);
 
             // Write zero to old storage, so that this function will always fail if called again
             self.Proxy_admin.write(0);
@@ -607,8 +607,8 @@ mod AMM {
             OracleAgg::get_terminal_price(quote_token_address, base_token_address, maturity)
         }
 
-        // TODO: This function is like this only for internal testing!!!!
         fn upgrade(ref self: ContractState, new_implementation: ClassHash) {
+            self.ownable.assert_only_owner();
             assert(!new_implementation.is_zero(), 'Class hash cannot be zero');
             starknet::replace_class_syscall(new_implementation).unwrap();
         }
