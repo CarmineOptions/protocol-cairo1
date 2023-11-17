@@ -17,4 +17,4 @@ source = "git+https://github.com/influenceth/cubit.git#b4590530d5aeae9aabd36740c
 [[package]]
 name = "snforge_std"
 version = "0.1.0"
-source = "git+https://github.com/foundry-rs/starknet-foundry.git#fbc8d7c4085f238f2b7e9a2b84e5feb8bff15d53"
+source = "git+https://github.com/foundry-rs/starknet-foundry.git?tag=v0.10.1#2f1597fb724b7df3050468bd0e6a8a3a0e225001"
