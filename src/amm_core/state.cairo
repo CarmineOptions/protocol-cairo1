@@ -387,7 +387,6 @@ mod State {
     // @param lptoken_address: Address of liquidity pool token under which the balance is stored
     // @param balance: New lpool balance in u256
     fn set_lpool_balance(lptoken_address: LPTAddress, balance: u256) {
-        assert(balance >= 0, 'lpool_balance negative');
 
         let mut state = AMM::unsafe_new_contract_state();
         state.lpool_balance_.write(lptoken_address, balance)
@@ -422,7 +421,6 @@ mod State {
 
         if res != 0 {
             // First assert it's not negative
-            assert(res.into() >= 0_u256, 'Old opt pos negative');
 
             // If it's not zero then move the old value to new storage var and set the old one to zero
 
@@ -461,7 +459,6 @@ mod State {
         let mut state = AMM::unsafe_new_contract_state();
 
         strike_price.assert_nn_not_zero('Strike zero/neg in set_opt_pos');
-        assert(position >= 0, 'Pos zero/neg in set_opt_pos');
 
         // Also it's important to set corresponding option position in old storage var to zero se that if this function is called before get_option_position then the value in new storage var won't be overwritten by the old one
         state
@@ -503,7 +500,6 @@ mod State {
     // @param  lptoken_address: Address of liquidity pool token that corresponds to the pool
     // @param  balance: New amount of locked pooled tokens in u256
     fn set_pool_locked_capital(lptoken_address: LPTAddress, balance: u256) {
-        assert(balance >= 0, 'Balance negative in set locked');
 
         let mut state = AMM::unsafe_new_contract_state();
         state.pool_locked_capital_.write(lptoken_address, balance)
@@ -522,7 +518,6 @@ mod State {
     // @param max bal: Maximum balance of pooled token for given pool
     fn set_max_lpool_balance(lpt_addr: LPTAddress, max_bal: u256) {
         let mut state = AMM::unsafe_new_contract_state();
-        assert(max_bal >= 0, 'Max lpool bal < 0'); // Kinda useless
 
         state.max_lpool_balance.write(lpt_addr, max_bal);
     }

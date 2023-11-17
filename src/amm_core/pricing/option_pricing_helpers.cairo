@@ -46,7 +46,6 @@ fn convert_amount_to_option_currency_from_base_uint256(
     //  - for put into quote token (USDC in case of ETH/USDC)   
 
     assert_option_type_exists(option_type.into(), 'CATOCFBU - unknown option type');
-    assert(amount >= 0, 'CATOCFBU - amt <= 0');
 
     if option_type == OPTION_PUT {
         let base_token_decimals: u128 = get_decimal(base_token_address)
@@ -59,7 +58,6 @@ fn convert_amount_to_option_currency_from_base_uint256(
         let (quot, rem) = integer::U256DivRem::div_rem(
             adj_amount, dec.try_into().expect('Div by zero in CATOCFBU')
         );
-        assert(quot >= 0, 'CATOCFBU: Opt size too low');
         assert(rem == 0, 'CATOCFBU: Value rounded');
 
         return quot;

@@ -365,10 +365,8 @@ mod Options {
         );
 
         let new_long_position = current_long_position - decrease_long_by;
-        assert(new_long_position >= 0, 'MOTL - New long pos negative');
 
         let new_short_position = current_short_position + increase_short_by;
-        assert(new_short_position >= 0, 'MOTL - New short pos negative');
 
         let new_locked_capital = current_locked_balance + increase_locked_by;
 
@@ -483,7 +481,7 @@ mod Options {
         );
         let size_to_increase_long_position = option_size - size_to_be_unlocked_in_base;
         let new_pools_long_position = pools_long_position + size_to_increase_long_position;
-        assert(new_pools_long_position >= 0, 'MOTS - New long pos negative');
+        
         set_option_position(
             lptoken_address, TRADE_SIDE_LONG, maturity, strike_price, new_pools_long_position
         );
@@ -678,7 +676,6 @@ mod Options {
             //      -> The locked capital was locked by users and not pool
             //      -> do not decrease pool_locked_capital by the option_size_in_pool_currency
             let new_option_position = pool_long_position + option_size;
-            assert(new_option_position.into() >= 0_u256, 'BOTL - New opt pos negative');
 
             set_option_position(
                 lptoken_address, option_side, maturity, strike_price, new_option_position
@@ -706,7 +703,7 @@ mod Options {
 
             // Update pool's short position
             let new_pools_short_position = pool_short_pos_u256 - size_to_be_unlocked_in_base_u256;
-            assert(new_pools_short_position >= 0, 'BOTL - new short pos negative');
+
             set_option_position(
                 lptoken_address,
                 TRADE_SIDE_SHORT,
@@ -718,11 +715,11 @@ mod Options {
             // Update pool's long position
             let size_to_increase_long_position = option_size.into()
                 - size_to_be_unlocked_in_base_u256;
-            assert(size_to_increase_long_position >= 0, 'BOTL - increase long negative');
+                
 
             let new_pools_long_position = pool_long_position.into()
                 + size_to_increase_long_position;
-            assert(new_pools_long_position >= 0, 'BOTL - new long pos negative');
+            
             set_option_position(
                 lptoken_address,
                 TRADE_SIDE_LONG,
@@ -833,12 +830,11 @@ mod Options {
 
             let decrease_long_position_by = min(pool_long_pos_u256, opt_size_u256);
             let increase_short_position_by = option_size_u256 - decrease_long_position_by;
-            assert(increase_short_position_by >= 0, 'BOTS - increase short pos neg');
+            
 
             let new_long_position = pool_long_pos_u256 - decrease_long_position_by;
             let new_short_position = pool_short_pos_u256 + increase_short_position_by;
-            assert(new_long_position >= 0, 'BOTS - new long pos negative');
-            assert(new_short_position >= 0, 'BOTS - new short pos negative');
+
 
             // The increase_short_position_by and capital_to_be_locked might both be zero,
             // if the long position is sufficient.
@@ -892,7 +888,7 @@ mod Options {
 
             // Update pools (short) position
             let new_pools_short_position = pool_short_position + option_size;
-            assert(new_pools_short_position.into() >= 0_u256, 'BOTS - new short pos negative');
+            
             set_option_position(
                 lptoken_address, TRADE_SIDE_SHORT, maturity, strike_price, new_pools_short_position
             );
