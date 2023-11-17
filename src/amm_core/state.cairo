@@ -387,7 +387,6 @@ mod State {
     // @param lptoken_address: Address of liquidity pool token under which the balance is stored
     // @param balance: New lpool balance in u256
     fn set_lpool_balance(lptoken_address: LPTAddress, balance: u256) {
-
         let mut state = AMM::unsafe_new_contract_state();
         state.lpool_balance_.write(lptoken_address, balance)
     }
@@ -500,7 +499,6 @@ mod State {
     // @param  lptoken_address: Address of liquidity pool token that corresponds to the pool
     // @param  balance: New amount of locked pooled tokens in u256
     fn set_pool_locked_capital(lptoken_address: LPTAddress, balance: u256) {
-
         let mut state = AMM::unsafe_new_contract_state();
         state.pool_locked_capital_.write(lptoken_address, balance)
     }

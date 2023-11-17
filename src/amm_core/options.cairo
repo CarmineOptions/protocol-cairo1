@@ -481,7 +481,7 @@ mod Options {
         );
         let size_to_increase_long_position = option_size - size_to_be_unlocked_in_base;
         let new_pools_long_position = pools_long_position + size_to_increase_long_position;
-        
+
         set_option_position(
             lptoken_address, TRADE_SIDE_LONG, maturity, strike_price, new_pools_long_position
         );
@@ -715,11 +715,10 @@ mod Options {
             // Update pool's long position
             let size_to_increase_long_position = option_size.into()
                 - size_to_be_unlocked_in_base_u256;
-                
 
             let new_pools_long_position = pool_long_position.into()
                 + size_to_increase_long_position;
-            
+
             set_option_position(
                 lptoken_address,
                 TRADE_SIDE_LONG,
@@ -830,11 +829,9 @@ mod Options {
 
             let decrease_long_position_by = min(pool_long_pos_u256, opt_size_u256);
             let increase_short_position_by = option_size_u256 - decrease_long_position_by;
-            
 
             let new_long_position = pool_long_pos_u256 - decrease_long_position_by;
             let new_short_position = pool_short_pos_u256 + increase_short_position_by;
-
 
             // The increase_short_position_by and capital_to_be_locked might both be zero,
             // if the long position is sufficient.
@@ -888,7 +885,7 @@ mod Options {
 
             // Update pools (short) position
             let new_pools_short_position = pool_short_position + option_size;
-            
+
             set_option_position(
                 lptoken_address, TRADE_SIDE_SHORT, maturity, strike_price, new_pools_short_position
             );
