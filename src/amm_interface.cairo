@@ -227,5 +227,5 @@ trait IAMM<TContractState> {
 
     fn set_pragma_checkpoint(ref self: TContractState, key: felt252);
     fn set_pragma_required_checkpoints(ref self: TContractState);
-    fn upgrade(ref self: TContractState, new_implementation: ClassHash); 
+    fn upgrade(ref self: TContractState, new_implementation: ClassHash);
 }
