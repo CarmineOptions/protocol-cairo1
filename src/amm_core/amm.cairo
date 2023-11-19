@@ -669,9 +669,5 @@ mod AMM {
         ) -> (Fixed, Fixed) {
             View::get_total_premia(option, position_size, is_closing)
         }
-
-        fn _get_pragma(self: @ContractState, key: felt252) -> PragmaPricesResponse {
-            Pragma::_get_pragma(key)
-        }
     }
 }

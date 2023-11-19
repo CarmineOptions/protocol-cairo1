@@ -572,32 +572,30 @@ mod State {
     // @notice Sets trading halt status
     // @param new_status: true if trading is halted, false otherwise
     fn set_trading_halt(new_status: bool) {
-        // assert_trading_halt_allowed();
-
         assert_option_type_exists(new_status.into(), 'Unknown halt status');
         let mut state = AMM::unsafe_new_contract_state();
 
         state.trading_halted.write(new_status)
     }
 
-    // TODO: Use/remove this
+    // TODO: Use this in mainnet
     fn assert_trading_halt_allowed() {
         let caller_addr = get_caller_address();
 
         if caller_addr == 0x0583a9d956d65628f806386ab5b12dccd74236a3c6b930ded9cf3c54efc722a1
             .try_into()
             .unwrap() {
-            return; // Ondra
+            return;
         }
         if caller_addr == 0x06717eaf502baac2b6b2c6ee3ac39b34a52e726a73905ed586e757158270a0af
             .try_into()
             .unwrap() {
-            return; // Andrej
+            return;
         }
         if caller_addr == 0x0011d341c6e841426448ff39aa443a6dbb428914e05ba2259463c18308b86233
             .try_into()
             .unwrap() {
-            return; // Marek
+            return;
         }
     // TODO: Add david
     // Todo: enable this
@@ -646,7 +644,7 @@ mod State {
     // @returns idx: Available index
     fn get_available_lptoken_addresses_usable_index(idx: felt252) -> felt252 {
         let addr = get_available_lptoken_addresses(idx);
-        if addr.is_zero() { // TODO: Does this check work?
+        if addr.is_zero() {
             return idx;
         }
         get_available_lptoken_addresses_usable_index(idx + 1)

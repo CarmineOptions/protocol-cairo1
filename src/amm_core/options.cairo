@@ -962,10 +962,7 @@ mod Options {
         // long_value and short_value are both in terms of locked capital
         let option_size_cubit = fromU256_balance(option_size.into(), base_token_address);
         let (long_value, short_value) = split_option_locked_capital(
-            option_type,
-            option_size_cubit, // TODO: This is wrong, it should stay in Int
-            strike_price,
-            terminal_price
+            option_type, option_size_cubit, strike_price, terminal_price
         );
 
         let long_value_u256 = toU256_balance(long_value, currency_address);

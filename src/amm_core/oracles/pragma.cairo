@@ -29,8 +29,6 @@ mod Pragma {
         0x6df335982dddce41008e4c03f2546fa27276567b5274c7d0c1262f3c2b5d167; // C1 version
 
 
-    // TODO: ANNOTATE THIS
-
     // @notice Returns Pragma key identifier for stablecoins
     // @param quote_token_addr: Address of given stablecoin 
     // @return stablecoin_key: Stablecoin key identifier
@@ -86,7 +84,6 @@ mod Pragma {
         };
 
         assert(time_diff < 3600, 'Pragma/_GPMP - Price too old');
-        assert(res.price > 0_u128, 'Pragma/-GPMP - Price <= 0');
 
         convert_from_int_to_Fixed(
             res.price, res.decimals.try_into().expect('Pragma/_GPMP - decimals err')
@@ -128,7 +125,6 @@ mod Pragma {
 
         assert(decs > 0, 'Pragma/GPTP - decs zero');
 
-        // TODO: Handle negative time diff gracefully, it'll fail with sub overflow
         let time_diff = maturity - res.timestamp;
 
         assert(time_diff < 7200, 'Pragma/GPTP - Term price old');

@@ -225,8 +225,7 @@ fn _fromU256_balance(x: u256, decimals: u128) -> Fixed {
 
     // x_ / five_to_dec
     let (q, rem) = U128DivRem::div_rem(x_, five_to_dec.try_into().expect('fromU256 - ftd zero'));
-    Fixed { mag: q, // TODO: Add rem
-     sign: false }
+    Fixed { mag: q, sign: false }
 }
 
 fn split_option_locked_capital(
