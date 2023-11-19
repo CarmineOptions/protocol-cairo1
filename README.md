@@ -35,6 +35,8 @@ The AMM is currently built on Cairo version 2.3.0. However while OpenZeppelin wa
 - src/amm_core/trading
 - src/types/option_
 - src/types/pool
+- src/tokens/lptoken.cairo
+- src/tokens/option_token.cairo
 
 ## Deployment - Zero to Hero 
 Deployment described using `starkli`, version `0.1.20 (e4d2307)`.
