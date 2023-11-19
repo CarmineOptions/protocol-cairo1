@@ -51,7 +51,7 @@ mod AMM {
         >,
         new_option_token_address: LegacyMap::<
             (LPTAddress, OptionSide, Timestamp, u128), ContractAddress
-        >, // TODO: last key value should be Fixed, not u128(or it's mag)
+        >,
         available_options: LegacyMap::<(LPTAddress, felt252), LegacyOption>,
         new_available_options: LegacyMap::<(LPTAddress, u32), Option_>,
         new_available_options_usable_index: LegacyMap::<LPTAddress, u32>,
@@ -177,6 +177,7 @@ mod AMM {
 
             // Convert admin to address
             let owner: ContractAddress = admin.try_into().unwrap();
+
             // Set owner
             self.ownable.initializer(owner);
 
@@ -298,6 +299,8 @@ mod AMM {
             max_lpool_bal: u256,
         ) {
             self.ownable.assert_only_owner();
+
+            self.re_guard.start();
             LiquidityPool::add_lptoken(
                 quote_token_address,
                 base_token_address,
@@ -306,7 +309,8 @@ mod AMM {
                 pooled_token_addr,
                 volatility_adjustment_speed,
                 max_lpool_bal,
-            )
+            );
+            self.re_guard.end();
         }
 
         fn add_option(
@@ -322,6 +326,8 @@ mod AMM {
             initial_volatility: Fixed,
         ) {
             self.ownable.assert_only_owner();
+
+            self.re_guard.start();
             Options::add_option(
                 option_side,
                 maturity,
@@ -332,7 +338,8 @@ mod AMM {
                 lptoken_address,
                 option_token_address_,
                 initial_volatility,
-            )
+            );
+            self.re_guard.end();
         }
         fn add_option_both_sides(
             ref self: ContractState,
@@ -347,6 +354,8 @@ mod AMM {
             initial_volatility: Fixed,
         ) {
             self.ownable.assert_only_owner();
+
+            self.re_guard.start();
             Options::add_option_both_sides(
                 maturity,
                 strike_price,
@@ -357,7 +366,8 @@ mod AMM {
                 option_token_address_long,
                 option_token_address_short,
                 initial_volatility,
-            )
+            );
+            self.re_guard.end();
         }
 
         fn get_option_token_address(
@@ -559,6 +569,7 @@ mod AMM {
         fn set_pool_volatility_adjustment_speed(
             ref self: ContractState, lptoken_address: ContractAddress, new_speed: Fixed
         ) {
+            self.ownable.assert_only_owner();
             State::set_pool_volatility_adjustment_speed(lptoken_address, new_speed);
         }
 
@@ -657,6 +668,10 @@ mod AMM {
             self: @ContractState, option: Option_, position_size: u256, is_closing: bool
         ) -> (Fixed, Fixed) {
             View::get_total_premia(option, position_size, is_closing)
+        }
+
+        fn _get_pragma(self: @ContractState, key: felt252) -> PragmaPricesResponse {
+            Pragma::_get_pragma(key)
         }
     }
 }
