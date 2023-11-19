@@ -20,7 +20,7 @@ Alternatively you can open this folder in VSCode Devcontainer, which comes with 
 The AMM is currently built on Cairo version 2.3.0. However while OpenZeppelin was porting their contracts to 2.3.0 the 2.3.1 came out in the meantime, so part of contracts (which we do not need) are built on top 2.3.1. and snforge 0.10.1 unfortunately does not support that so tests can't be run if we include OZ contracts in the Scarb.toml file. For that reason we just imported needed contracts directly.
 
 ## List of files to be audited
-**Basically everything except for OZ smart contracts, `src/amm_core/peripheries` folder and tests is intended for audit:**
+**Everything except for OZ smart contracts, `src/amm_core/peripheries` folder and tests is intended for audit:**
 - src/amm_core/oracles/agg
 - src/amm_core/oracles/oracle_helpers
 - src/amm_core/oracles/pragma
