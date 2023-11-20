@@ -82,7 +82,6 @@ mod LiquidityPool {
     // @param lptoken_address: Address of the liquidity pool token
     // @return res: Value of the position within specified liquidity pool
     fn get_value_of_pool_position(lptoken_address: LPTAddress) -> Fixed {
-        // TODO: Check this thoroughly
         let non_expired = get_value_of_pool_non_expired_position(lptoken_address);
         let expired = get_value_of_pool_expired_position(lptoken_address);
         non_expired + expired

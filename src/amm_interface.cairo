@@ -177,7 +177,6 @@ trait IAMM<TContractState> {
     fn get_pool_definition_from_lptoken_address(
         self: @TContractState, lptoken_addres: ContractAddress
     ) -> Pool;
-    // fn get_option_type(self: @TContractState, lptoken_address: ContractAddress) -> OptionType; // Deleting this one - get_pool_def_from_lptoken_addr can be used
     fn get_option_volatility(
         self: @TContractState, lptoken_address: ContractAddress, maturity: u64, strike_price: Fixed,
     ) -> Fixed;
