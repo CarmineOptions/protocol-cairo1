@@ -21,21 +21,21 @@ The AMM is currently built on Cairo version 2.3.0. However while OpenZeppelin wa
 
 ## List of files to be audited
 **Everything except for OZ smart contracts, `src/amm_core/peripheries` folder and tests is intended for audit:**
-- src/amm_core/oracles/agg
-- src/amm_core/oracles/oracle_helpers
-- src/amm_core/oracles/pragma
-- src/amm_core/pricing/fees
-- src/amm_core/pricing/option_pricing
-- src/amm_core/pricing/option_pricing_helpers
-- src/amm_core/amm
-- src/amm_core/constants
-- src/amm_core/helpers
-- src/amm_core/liquidity_pool
-- src/amm_core/options
-- src/amm_core/state
-- src/amm_core/trading
-- src/types/option_
-- src/types/pool
+- src/amm_core/oracles/agg.cairo
+- src/amm_core/oracles/oracle_helpers.cairo
+- src/amm_core/oracles/pragma.cairo
+- src/amm_core/pricing/fees.cairo
+- src/amm_core/pricing/option_pricing.cairo
+- src/amm_core/pricing/option_pricing_helpers.cairo
+- src/amm_core/amm.cairo
+- src/amm_core/constants.cairo
+- src/amm_core/helpers.cairo
+- src/amm_core/liquidity_pool.cairo
+- src/amm_core/options.cairo
+- src/amm_core/state.cairo
+- src/amm_core/trading.cairo
+- src/types/option_.cairo
+- src/types/pool.cairo
 - src/tokens/lptoken.cairo
 - src/tokens/option_token.cairo
 
