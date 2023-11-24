@@ -265,12 +265,12 @@ mod State {
         let mut state = AMM::unsafe_new_contract_state();
 
         // Read storage var containg the usable index
-        let usable_index = get_available_options_usable_index(lptoken_address);
+        let mut usable_index = get_available_options_usable_index(lptoken_address);
 
         // In this case we need to migrate the old options to the new storage var
         // since this storage var was introduced and is used only in c1 version
         if usable_index == 0 {
-            let usable_index = migrate_old_options(lptoken_address, 0);
+            usable_index = migrate_old_options(lptoken_address, 0);
         }
 
         state.new_available_options.write((lptoken_address, usable_index), option);
