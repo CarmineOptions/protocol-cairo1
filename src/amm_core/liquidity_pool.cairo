@@ -346,7 +346,7 @@ mod LiquidityPool {
 
         let max_balance = get_max_lpool_balance(lptoken_address);
 
-        assert(current_balance <= max_balance, 'Lpool bal exceeds maximum');
+        assert(new_balance <= max_balance, 'Lpool bal exceeds maximum');
 
         IERC20Dispatcher { contract_address: lptoken_address }.mint(caller_addr, mint_amount);
 
