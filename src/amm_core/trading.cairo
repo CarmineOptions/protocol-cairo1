@@ -309,7 +309,7 @@ mod Trading {
             assert(current_block_time < maturity, 'VTI - opt already expired');
             assert(
                 current_block_time < (maturity - STOP_TRADING_BEFORE_MATURITY_SECONDS),
-                'VTI - Trading is no mo'
+                'VTI - Trading is stopped'
             );
         } else {
             let is_not_ripe = current_block_time <= maturity;
