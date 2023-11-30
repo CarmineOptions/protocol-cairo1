@@ -419,21 +419,12 @@ mod State {
             .read((lptoken_address, option_side, maturity.into(), strike_price.to_legacyMath()));
 
         if res != 0 {
-            // First assert it's not negative
-
-            // If it's not zero then move the old value to new storage var and set the old one to zero
+            // If it's not zero then move the old value to new storage var
 
             // Write old value to new storage var
             set_option_position(
                 lptoken_address, option_side, maturity, strike_price, res.try_into().unwrap()
             );
-
-            // Set old value to zero
-            state
-                .option_position_
-                .write(
-                    (lptoken_address, option_side, maturity.into(), strike_price.to_legacyMath()), 0
-                );
 
             return res.try_into().unwrap();
         }
