@@ -4,6 +4,7 @@ use starknet::ContractAddress;
 use traits::Into;
 use traits::TryInto;
 use option::OptionTrait;
+use result::ResultTrait;
 
 use core::cmp::max;
 use core::cmp::min;
@@ -164,9 +165,7 @@ fn toU256_balance(x: Fixed, currency_address: ContractAddress) -> u256 {
 
     x.assert_nn('toU256 - x is zero'); //  Now we can just use the mag in Fixed
 
-    let decimals: u128 = get_decimal(currency_address)
-        .expect('toU256 - Unable to get decimals')
-        .into();
+    let decimals: u128 = get_decimal(currency_address).into();
 
     _toU256_balance(x, decimals)
 }
@@ -205,7 +204,7 @@ fn fromU256_balance(x: u256, currency_address: ContractAddress) -> Fixed {
     // We can split the 10*18 to (2**18 * 5**18)
     // (1.2 * 10**18) * 2**64 / (5**18 * 2**18)
 
-    let decimals: u128 = get_decimal(currency_address).expect('fromU256 - decimals zero').into();
+    let decimals: u128 = get_decimal(currency_address).into();
 
     _fromU256_balance(x, decimals)
 }
@@ -289,13 +288,13 @@ fn get_underlying_from_option_data(
 // @dev 18 for ETH, 6 for USDC
 // @param token_address: Address of the token for which decimals are being retrieved
 // @return dec: Decimal count
-fn get_decimal(token_address: ContractAddress) -> Option<u8> {
-    if token_address == TOKEN_ETH_ADDRESS.try_into()? {
-        return Option::Some(18);
+fn get_decimal(token_address: ContractAddress) -> u8 {
+    if token_address == TOKEN_ETH_ADDRESS.try_into().unwrap() {
+        return 18;
     }
 
-    if token_address == TOKEN_USDC_ADDRESS.try_into()? {
-        return Option::Some(6);
+    if token_address == TOKEN_USDC_ADDRESS.try_into().unwrap() {
+        return 6;
     }
 
     assert(!token_address.is_zero(), 'Token address is zero');
@@ -303,12 +302,7 @@ fn get_decimal(token_address: ContractAddress) -> Option<u8> {
     let decimals = IERC20Dispatcher { contract_address: token_address }.decimals();
     assert(decimals != 0, 'Token has decimals = 0');
 
-    if decimals == 0 {
-        return Option::None(());
-    } else {
-        let decimals_felt: felt252 = decimals.into();
-        return Option::Some(decimals_felt.try_into()?);
-    }
+    decimals
 }
 
 // Tests --------------------------------------------------------------------------------------------------------------
