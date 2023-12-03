@@ -116,6 +116,11 @@ fn pow(a: u128, b: u128) -> u128 {
     let mut n = b;
 
     if n == 0 {
+        // 0**0 is undefined
+        if x == 0{
+            return 0;
+        };
+        
         return 1;
     }
 
