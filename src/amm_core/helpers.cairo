@@ -118,7 +118,7 @@ fn pow(a: u128, b: u128) -> u128 {
     if n == 0 {
         // 0**0 is undefined
         assert(x > 0, 'Undefined pow action');
-        
+
         return 1;
     }
 
