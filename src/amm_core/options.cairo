@@ -841,7 +841,7 @@ mod Options {
                 increase_short_position_by, option_type, strike_price_u256, base_address
             );
 
-            let new_locked_capital = current_locked_capital_u256 - capital_to_be_locked;
+            let new_locked_capital = current_locked_capital_u256 + capital_to_be_locked;
 
             // Set the option positions
             set_option_position(
