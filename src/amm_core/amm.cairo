@@ -1,6 +1,8 @@
 #[starknet::contract]
 mod AMM {
+    use starknet::get_block_info;
     use starknet::ContractAddress;
+    use starknet::get_caller_address;
 
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
     use carmine_protocol::types::basic::{
@@ -35,6 +37,8 @@ mod AMM {
         re_guard: ReentrancyGuardComponent::Storage,
         #[substorage(v0)]
         ownable: OwnableComponent::Storage,
+        // Storage used for preventing sandwich attacks within single block
+        sandwich_storage: LegacyMap<ContractAddress, u64>,
         // Old admin storage
         Proxy_admin: felt252,
         // Storage vars with new types
@@ -143,6 +147,26 @@ mod AMM {
         ExpireOptionTokenForPool: ExpireOptionTokenForPool
     }
 
+
+    // @notice Checks whether user has not deposited/withdrawed in the same block
+    // @param user_addr: User address
+    fn SandwichGuard() {
+        // Get caller's address
+        let user_addr = get_caller_address();
+
+        // Get current block number
+        let curr_block = get_block_info().unbox().block_number;
+
+        // Read block number of the last user interaction
+        let mut state: ContractState = unsafe_new_contract_state();
+        let user_last_interaction = state.sandwich_storage.read(user_addr);
+
+        // Assert that the values above are not the same
+        assert(curr_block != user_last_interaction, 'Cant deposit/withdraw');
+
+        // Write block number of the last user interaction
+        state.sandwich_storage.write(user_addr, curr_block);
+    }
 
     use carmine_protocol::amm_core::trading::Trading;
     use carmine_protocol::amm_core::state::State;
@@ -437,6 +461,8 @@ mod AMM {
         ) {
             self.re_guard.start();
 
+            SandwichGuard();
+
             LiquidityPool::deposit_liquidity(
                 pooled_token_addr, quote_token_address, base_token_address, option_type, amount,
             );
@@ -453,6 +479,8 @@ mod AMM {
             lp_token_amount: u256,
         ) {
             self.re_guard.start();
+
+            SandwichGuard();
 
             LiquidityPool::withdraw_liquidity(
                 pooled_token_addr,

@@ -11,7 +11,7 @@ use carmine_protocol::amm_core::amm::AMM;
 use carmine_protocol::amm_interface::{IAMMDispatcher, IAMMDispatcherTrait};
 use snforge_std::{
     declare, ContractClassTrait, start_prank, stop_prank, start_warp, stop_warp, ContractClass,
-    start_mock_call, stop_mock_call
+    start_mock_call, stop_mock_call, start_roll
 };
 
 use carmine_protocol::tokens::my_token::{MyToken, IMyTokenDispatcher, IMyTokenDispatcherTrait};
@@ -310,6 +310,7 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     let five_k_usdc = 5000000000;
 
     // ETH
+    start_roll(ctx.amm_address, 1);
     disp
         .amm
         .deposit_liquidity(
@@ -317,6 +318,7 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
         );
 
     // Put
+    start_roll(ctx.amm_address, 2);
     disp
         .amm
         .deposit_liquidity(

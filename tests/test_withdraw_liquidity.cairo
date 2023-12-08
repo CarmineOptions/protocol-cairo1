@@ -10,7 +10,7 @@ use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 use snforge_std::{
     declare, ContractClassTrait, start_prank, stop_prank, start_warp, stop_warp, ContractClass,
-    start_mock_call, stop_mock_call
+    start_mock_call, stop_mock_call, start_roll
 };
 use carmine_protocol::amm_core::helpers::{FixedHelpersTrait, toU256_balance};
 use carmine_protocol::amm_core::amm::AMM;
@@ -72,11 +72,13 @@ fn test_withdraw_liquidity() {
     let one_eth: u256 = 1000000000000000000;
     let one_k_usdc: u256 = 1000000000;
 
+    start_roll(ctx.amm_address, 1000);
     dsps
         .amm
         .withdraw_liquidity(ctx.eth_address, ctx.usdc_address, ctx.eth_address, 0, // Call
          one_eth);
 
+    start_roll(ctx.amm_address, 1001);
     dsps
         .amm
         .withdraw_liquidity(
@@ -210,11 +212,13 @@ fn test_withdraw_liquidity() {
     assert(stats_2.pool_pos_val_p == FixedTrait::ZERO(), 'Put2 pos val wrong');
 
     // Withdraw one more time
+    start_roll(ctx.amm_address, 1002);
     dsps
         .amm
         .withdraw_liquidity(ctx.eth_address, ctx.usdc_address, ctx.eth_address, 0, // Call
          one_eth);
 
+    start_roll(ctx.amm_address, 1003);
     dsps
         .amm
         .withdraw_liquidity(
