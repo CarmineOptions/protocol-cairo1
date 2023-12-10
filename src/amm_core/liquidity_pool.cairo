@@ -143,7 +143,6 @@ mod LiquidityPool {
         let mut pool_pos: Fixed = FixedTrait::from_felt(0);
 
         loop {
-
             // Get option stored under given index
             let option = get_available_options(lptoken_address, ix);
             assert(option.sum() != 0, 'GVoEO - opt sum zero');
@@ -161,7 +160,7 @@ mod LiquidityPool {
                 // We're not at the end (beginning) of array 
                 // so decrease index and continue
                 ix -= 1;
-                continue; 
+                continue;
             };
 
             if (now - option.maturity) > LOOKBACK {
