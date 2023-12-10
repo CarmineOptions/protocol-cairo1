@@ -153,11 +153,11 @@ fn pow(a: u128, b: u128) -> u128 {
 // @param currency_address: Address of the currency - used to get decimals
 // @return Input converted to Uint256
 fn toU256_balance(x: Fixed, currency_address: ContractAddress) -> u256 {
-    // converts for example 1.2 ETH (as Math64_61 float) to int(1.2*10**18)
+    // converts for example 1.2 ETH (as Cubit float) to int(1.2*10**18)
 
     // We will guide you through with an example
-    // x = 1.2 * 2**61 (example input... 2**61 since it is Math64x61)
-    // We want to divide the number by 2**61 and multiply by 10**18 to get number in the "wei style
+    // x = 1.2 * 2**64 (example input... 2**64 since it is Cubit)
+    // We want to divide the number by 2**64 and multiply by 10**18 to get number in the "wei style
     // But the order is important, first multiply and then divide, otherwise the .2 would be lost.
     // (1.2 * 2**64) * 10**18 / 2**64
     // We can split the 10*18 to (2**18 * 5**18)
@@ -176,8 +176,8 @@ fn _toU256_balance(x: Fixed, decimals: u128) -> u256 {
     let x_5 = x.mag * five_to_dec;
 
     // // we can rearange a little again
-    // // (1.2 * 2**61 * 5**18) / (2**61 / 2**18)
-    // // (1.2 * 2**61 * 5**18) / 2**(61 - 18)
+    // // (1.2 * 2**64 * 5**18) / (2**64 / 2**18)
+    // // (1.2 * 2**64 * 5**18) / 2**(64 - 18)
     let _64_minus_dec = 64 - decimals;
 
     let decreased_part = pow(2, _64_minus_dec);
@@ -194,13 +194,13 @@ fn _toU256_balance(x: Fixed, decimals: u128) -> u256 {
 // @dev Only for balances/token amounts, takes care of getting decimals etc
 // @param x: Value to be converted
 // @param currency_address: Address of the currency - used to get decimals
-// @return Input converted to Math64_61
+// @return Input converted to Cubit
 fn fromU256_balance(x: u256, currency_address: ContractAddress) -> Fixed {
     // We will guide you through with an example
     // x = 1.2*10**18 (example input... 10**18 since it is ETH)
-    // We want to divide the number by 10**18 and multiply by 2**64 to get Math64x61 number
+    // We want to divide the number by 10**18 and multiply by 2**64 to get Cubit number
     // But the order is important, first multiply and then divide, otherwise the .2 would be lost.
-    // (1.2 * 10**18) * 2**61 / 10**18
+    // (1.2 * 10**18) * 2**64 / 10**18
     // We can split the 10*18 to (2**18 * 5**18)
     // (1.2 * 10**18) * 2**64 / (5**18 * 2**18)
 
