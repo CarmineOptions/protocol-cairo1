@@ -143,28 +143,46 @@ mod LiquidityPool {
         let mut pool_pos: Fixed = FixedTrait::from_felt(0);
 
         loop {
+
+            // Get option stored under given index
             let option = get_available_options(lptoken_address, ix);
             assert(option.sum() != 0, 'GVoEO - opt sum zero');
 
+            // This function only calculates value of expired position, 
+            // so if maturity is in the future just decrease the index
+            // for next iteration and continue
             if (option.maturity >= now) {
-                break; // Option is not yet expired
+                // ix = 0 means there are no more options to consider
+                // so break the loop
+                if ix == 0 {
+                    break;
+                }
+
+                // We're not at the end (beginning) of array 
+                // so decrease index and continue
+                ix -= 1;
+                continue; 
             };
 
             if (now - option.maturity) > LOOKBACK {
-                break; // We're over lookback window
+                // We're over lookback window so break the loop
+                break;
             };
 
+            // Get pool's position in given option
+            let option_position = option.pools_position();
+
+            // Add value of the given position
+            pool_pos += option.value_of_position(option_position);
+
+            // ix = 0 means there are no more options to consider
+            // so break the loop
             if ix == 0 {
                 break;
             }
+
+            // Decrease ix for next iteration
             ix -= 1;
-
-            let option_position = option.pools_position();
-            if option_position == 0 {
-                continue; // Don't care if there is no position - or the option is already expired
-            }
-
-            pool_pos += option.value_of_position(option_position);
         };
 
         pool_pos

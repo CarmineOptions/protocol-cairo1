@@ -809,7 +809,7 @@ mod Options {
         );
 
         let current_locked_capital_u256 = get_pool_locked_capital(lptoken_address);
-        // FIXME: the inside of the if (not the else) should work for both cases
+        // TODO: the inside of the if (not the else) should work for both cases
         //      -> validate and update for more simple code
 
         if pool_short_position == 0 {
