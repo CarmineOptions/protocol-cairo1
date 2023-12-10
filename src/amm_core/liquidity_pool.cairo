@@ -126,7 +126,8 @@ mod LiquidityPool {
     // @notice Retrieves the value of the expired position within the pool
     // @dev Returns a total value of pools non expired position.
     // @dev Walks backwards (iteration starts from last index) all options in storage var "available_options" 
-    // @dev     that expired in last 8 weeks
+    // @dev     that expired in last 8 weeks 
+    // @dev     (how much to go back is defined by LOOKBACK variable inside the function)
     // @param lptoken_address: Address of the liquidity pool token
     // @return res: Value of the expired position within specified liquidity pool
     fn get_value_of_pool_expired_position(lptoken_address: LPTAddress) -> Fixed {
