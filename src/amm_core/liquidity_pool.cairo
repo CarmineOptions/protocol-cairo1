@@ -96,27 +96,42 @@ mod LiquidityPool {
     // @return res: Value of the non_expired position within specified liquidity pool
     fn get_value_of_pool_non_expired_position(lptoken_address: LPTAddress) -> Fixed {
         let mut i: u32 = 0;
+
+        // This variable accumulates the position while iterating
+        // over the options
         let mut pool_pos: Fixed = FixedTrait::from_felt(0);
         let now = get_block_timestamp();
 
         loop {
+            // Get option stored under given index
             let option = get_available_options(lptoken_address, i);
+            // Increase index for next iteration
             i += 1;
 
+            // Option.sum() = 0 means we've reached the end of stored
+            // options so we can break
             if option.sum() == 0 {
                 break;
             }
 
+            // Get pool's position for given option
             let option_position = option.pools_position();
+            
+            // If there is no position then we don't have to
+            // calculate anything
             if option_position == 0 {
                 continue;
             }
 
+            // This function only calculates value of non-expired position, 
+            // so if maturity has alread passed then just continue
+            // (index is already increased few lines above)
             if option.maturity < now {
                 // Option is expired
                 continue;
             }
 
+            // Add value of the given position
             pool_pos += option.value_of_position(option_position);
         };
 
@@ -136,11 +151,19 @@ mod LiquidityPool {
         let now = get_block_timestamp();
         let last_ix = get_available_options_usable_index(lptoken_address);
 
+        // If usable index is zero, there are no options available
         if last_ix == 0 {
             return FixedTrait::ZERO();
         }
 
+        // Usable index indicates where we can store new option,
+        // meaning it corresponds to an empty space so we need to 
+        // decrease it by one so that iteration starts at filled position
+        // in storage var
         let mut ix = last_ix - 1;
+
+        // This variable accumulates the position while iterating
+        // over the options
         let mut pool_pos: Fixed = FixedTrait::from_felt(0);
 
         loop {
