@@ -116,7 +116,7 @@ mod LiquidityPool {
 
             // Get pool's position for given option
             let option_position = option.pools_position();
-            
+
             // If there is no position then we don't have to
             // calculate anything
             if option_position == 0 {
