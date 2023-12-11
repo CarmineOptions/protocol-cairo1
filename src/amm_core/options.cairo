@@ -943,7 +943,9 @@ mod Options {
 
         // If there is any then expire the corresponding position
         if (current_pool_pos_short != 0) {
-            expire_option_token_for_pool(lptoken_address, TRADE_SIDE_SHORT, strike_price, maturity,);
+            expire_option_token_for_pool(
+                lptoken_address, TRADE_SIDE_SHORT, strike_price, maturity,
+            );
         }
         if (current_pool_pos_long != 0) {
             expire_option_token_for_pool(lptoken_address, TRADE_SIDE_LONG, strike_price, maturity,);
