@@ -39,6 +39,24 @@ The AMM is currently built on Cairo version 2.3.0. However while OpenZeppelin wa
 - src/tokens/lptoken.cairo
 - src/tokens/option_token.cairo
 
+## Tests
+Unit tests are located in files containing relevant code, while integration tests are located in `tests` folder. Currently there are integration tests for: 
+- Depositing liquidity
+- Withdrawing liquidity
+- Opening trade
+- Closing trade
+- Settling trade
+- View functions
+- Sandwich guard
+
+Most of the tests also contain a couple of different scenarios.
+
+Folder `src/testing` contains various utilities for writing tests:
+ - `setup.cairo` - Contains function that will fully deploy the AMM (along with tokens representing ETH, USDC), set it up, add liquidity etc. The function is called `deploy_setup` and it returns a tuple of two structs, where the first one is `Ctx` (context) which contains information needed for tests - addresses (AMM, tokens, LP tokens, OP tokens, admin...) strike, expiry etc. The second struct, `Dispatchers`, provides dispatcher for every contract that is deployed in the tests (it's more convenient than having to create them in the test manually). 
+ - `test_utils.cairo` provides utilities for fetching all the information about current AMM state (plus some user balances etc.). To fetch the `Stats` struct, call the `new` method on it with `Ctx` and `Dispatchers` as args. `Stats` also implement `PrintTrait` for more convenient debugging. 
+
+You can look into `tests/test_dummy.cairo` to see an example of how to write a new test - how to deploy the setup, prank the AMM, mock the Pragma price, fetch the AMM state etc.
+
 ## Deployment - Zero to Hero 
 Deployment described using `starkli`, version `0.1.20 (e4d2307)`.
 
