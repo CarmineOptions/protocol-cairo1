@@ -933,22 +933,21 @@ mod Options {
         let base_token_address = IOptionTokenDispatcher { contract_address: option_token_address }
             .base_token_address();
 
-        // The option (underlying asset x maturity x option type x strike) has to be "expired"
-        // (settled) on the pool's side in terms of locked capital. Ie check that SHORT position
-        // has been settled, if pool is LONG then it did not lock capital and we can go on.
-        let current_pool_position = get_option_position(
+        // Check pools SHORT and LONG position
+        let current_pool_pos_short = get_option_position(
             lptoken_address, TRADE_SIDE_SHORT, maturity, strike_price
         );
-
-        if (current_pool_position != 0) {
-            expire_option_token_for_pool(lptoken_address, option_side, strike_price, maturity,);
-        }
-        // Check that the pool's position was expired correctly
-        let current_pool_position_2 =
-            get_option_position( // FIXME this is called twice in the happy case
-            lptoken_address, option_side, maturity, strike_price
+        let current_pool_pos_long = get_option_position(
+            lptoken_address, TRADE_SIDE_LONG, maturity, strike_price
         );
-        assert(current_pool_position_2 == 0, 'EOT - pool pos not zero');
+
+        // If there is any then expire the corresponding position
+        if (current_pool_pos_short != 0) {
+            expire_option_token_for_pool(lptoken_address, TRADE_SIDE_SHORT, strike_price, maturity,);
+        }
+        if (current_pool_pos_long != 0) {
+            expire_option_token_for_pool(lptoken_address, TRADE_SIDE_LONG, strike_price, maturity,);
+        }
 
         // Make sure that user owns the option tokens
         let user_address = get_caller_address();
