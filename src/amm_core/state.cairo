@@ -92,11 +92,11 @@ mod State {
     ) {
         let mut state = AMM::unsafe_new_contract_state();
 
-        assert_option_side_exists(option_side.into(), 'SOTA - opt side 0');
-        assert(!lptoken_address.is_zero(), 'SOTE - lpt addr 0');
+        assert_option_side_exists(option_side.into(), 'SOTA - opt side non existent');
+        assert(!lptoken_address.is_zero(), 'SOTA - lpt addr 0');
         assert(maturity > 0, 'SOTA - maturity <= 0');
-        strike_price.assert_nn_not_zero('sota - maturity <= 0');
-        assert(!opt_address.is_zero(), 'SOTE - opt addr 0');
+        strike_price.assert_nn_not_zero('SOTA - strike <= 0');
+        assert(!opt_address.is_zero(), 'SOTA - opt addr 0');
 
         // Set old storage var to zero in case this function get called before the getter
         // option_token_address::InternalContractStateTrait::write(
