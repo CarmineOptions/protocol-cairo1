@@ -445,7 +445,7 @@ mod Options {
             TradeOpen {
                 caller: user_address,
                 option_token: option_token_address,
-                capital_transfered: premia_including_fees_u256,
+                capital_transfered: to_be_paid_by_user,
                 option_tokens_minted: option_size.into()
             }
         );
@@ -790,7 +790,7 @@ mod Options {
             TradeClose {
                 caller: user_address,
                 option_token: option_token_address,
-                capital_transfered: premia_including_fees_u256,
+                capital_transfered: total_user_payment,
                 option_tokens_burned: option_size.into()
             }
         );
