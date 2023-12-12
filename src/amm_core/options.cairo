@@ -347,8 +347,7 @@ mod Options {
 
         let current_short_position = get_option_position(
             lptoken_address, TRADE_SIDE_SHORT, maturity, strike_price
-        )
-            .into();
+        );
 
         let current_locked_balance = get_pool_locked_capital(lptoken_address);
 
