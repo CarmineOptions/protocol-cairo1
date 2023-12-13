@@ -9,8 +9,6 @@ use starknet::ClassHash;
 
 #[starknet::interface]
 trait IAMM<TContractState> {
-    fn migrate_admin_to_owner(ref self: TContractState);
-
     fn trade_open(
         ref self: TContractState,
         option_type: OptionType,
