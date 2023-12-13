@@ -176,6 +176,33 @@ mod AMM {
         self.ownable.initializer(owner);
     }
 
+    fn can_halt_trading() -> bool {
+        let caller = get_caller_address();
+        let mut state: ContractState = unsafe_new_contract_state();
+
+        if caller == state.ownable.owner() {
+            true // Governance
+        } else if caller == 0x0583a9d956d65628f806386ab5b12dccd74236a3c6b930ded9cf3c54efc722a1
+            .try_into()
+            .unwrap() {
+            true // Ondra
+        } else if caller == 0x06717eaf502baac2b6b2c6ee3ac39b34a52e726a73905ed586e757158270a0af
+            .try_into()
+            .unwrap() {
+            true // Andrej
+        } else if caller == 0x0011d341c6e841426448ff39aa443a6dbb428914e05ba2259463c18308b86233
+            .try_into()
+            .unwrap() {
+            true // Marek
+        } else if caller == 0x03d1525605db970fa1724693404f5f64cba8af82ec4aab514e6ebd3dec4838ad
+            .try_into()
+            .unwrap() {
+            true // Dave
+        } else {
+            false
+        }
+    }
+
     #[external(v0)]
     impl Amm of IAMM<ContractState> {
         fn trade_open(
@@ -273,7 +300,8 @@ mod AMM {
         }
 
         fn set_trading_halt(ref self: ContractState, new_status: bool) {
-            self.ownable.assert_only_owner();
+            assert(can_halt_trading(), 'Cant set trading halt status');
+
             State::set_trading_halt(new_status)
         }
 
