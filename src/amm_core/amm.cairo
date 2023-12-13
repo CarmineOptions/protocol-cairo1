@@ -39,28 +39,14 @@ mod AMM {
         ownable: OwnableComponent::Storage,
         // Storage used for preventing sandwich attacks within single block
         sandwich_storage: LegacyMap<ContractAddress, u64>,
-        // Old admin storage
-        Proxy_admin: felt252,
-        // Storage vars with new types
-        pool_volatility_adjustment_speed: LegacyMap<LPTAddress, Math64x61_>,
         new_pool_volatility_adjustment_speed: LegacyMap<LPTAddress, Fixed>,
-        pool_volatility_separate: LegacyMap::<
-            (LPTAddress, Maturity, LegacyStrike), LegacyVolatility
-        >,
         option_volatility: LegacyMap::<(ContractAddress, u64, u128), Volatility>,
-        option_position_: LegacyMap<(LPTAddress, OptionSide, Maturity, LegacyStrike), felt252>,
         new_option_position: LegacyMap<(LPTAddress, OptionSide, Timestamp, u128), Int>,
-        option_token_address: LegacyMap::<
-            (LPTAddress, OptionSide, Maturity, LegacyStrike), ContractAddress
-        >,
         new_option_token_address: LegacyMap::<
             (LPTAddress, OptionSide, Timestamp, u128), ContractAddress
         >,
-        available_options: LegacyMap::<(LPTAddress, felt252), LegacyOption>,
         new_available_options: LegacyMap::<(LPTAddress, u32), Option_>,
         new_available_options_usable_index: LegacyMap::<LPTAddress, u32>,
-        // Storage vars that are basically the same
-
         underlying_token_address: LegacyMap<LPTAddress, ContractAddress>,
         max_lpool_balance: LegacyMap::<LPTAddress, u256>,
         pool_locked_capital_: LegacyMap<LPTAddress, u256>,
@@ -192,23 +178,6 @@ mod AMM {
 
     #[external(v0)]
     impl Amm of IAMM<ContractState> {
-        // This is a helper function that migrates old Proxy admin (from C0 OZ contracts) 
-        // Since C1 OZ contracts don't have Proxy admin contracts, we need to migrate to owner   
-        fn migrate_admin_to_owner(ref self: ContractState) {
-            // Read old storage 
-            let admin = self.Proxy_admin.read();
-            assert(admin != 0, 'Admin is zero');
-
-            // Convert admin to address
-            let owner: ContractAddress = admin.try_into().unwrap();
-
-            // Set owner
-            self.ownable.initializer(owner);
-
-            // Write zero to old storage, so that this function will always fail if called again
-            self.Proxy_admin.write(0);
-        }
-
         fn trade_open(
             ref self: ContractState,
             option_type: OptionType,
