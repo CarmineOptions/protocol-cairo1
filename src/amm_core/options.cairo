@@ -871,7 +871,7 @@ mod Options {
             let current_unlocked_capital_u256 = get_unlocked_capital(lptoken_address);
 
             // Update locked capital
-            let new_locked_capital = current_unlocked_capital_u256 + option_size_in_pool_currency;
+            let new_locked_capital = current_locked_capital_u256 + option_size_in_pool_currency;
 
             assert(
                 option_size_in_pool_currency <= current_unlocked_capital_u256,
