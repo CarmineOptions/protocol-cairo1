@@ -314,7 +314,6 @@ mod State {
     // @param  lptoken_address: Address of liquidity pool token that corresponds to the pool
     // @retuns unlocked_capital: Amount of unlocked pooled tokens in u256
     fn get_unlocked_capital(lptoken_address: LPTAddress) -> u256 {
-
         // Capital locked by the pool
         let locked_capital = get_pool_locked_capital(lptoken_address);
 
