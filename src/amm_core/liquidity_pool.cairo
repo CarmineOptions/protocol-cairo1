@@ -396,8 +396,10 @@ mod LiquidityPool {
 
         IERC20Dispatcher { contract_address: lptoken_address }.mint(caller_addr, mint_amount);
 
-        IERC20Dispatcher { contract_address: pooled_token_address }
+        let transfer_res = IERC20Dispatcher { contract_address: pooled_token_address }
             .transferFrom(caller_addr, own_addr, amount);
+
+        assert(transfer_res,'Deposit liq unable to transfer');
     }
 
     // @notice Withdraw liquidity from the LP
@@ -451,8 +453,10 @@ mod LiquidityPool {
 
         set_lpool_balance(lptoken_address, new_balance);
 
-        IERC20Dispatcher { contract_address: pooled_token_address }
+        let transfer_res = IERC20Dispatcher { contract_address: pooled_token_address }
             .transfer(caller_addr, underlying_amount);
+
+        assert(transfer_res,'Withdraw liq unable to transfer');
 
         IERC20Dispatcher { contract_address: lptoken_address }.burn(caller_addr, lp_token_amount);
     }
