@@ -361,9 +361,6 @@ mod LiquidityPool {
         let caller_addr = get_caller_address();
         let own_addr = get_contract_address();
 
-        assert(!caller_addr.is_zero(), 'Caller address is zero');
-        assert(!own_addr.is_zero(), 'Own address is zero');
-
         let lptoken_address = get_lptoken_address_for_given_option(
             quote_token_address, base_token_address, option_type
         );
