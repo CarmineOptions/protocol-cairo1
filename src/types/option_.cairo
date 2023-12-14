@@ -8,7 +8,7 @@ use carmine_protocol::amm_core::helpers::{
 };
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
-use carmine_protocol::types::basic::{OptionSide, OptionType, Timestamp, LegacyStrike, Int};
+use carmine_protocol::types::basic::{OptionSide, OptionType, Timestamp, Int};
 
 use carmine_protocol::amm_core::state::State::{
     get_lptoken_address_for_given_option, get_option_volatility,
@@ -33,17 +33,6 @@ use carmine_protocol::amm_core::oracles::agg::OracleAgg::{get_current_price, get
 use carmine_protocol::erc20_interface::{IERC20Dispatcher, IERC20DispatcherTrait};
 use carmine_protocol::tokens::option_token::{IOptionTokenDispatcher, IOptionTokenDispatcherTrait};
 
-
-// Option used in c0 AMM
-#[derive(Copy, Drop, Serde, starknet::Store)]
-struct LegacyOption {
-    option_side: OptionSide,
-    maturity: felt252,
-    strike_price: LegacyStrike,
-    quote_token_address: ContractAddress,
-    base_token_address: ContractAddress,
-    option_type: OptionType
-}
 
 // New option
 #[derive(Copy, Drop, Serde, starknet::Store)]
@@ -297,42 +286,9 @@ struct OptionWithUsersPosition {
     value_of_position: Fixed
 }
 
-// Helper functions
-fn Option_to_LegacyOption(opt: Option_) -> LegacyOption {
-    LegacyOption {
-        option_side: opt.option_side,
-        maturity: opt.maturity.into(),
-        strike_price: opt.strike_price.to_legacyMath(),
-        quote_token_address: opt.quote_token_address,
-        base_token_address: opt.base_token_address,
-        option_type: opt.option_type
-    }
-}
-
-fn LegacyOption_to_Option(opt: LegacyOption) -> Option_ {
-    Option_ {
-        option_side: opt.option_side,
-        maturity: opt.maturity.try_into().unwrap(),
-        strike_price: FixedHelpersTrait::from_legacyMath(opt.strike_price),
-        quote_token_address: opt.quote_token_address,
-        base_token_address: opt.base_token_address,
-        option_type: opt.option_type
-    }
-}
 
 impl Option_Print of PrintTrait<Option_> {
     fn print(self: Option_) {
-        self.option_side.print();
-        self.maturity.print();
-        self.strike_price.print();
-        self.quote_token_address.print();
-        self.base_token_address.print();
-        self.option_type.print();
-    }
-}
-
-impl LegacyOptionPrint of PrintTrait<LegacyOption> {
-    fn print(self: LegacyOption) {
         self.option_side.print();
         self.maturity.print();
         self.strike_price.print();

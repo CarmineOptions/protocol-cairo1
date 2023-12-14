@@ -19,7 +19,6 @@ use cubit::f128::types::fixed::FixedInto;
 use carmine_protocol::amm_core::oracles::agg::OracleAgg::get_terminal_price;
 use carmine_protocol::amm_core::oracles::agg::OracleAgg::get_current_price;
 
-use carmine_protocol::types::basic::Math64x61_;
 use carmine_protocol::types::basic::OptionSide;
 use carmine_protocol::types::basic::OptionType;
 use carmine_protocol::types::basic::Int;
@@ -63,24 +62,6 @@ impl FixedHelpersImpl of FixedHelpersTrait {
     // @param msg: Error message for assert statement
     fn assert_nn(self: Fixed, errmsg: felt252) {
         assert(self >= FixedTrait::ZERO(), errmsg)
-    }
-
-    // @notice Converts Fixed number to Math64x61 number (used in Cairo 0)
-    // @param self: Fixed Instance
-    // @returns Math64x61 (num * 2**61)
-    fn to_legacyMath(self: Fixed) -> Math64x61_ {
-        // Fixed is 8 times the old math
-        let new: felt252 = (self / FixedTrait::from_unscaled_felt(8)).into();
-        new
-    }
-
-    // @notice Converts Math64x61 number to Fixed number
-    // @param num: Math64x61 number
-    // @returns Fixed number
-    fn from_legacyMath(num: Math64x61_) -> Fixed {
-        // 2**61 is 8 times smaller than 2**64
-        // so we can just multiply old legacy math number by 8 to get cubit 
-        FixedTrait::from_felt(num * 8)
     }
 }
 

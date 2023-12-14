@@ -6,14 +6,13 @@ mod AMM {
 
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
     use carmine_protocol::types::basic::{
-        Math64x61_, LegacyVolatility, LegacyStrike, Volatility, Strike, LPTAddress, OptionSide,
-        Timestamp, OptionType, Maturity, Int
+        Volatility, Strike, LPTAddress, OptionSide, Timestamp, OptionType, Maturity, Int
     };
 
     use carmine_protocol::oz::security::reentrancyguard::ReentrancyGuardComponent;
     use carmine_protocol::oz::access::ownable::OwnableComponent;
     use carmine_protocol::types::pool::Pool;
-    use carmine_protocol::types::option_::{LegacyOption, Option_};
+    use carmine_protocol::types::option_::Option_;
     use carmine_protocol::amm_interface::IAMM;
 
 

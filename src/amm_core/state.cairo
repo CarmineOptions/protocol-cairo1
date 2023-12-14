@@ -52,19 +52,13 @@ mod State {
     use carmine_protocol::types::basic::LPTAddress;
     use carmine_protocol::types::basic::OptionSide;
     use carmine_protocol::types::basic::OptionType;
-    use carmine_protocol::types::basic::Math64x61_;
-    use carmine_protocol::types::basic::LegacyVolatility;
-    use carmine_protocol::types::basic::LegacyStrike;
     use carmine_protocol::types::basic::Volatility;
     use carmine_protocol::types::basic::Strike;
     use carmine_protocol::types::basic::Int;
     use carmine_protocol::types::basic::Timestamp;
 
     use carmine_protocol::types::pool::Pool;
-    use carmine_protocol::types::option_::LegacyOption;
     use carmine_protocol::types::option_::Option_;
-    use carmine_protocol::types::option_::LegacyOption_to_Option;
-    use carmine_protocol::types::option_::Option_to_LegacyOption;
     use carmine_protocol::types::option_::Option_Trait;
 
     // @notice Writes option token address into storage var, mapped against option definition

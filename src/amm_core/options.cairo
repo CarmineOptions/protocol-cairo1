@@ -21,7 +21,6 @@ mod Options {
 
     use carmine_protocol::types::basic::OptionSide;
     use carmine_protocol::types::basic::OptionType;
-    use carmine_protocol::types::basic::Math64x61_;
     use carmine_protocol::types::basic::Int;
     use carmine_protocol::types::basic::LPTAddress;
     use carmine_protocol::types::basic::Volatility;

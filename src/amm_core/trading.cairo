@@ -8,7 +8,6 @@ mod Trading {
     use cubit::f128::types::fixed::Fixed;
     use cubit::f128::types::fixed::FixedTrait;
 
-    use carmine_protocol::types::basic::Math64x61_;
     use carmine_protocol::types::basic::OptionType;
     use carmine_protocol::types::basic::OptionSide;
     use carmine_protocol::types::basic::LPTAddress;
