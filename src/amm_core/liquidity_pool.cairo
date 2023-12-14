@@ -447,7 +447,6 @@ mod LiquidityPool {
         );
 
         let current_balance = get_lpool_balance(lptoken_address);
-        let unlocked_capital = get_unlocked_capital(lptoken_address);
         let new_balance = current_balance - underlying_amount;
 
         set_lpool_balance(lptoken_address, new_balance);
