@@ -318,8 +318,7 @@ fn _add_options_with_longer_expiry(ctx: Ctx, dsps: Dispatchers) -> felt252 {
 
     dsps
         .amm
-        .add_option(
-            0, // side
+        .add_option_both_sides(
             longer_expiry.try_into().unwrap(),
             ctx.strike_price,
             ctx.usdc_address,
@@ -327,27 +326,13 @@ fn _add_options_with_longer_expiry(ctx: Ctx, dsps: Dispatchers) -> felt252 {
             0, // type
             ctx.call_lpt_address,
             new_long_call_address,
-            FixedTrait::from_unscaled_felt(100)
-        );
-
-    dsps
-        .amm
-        .add_option(
-            1, // side
-            longer_expiry.try_into().unwrap(),
-            ctx.strike_price,
-            ctx.usdc_address,
-            ctx.eth_address,
-            0, // type
-            ctx.call_lpt_address,
             new_short_call_address,
             FixedTrait::from_unscaled_felt(100)
         );
 
     dsps
         .amm
-        .add_option(
-            0, // side
+        .add_option_both_sides(
             longer_expiry.try_into().unwrap(),
             ctx.strike_price,
             ctx.usdc_address,
@@ -355,19 +340,6 @@ fn _add_options_with_longer_expiry(ctx: Ctx, dsps: Dispatchers) -> felt252 {
             1, // type
             ctx.put_lpt_address,
             new_long_put_address,
-            FixedTrait::from_unscaled_felt(100)
-        );
-
-    dsps
-        .amm
-        .add_option(
-            1, // side
-            longer_expiry.try_into().unwrap(),
-            ctx.strike_price,
-            ctx.usdc_address,
-            ctx.eth_address,
-            1, // type
-            ctx.put_lpt_address,
             new_short_put_address,
             FixedTrait::from_unscaled_felt(100)
         );

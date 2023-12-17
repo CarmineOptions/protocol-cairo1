@@ -335,11 +335,10 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     // Add Options
     let hundred = FixedTrait::from_unscaled_felt(100);
 
-    // Long call
+    // Long and short call
     disp
         .amm
-        .add_option(
-            LONG.try_into().unwrap(),
+        .add_option_both_sides(
             ctx.expiry,
             ctx.strike_price,
             ctx.usdc_address,
@@ -347,27 +346,13 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
             CALL.try_into().unwrap(),
             ctx.call_lpt_address,
             ctx.long_call_address,
-            hundred
-        );
-    // Short call
-    disp
-        .amm
-        .add_option(
-            SHORT.try_into().unwrap(),
-            ctx.expiry,
-            ctx.strike_price,
-            ctx.usdc_address,
-            ctx.eth_address,
-            CALL.try_into().unwrap(),
-            ctx.call_lpt_address,
             ctx.short_call_address,
             hundred
         );
     // Long put
     disp
         .amm
-        .add_option(
-            LONG.try_into().unwrap(),
+        .add_option_both_sides(
             ctx.expiry,
             ctx.strike_price,
             ctx.usdc_address,
@@ -375,19 +360,6 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
             PUT.try_into().unwrap(),
             ctx.put_lpt_address,
             ctx.long_put_address,
-            hundred
-        );
-    // Short call
-    disp
-        .amm
-        .add_option(
-            SHORT.try_into().unwrap(),
-            ctx.expiry,
-            ctx.strike_price,
-            ctx.usdc_address,
-            ctx.eth_address,
-            PUT.try_into().unwrap(),
-            ctx.put_lpt_address,
             ctx.short_put_address,
             hundred
         );
@@ -411,15 +383,26 @@ fn _add_expired_option(ctx: Ctx, dsps: Dispatchers) {
     long_call_data.append(1000000000 - 60 * 60 * 24);
     long_call_data.append(0); // LONG
 
+    let mut short_call_data = ArrayTrait::<felt252>::new();
+    short_call_data.append('OptShortCallExpired');
+    short_call_data.append('OSC');
+    short_call_data.append(ctx.amm_address.into());
+    short_call_data.append(ctx.usdc_address.into());
+    short_call_data.append(ctx.eth_address.into());
+    short_call_data.append(0); // CALL
+    short_call_data.append(27670116110564327424000);
+    short_call_data.append(1000000000 - 60 * 60 * 24);
+    short_call_data.append(1); // short
+
     let long_call_address = ctx.opt_contract.deploy(@long_call_data).unwrap();
+    let short_call_address = ctx.opt_contract.deploy(@short_call_data).unwrap();
 
     start_warp(ctx.amm_address, 1000000000 - 60 * 60 * 96);
     start_prank(ctx.amm_address, ctx.admin_address);
 
     dsps
         .amm
-        .add_option(
-            0,
+        .add_option_both_sides(
             1000000000 - 60 * 60 * 24,
             ctx.strike_price,
             ctx.usdc_address,
@@ -427,6 +410,7 @@ fn _add_expired_option(ctx: Ctx, dsps: Dispatchers) {
             0,
             ctx.call_lpt_address,
             long_call_address,
+            short_call_address,
             FixedTrait::from_unscaled_felt(100)
         );
 

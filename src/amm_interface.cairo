@@ -62,18 +62,6 @@ trait IAMM<TContractState> {
         volatility_adjustment_speed: Fixed,
         max_lpool_bal: u256,
     );
-    fn add_option(
-        ref self: TContractState,
-        option_side: OptionSide,
-        maturity: u64,
-        strike_price: Fixed,
-        quote_token_address: ContractAddress,
-        base_token_address: ContractAddress,
-        option_type: OptionType,
-        lptoken_address: ContractAddress,
-        option_token_address_: ContractAddress,
-        initial_volatility: Fixed,
-    );
     fn add_option_both_sides(
         ref self: TContractState,
         maturity: u64,

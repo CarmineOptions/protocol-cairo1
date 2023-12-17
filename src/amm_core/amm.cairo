@@ -333,34 +333,6 @@ mod AMM {
             self.re_guard.end();
         }
 
-        fn add_option(
-            ref self: ContractState,
-            option_side: OptionSide,
-            maturity: u64,
-            strike_price: Fixed,
-            quote_token_address: ContractAddress,
-            base_token_address: ContractAddress,
-            option_type: OptionType,
-            lptoken_address: ContractAddress,
-            option_token_address_: ContractAddress,
-            initial_volatility: Fixed,
-        ) {
-            self.ownable.assert_only_owner();
-
-            self.re_guard.start();
-            Options::add_option(
-                option_side,
-                maturity,
-                strike_price,
-                quote_token_address,
-                base_token_address,
-                option_type,
-                lptoken_address,
-                option_token_address_,
-                initial_volatility,
-            );
-            self.re_guard.end();
-        }
         fn add_option_both_sides(
             ref self: ContractState,
             maturity: u64,
