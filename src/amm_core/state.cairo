@@ -386,6 +386,13 @@ mod State {
 
         let mut state = AMM::unsafe_new_contract_state();
 
+        // Assert that there is no lptoken address for given option existing yet
+        let curr_lpt_addr = state
+            .lptoken_addr_for_given_pooled_token
+            .read((quote_token_address, base_token_address, option_type));
+
+        assert(curr_lpt_addr.is_zero(), 'LPT for given params existing');
+
         state
             .lptoken_addr_for_given_pooled_token
             .write((quote_token_address, base_token_address, option_type), lpt_address);
