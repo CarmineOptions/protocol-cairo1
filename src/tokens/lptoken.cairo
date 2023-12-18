@@ -61,18 +61,11 @@ mod LPToken {
     component!(path: ERC20Component, storage: erc20, event: ERC20Event);
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
 
-    // ERC20 Component
-    // #[abi(embed_v0)]
-    // impl ERC20Impl = ERC20Component::ERC20Impl<ContractState>;
-
     #[abi(embed_v0)]
     impl SafeAllowanceImpl = ERC20Component::SafeAllowanceImpl<ContractState>;
     #[abi(embed_v0)]
     impl SafeAllowanceCamelImpl =
         ERC20Component::SafeAllowanceCamelImpl<ContractState>;
-
-    // #[abi(embed_v0)]
-    // impl ERC20CamelOnlyImpl = ERC20Component::ERC20CamelOnlyImpl<ContractState>;
 
     #[abi(embed_v0)]
     impl ERC20MetadataImpl = ERC20Component::ERC20MetadataImpl<ContractState>;
