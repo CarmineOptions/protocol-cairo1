@@ -203,9 +203,6 @@ impl Option_Impl of Option_Trait {
                 return short_value;
             }
         }
-        // Fail if the value of option that matures in 2 hours or less (can't price the option)
-        let stop_trading_by = self.maturity - STOP_TRADING_BEFORE_MATURITY_SECONDS;
-        assert(current_block_time <= stop_trading_by, 'GVoP - Wait till maturity');
 
         let total_premia_before_fees = self.premia_before_fees(position_size,);
 
