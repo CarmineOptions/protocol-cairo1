@@ -310,7 +310,7 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
     let five_k_usdc = 5000000000;
 
     // ETH
-    start_roll(ctx.amm_address, 1);
+    start_roll(ctx.call_lpt_address, 1);
     disp
         .amm
         .deposit_liquidity(
@@ -318,7 +318,7 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
         );
 
     // Put
-    start_roll(ctx.amm_address, 2);
+    start_roll(ctx.put_lpt_address, 1);
     disp
         .amm
         .deposit_liquidity(

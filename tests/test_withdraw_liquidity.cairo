@@ -72,13 +72,13 @@ fn test_withdraw_liquidity() {
     let one_eth: u256 = 1000000000000000000;
     let one_k_usdc: u256 = 1000000000;
 
-    start_roll(ctx.amm_address, 1000);
+    start_roll(ctx.call_lpt_address, 2);
     dsps
         .amm
         .withdraw_liquidity(ctx.eth_address, ctx.usdc_address, ctx.eth_address, 0, // Call
          one_eth);
 
-    start_roll(ctx.amm_address, 1001);
+    start_roll(ctx.put_lpt_address, 2);
     dsps
         .amm
         .withdraw_liquidity(
@@ -212,13 +212,13 @@ fn test_withdraw_liquidity() {
     assert(stats_2.pool_pos_val_p == FixedTrait::ZERO(), 'Put2 pos val wrong');
 
     // Withdraw one more time
-    start_roll(ctx.amm_address, 1002);
+    start_roll(ctx.call_lpt_address, 3);
     dsps
         .amm
         .withdraw_liquidity(ctx.eth_address, ctx.usdc_address, ctx.eth_address, 0, // Call
          one_eth);
 
-    start_roll(ctx.amm_address, 1003);
+    start_roll(ctx.put_lpt_address, 3);
     dsps
         .amm
         .withdraw_liquidity(
