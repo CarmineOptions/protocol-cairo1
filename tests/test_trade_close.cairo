@@ -697,7 +697,6 @@ fn test_trade_close_long_with_pool_long_position() {
             FixedTrait::from_felt(1), // Disable this check
             99999999999 // Disable this check
         );
-        
 
     let long_put_premia = dsps
         .amm
@@ -863,7 +862,6 @@ fn test_trade_close_long_with_pool_short_position() {
             FixedTrait::from_felt(1), // Disable this check
             99999999999 // Disable this check
         );
-        
 
     let long_put_premia = dsps
         .amm
@@ -895,27 +893,19 @@ fn test_trade_close_long_with_pool_short_position() {
     assert(stats_1.lpool_balance_c == 5003813455106775683, 'Call1 lpool bal wrong');
     assert(stats_1.lpool_balance_p == 5115298467, 'Put1 lpool bal wrong');
 
+    assert(stats_1.bal_eth + stats_1.lpool_balance_c == 2 * five_tokens, 'random eth appeared 1');
     assert(
-        stats_1.bal_eth + stats_1.lpool_balance_c == 2 * five_tokens,
-        'random eth appeared 1'
-    );
-    assert(
-        stats_1.bal_usdc + stats_1.lpool_balance_p == 2 * five_k_tokens,
-        'random usdc appeared 1'
+        stats_1.bal_usdc + stats_1.lpool_balance_p == 2 * five_k_tokens, 'random usdc appeared 1'
     );
 
     assert(
-        stats_1.bal_eth
-            + stats_1.locked_capital_c
-            + stats_1.unlocked_capital_c
-            == 2 * five_tokens,
+        stats_1.bal_eth + stats_1.locked_capital_c + stats_1.unlocked_capital_c == 2 * five_tokens,
         'random eth appeared 2'
     );
     assert(
         stats_1.bal_usdc
             + stats_1.locked_capital_p
-            + stats_1.unlocked_capital_p
-            == 2 * five_k_tokens,
+            + stats_1.unlocked_capital_p == 2 * five_k_tokens,
         'random usdc appeared 2'
     );
 
@@ -1060,22 +1050,30 @@ fn test_trade_close_short_with_pool_long_position() {
     assert(stats_1.lpool_balance_c == 4998519727486255218, 'Call1 lpool bal wrong');
     assert(stats_1.lpool_balance_p == 4907371674, 'Put1 lpool bal wrong');
 
-    assert(stats_1.bal_eth + stats_1.lpool_balance_c + 1000000000000000000 == 2 * five_tokens, 'random eth appeared 1');
     assert(
-        stats_1.bal_usdc + stats_1.lpool_balance_p + 1500000000 == 2 * five_k_tokens, 'random usdc appeared 1'
+        stats_1.bal_eth + stats_1.lpool_balance_c + 1000000000000000000 == 2 * five_tokens,
+        'random eth appeared 1'
+    );
+    assert(
+        stats_1.bal_usdc + stats_1.lpool_balance_p + 1500000000 == 2 * five_k_tokens,
+        'random usdc appeared 1'
     );
 
     assert(stats_1.locked_capital_c == 0, 'Call1 locked wrong');
     assert(stats_1.locked_capital_p == 0, 'Put1 locked wrong');
 
     assert(
-        stats_1.bal_eth + stats_1.locked_capital_c + stats_1.unlocked_capital_c + 1000000000000000000 == 2 * five_tokens,
+        stats_1.bal_eth
+            + stats_1.locked_capital_c
+            + stats_1.unlocked_capital_c
+            + 1000000000000000000 == 2 * five_tokens,
         'random eth appeared 2'
     );
     assert(
         stats_1.bal_usdc
             + stats_1.locked_capital_p
-            + stats_1.unlocked_capital_p + 1500000000 == 2 * five_k_tokens,
+            + stats_1.unlocked_capital_p
+            + 1500000000 == 2 * five_k_tokens,
         'random usdc appeared 2'
     );
 
@@ -1200,7 +1198,7 @@ fn test_trade_close_short_with_pool_short_position() {
             FixedTrait::from_unscaled_felt(100_000), // Disable this check
             99999999999 // Disable this check
         );
-        
+
     let stats_1 = StatsTrait::new(ctx, dsps);
 
     assert(stats_1.bal_lpt_c == five_tokens, 'Call lpt bal wrong');
