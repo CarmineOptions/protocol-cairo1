@@ -283,9 +283,10 @@ fn test_withdraw_liquidity_not_enough_capital() {
     start_roll(ctx.call_lpt_address, 2);
     dsps
         .amm
-        .withdraw_liquidity(ctx.eth_address, ctx.usdc_address, ctx.eth_address, 0, // call
-         one_eth*6);
-    
+        .withdraw_liquidity(
+            ctx.eth_address, ctx.usdc_address, ctx.eth_address, 0, // call
+             one_eth * 6
+        );
 }
 
 #[test]
@@ -323,7 +324,8 @@ fn test_withdraw_liquidity_not_enough_lptokens() {
     start_roll(ctx.call_lpt_address, 3);
     dsps
         .amm
-        .withdraw_liquidity(ctx.eth_address, ctx.usdc_address, ctx.eth_address, 0, // call
-         one_eth*2);
-    
+        .withdraw_liquidity(
+            ctx.eth_address, ctx.usdc_address, ctx.eth_address, 0, // call
+             one_eth * 2
+        );
 }

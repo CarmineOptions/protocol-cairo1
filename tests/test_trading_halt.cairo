@@ -85,7 +85,7 @@ fn test_set_trading_halt_failing() {
 }
 
 #[test]
-#[should_panic(expected: ('Trading halted', ))]
+#[should_panic(expected: ('Trading halted',))]
 fn test_set_trading_halt_trade_failing() {
     let (ctx, dsps) = deploy_setup();
     let dummy_addr: felt252 = 0x0178227144f45dd9e704dab545018813d17383e4cd1181a94fb7086df8cc50e1;
