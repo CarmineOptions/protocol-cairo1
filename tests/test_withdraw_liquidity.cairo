@@ -17,7 +17,9 @@ use carmine_protocol::amm_core::amm::AMM;
 use carmine_protocol::amm_interface::{IAMMDispatcher, IAMMDispatcherTrait};
 use carmine_protocol::testing::setup::{Ctx, Dispatchers};
 
-// TODO: add scenario where pool has loss
+use carmine_protocol::erc20_interface::IERC20Dispatcher;
+use carmine_protocol::erc20_interface::IERC20DispatcherTrait;
+
 #[test]
 fn test_withdraw_liquidity() {
     let (ctx, dsps) = deploy_setup();
@@ -253,4 +255,75 @@ fn test_withdraw_liquidity() {
 
     assert(stats_3.pool_pos_val_c == FixedTrait::ZERO(), 'Call3 pos val wrong');
     assert(stats_3.pool_pos_val_p == FixedTrait::ZERO(), 'Put2 pos val wrong');
+}
+
+
+#[test]
+#[should_panic(expected: ('Not enough capital',))]
+fn test_withdraw_liquidity_not_enough_capital() {
+    let (ctx, dsps) = deploy_setup();
+    let five_tokens: u128 = 5000000000000000000; // with 18 decimals
+    let one_eth: u256 = 1000000000000000000;
+    let one_int: u128 = 1000000000000000000;
+
+    start_prank(ctx.amm_address, ctx.admin_address);
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_data',
+        PragmaPricesResponse {
+            price: 140000000000,
+            decimals: 8,
+            last_updated_timestamp: 1000000000 + 60 * 60 * 12,
+            num_sources_aggregated: 0,
+            expiration_timestamp: Option::None(())
+        }
+    );
+
+    // Withdraw more capital than capital in amm
+    start_roll(ctx.call_lpt_address, 2);
+    dsps
+        .amm
+        .withdraw_liquidity(ctx.eth_address, ctx.usdc_address, ctx.eth_address, 0, // call
+         one_eth*6);
+    
+}
+
+#[test]
+#[should_panic(expected: ('u256_sub Overflow',))]
+fn test_withdraw_liquidity_not_enough_lptokens() {
+    let (ctx, dsps) = deploy_setup();
+    let five_tokens: u128 = 5000000000000000000; // with 18 decimals
+    let one_eth: u256 = 1000000000000000000;
+    let one_int: u128 = 1000000000000000000;
+
+    start_prank(ctx.amm_address, ctx.admin_address);
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_data',
+        PragmaPricesResponse {
+            price: 140000000000,
+            decimals: 8,
+            last_updated_timestamp: 1000000000 + 60 * 60 * 12,
+            num_sources_aggregated: 0,
+            expiration_timestamp: Option::None(())
+        }
+    );
+
+    let dummy_addr: felt252 = 0x0178227144f45dd9e704dab545018813d17383e4cd1181a94fb7086df8cc50e1;
+
+    // Send lpts to dummy addr
+    start_roll(ctx.call_lpt_address, 2);
+    start_prank(ctx.call_lpt_address, ctx.admin_address);
+    let transfer_res = IERC20Dispatcher { contract_address: ctx.call_lpt_address }
+        .transfer(dummy_addr.try_into().unwrap(), one_eth * 4);
+
+    stop_prank(ctx.call_lpt_address);
+
+    // Withdraw more capital than lpts
+    start_roll(ctx.call_lpt_address, 3);
+    dsps
+        .amm
+        .withdraw_liquidity(ctx.eth_address, ctx.usdc_address, ctx.eth_address, 0, // call
+         one_eth*2);
+    
 }
