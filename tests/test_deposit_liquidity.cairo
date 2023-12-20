@@ -345,3 +345,37 @@ fn _add_options_with_longer_expiry(ctx: Ctx, dsps: Dispatchers) -> felt252 {
 
     longer_expiry
 }
+
+#[test]
+#[should_panic(expected: ('Lpool bal exceeds maximum',))]
+fn test_deposit_liquidity_at_max_lpool_balance() {
+    let (ctx, dsps) = deploy_setup();
+
+    start_prank(ctx.amm_address, ctx.admin_address);
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_data',
+        PragmaPricesResponse {
+            price: 140000000000,
+            decimals: 8,
+            last_updated_timestamp: 1000000000 + 60 * 60 * 12,
+            num_sources_aggregated: 0,
+            expiration_timestamp: Option::None(())
+        }
+    );
+
+    let stats_0 = StatsTrait::new(ctx, dsps);
+
+    // Set lower max lpool bal - at current balance so it's at maximum
+    start_prank(ctx.amm_address, ctx.admin_address);
+    dsps.amm.set_max_lpool_balance(ctx.call_lpt_address, stats_0.lpool_balance_c - 1);
+
+    // Deposit one more eth - it should fail
+    let one_eth: u256 = 1000000000000000000;
+
+    start_roll(ctx.call_lpt_address, 2);
+    dsps
+        .amm
+        .deposit_liquidity(ctx.eth_address, ctx.usdc_address, ctx.eth_address, 0, // Call
+         one_eth);
+}
