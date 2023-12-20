@@ -52,6 +52,10 @@ trait IAMM<TContractState> {
     ) -> bool;
     fn set_trading_halt(ref self: TContractState, new_status: bool);
     fn get_trading_halt(self: @TContractState) -> bool;
+    fn set_trading_halt_permission(
+        ref self: TContractState, address: ContractAddress, permission: bool
+    );
+    fn get_trading_halt_permission(self: @TContractState, address: ContractAddress) -> bool;
     fn add_lptoken(
         ref self: TContractState,
         quote_token_address: ContractAddress,
