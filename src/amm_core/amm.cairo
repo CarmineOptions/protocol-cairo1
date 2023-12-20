@@ -49,7 +49,8 @@ mod AMM {
         pool_locked_capital_: LegacyMap<LPTAddress, u256>,
         lpool_balance_: LegacyMap<LPTAddress, u256>,
         max_option_size_percent_of_voladjspd: felt252,
-        trading_halted: bool, // Make this bool if they can be interchanged
+        trading_halted: bool,
+        trading_halt_permission: LegacyMap::<ContractAddress, bool>,
         available_lptoken_adresses: LegacyMap<felt252, LPTAddress>,
         // (quote_token_addr, base_token_address, option_type) -> LpToken address
         lptoken_addr_for_given_pooled_token: LegacyMap::<
@@ -153,30 +154,20 @@ mod AMM {
         self.ownable.initializer(owner);
     }
 
-    fn can_halt_trading() -> bool {
+    fn can_set_trading_halt_status(trading_halt_status: bool) -> bool {
         let caller = get_caller_address();
         let mut state: ContractState = unsafe_new_contract_state();
 
         if caller == state.ownable.owner() {
-            true // Governance
-        } else if caller == 0x0583a9d956d65628f806386ab5b12dccd74236a3c6b930ded9cf3c54efc722a1
-            .try_into()
-            .unwrap() {
-            true // Ondra
-        } else if caller == 0x06717eaf502baac2b6b2c6ee3ac39b34a52e726a73905ed586e757158270a0af
-            .try_into()
-            .unwrap() {
-            true // Andrej
-        } else if caller == 0x0011d341c6e841426448ff39aa443a6dbb428914e05ba2259463c18308b86233
-            .try_into()
-            .unwrap() {
-            true // Marek
-        } else if caller == 0x03d1525605db970fa1724693404f5f64cba8af82ec4aab514e6ebd3dec4838ad
-            .try_into()
-            .unwrap() {
-            true // Dave
+            true // Governance can do whathever it wants
         } else {
-            false
+            // Trading halt is true if trading is to be halted, false otherwise
+            // We want permitted addresses to be able to set it to true - to halt trading
+            // but not resume trading again (set trading halt to false)
+
+            // So for this function to return true, the 
+            // caller must be permitted and status has to be true
+            state.trading_halt_permission.read(caller) && trading_halt_status
         }
     }
 
@@ -277,13 +268,24 @@ mod AMM {
         }
 
         fn set_trading_halt(ref self: ContractState, new_status: bool) {
-            assert(can_halt_trading(), 'Cant set trading halt status');
+            assert(can_set_trading_halt_status(new_status), 'Cant set trading halt status');
 
             State::set_trading_halt(new_status)
         }
 
         fn get_trading_halt(self: @ContractState) -> bool {
             State::get_trading_halt()
+        }
+
+        fn set_trading_halt_permission(
+            ref self: ContractState, address: ContractAddress, permission: bool
+        ) {
+            self.ownable.assert_only_owner();
+            State::set_trading_halt_permission(address, permission);
+        }
+
+        fn get_trading_halt_permission(self: @ContractState, address: ContractAddress) -> bool {
+            State::get_trading_halt_permission(address)
         }
 
         fn add_lptoken(

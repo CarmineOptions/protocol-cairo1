@@ -31,6 +31,8 @@ mod State {
     use carmine_protocol::amm_core::amm::AMM::new_available_optionsContractMemberStateTrait;
     use carmine_protocol::amm_core::amm::AMM::new_pool_volatility_adjustment_speedContractMemberStateTrait;
     use carmine_protocol::amm_core::amm::AMM::new_available_options_usable_indexContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::trading_halt_permissionContractMemberStateTrait;
+    use carmine_protocol::amm_core::amm::AMM::trading_halt_permission;
     use carmine_protocol::amm_core::amm::AMM::option_volatility;
     use carmine_protocol::amm_core::amm::AMM::new_pool_volatility_adjustment_speed;
     use carmine_protocol::amm_core::amm::AMM::new_option_position;
@@ -409,6 +411,16 @@ mod State {
     fn set_trading_halt(new_status: bool) {
         let mut state = AMM::unsafe_new_contract_state();
         state.trading_halted.write(new_status)
+    }
+
+    fn set_trading_halt_permission(address: ContractAddress, permission: bool) {
+        let mut state = AMM::unsafe_new_contract_state();
+        state.trading_halt_permission.write(address, permission);
+    }
+
+    fn get_trading_halt_permission(address: ContractAddress) -> bool {
+        let mut state = AMM::unsafe_new_contract_state();
+        state.trading_halt_permission.read(address)
     }
 
     // @notice  Returns the token that's underlying the given liquidity pool.

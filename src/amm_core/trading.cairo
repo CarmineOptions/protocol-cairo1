@@ -289,7 +289,7 @@ mod Trading {
         tx_deadline: Timestamp,
     ) {
         let halt_status = get_trading_halt();
-        assert(halt_status, 'Trading halted');
+        assert(!halt_status, 'Trading halted');
 
         assert(option_size > 0_u128, 'VTI - opt size <= 0');
         assert_option_type_exists(option_type.into(), 'VTI - invalid option type');
