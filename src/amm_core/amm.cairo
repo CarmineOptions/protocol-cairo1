@@ -163,7 +163,7 @@ mod AMM {
         } else {
             // Trading halt is true if trading is to be halted, false otherwise
             // We want permitted addresses to be able to set it to true - to halt trading
-            // but not to set turn it back on again (set it to false)
+            // but not resume trading again (set trading halt to false)
 
             // So for this function to return true, the 
             // caller must be permitted and status has to be true
