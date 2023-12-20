@@ -332,7 +332,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected: ('Unknown option side',))]
     fn test_assert_option_side_exists_failing() {
         assert_option_side_exists(2, 'Unknown option side')
     }
@@ -345,7 +345,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected: ('Unknown option type',))]
     fn test_assert_option_type_exists_failing() {
         assert_option_type_exists(2, 'Unknown option type')
     }
@@ -407,7 +407,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected: ('u128_mul Overflow',))]
     fn test__pow_failing() {
         pow(69, 69); // Should overflow
     }

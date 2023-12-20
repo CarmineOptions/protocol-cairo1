@@ -41,7 +41,7 @@ fn test_set_trading_halt_permission() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected: ('Caller is not the owner',))]
 fn test_set_trading_halt_permission_failing() {
     let (ctx, dsps) = deploy_setup();
     let dummy_addr: felt252 = 0x0178227144f45dd9e704dab545018813d17383e4cd1181a94fb7086df8cc50e1;
@@ -70,7 +70,7 @@ fn test_set_trading_halt() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected: ('Cant set trading halt status',))]
 fn test_set_trading_halt_failing() {
     let (ctx, dsps) = deploy_setup();
     let dummy_addr: felt252 = 0x0178227144f45dd9e704dab545018813d17383e4cd1181a94fb7086df8cc50e1;
@@ -85,7 +85,7 @@ fn test_set_trading_halt_failing() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected: ('Trading halted', ))]
 fn test_set_trading_halt_trade_failing() {
     let (ctx, dsps) = deploy_setup();
     let dummy_addr: felt252 = 0x0178227144f45dd9e704dab545018813d17383e4cd1181a94fb7086df8cc50e1;

@@ -47,7 +47,7 @@ fn sandwich_setup() -> (Ctx, Dispatchers) {
 //////////////////////////////////////////////////////////////////////
 
 #[test]
-#[should_panic]
+#[should_panic(expected: ('LPT: too many actions',))]
 fn test_sandwich_guard_mint_mint_failing() {
     let (ctx, dsps) = sandwich_setup();
 
@@ -59,7 +59,7 @@ fn test_sandwich_guard_mint_mint_failing() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected: ('LPT: too many actions',))]
 fn test_sandwich_guard_mint_burn_failing() {
     let (ctx, dsps) = sandwich_setup();
 
@@ -71,7 +71,7 @@ fn test_sandwich_guard_mint_burn_failing() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected: ('LPT: too many actions',))]
 fn test_sandwich_guard_mint_transfer_failing() {
     let (ctx, dsps) = sandwich_setup();
 
@@ -86,7 +86,7 @@ fn test_sandwich_guard_mint_transfer_failing() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected: ('LPT: too many actions',))]
 fn test_sandwich_guard_mint_transferFrom_failing() {
     let (ctx, dsps) = sandwich_setup();
 
@@ -170,7 +170,7 @@ fn test_sandwich_guard_mint_transferFrom() {
 //////////////////////////////////////////////////////////////////////
 
 #[test]
-#[should_panic]
+#[should_panic(expected: ('LPT: too many actions',))]
 fn test_sandwich_guard_burn_mint_failing() {
     let (ctx, dsps) = sandwich_setup();
 
@@ -182,7 +182,7 @@ fn test_sandwich_guard_burn_mint_failing() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected: ('LPT: too many actions',))]
 fn test_sandwich_guard_burn_burn_failing() {
     let (ctx, dsps) = sandwich_setup();
 
@@ -194,7 +194,7 @@ fn test_sandwich_guard_burn_burn_failing() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected: ('LPT: too many actions',))]
 fn test_sandwich_guard_burn_transfer_failing() {
     let (ctx, dsps) = sandwich_setup();
 
@@ -210,7 +210,7 @@ fn test_sandwich_guard_burn_transfer_failing() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected: ('LPT: too many actions',))]
 fn test_sandwich_guard_burn_transferFrom_failing() {
     let (ctx, dsps) = sandwich_setup();
 
