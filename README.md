@@ -174,8 +174,7 @@ There will be a lot of invoking and deploying, so it might be useful to make som
     - PUT
         - `starkli call $AMM_ADDR get_lpool_balance $ETH_PUT_LPT`
 
-13. Enable trading and set max option size
-    - `sinv $AMM_ADDR set_trading_halt 1`
+13. Set max option size
     - `sinv $AMM_ADDR set_max_option_size_percent_of_voladjspd 50`
 
 14. YOLO into some Options
