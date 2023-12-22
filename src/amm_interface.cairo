@@ -62,7 +62,6 @@ trait IAMM<TContractState> {
         base_token_address: ContractAddress,
         option_type: OptionType,
         lptoken_address: ContractAddress,
-        pooled_token_addr: ContractAddress,
         volatility_adjustment_speed: Fixed,
         max_lpool_bal: u256,
     );

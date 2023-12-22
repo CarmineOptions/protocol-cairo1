@@ -273,7 +273,6 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
             ctx.eth_address,
             CALL.try_into().unwrap(),
             ctx.call_lpt_address,
-            ctx.eth_address,
             call_vol_adjspd,
             10000000000000000000 // 10eth
         );
@@ -286,7 +285,6 @@ fn deploy_setup() -> (Ctx, Dispatchers) {
             ctx.eth_address,
             PUT.try_into().unwrap(),
             ctx.put_lpt_address,
-            ctx.usdc_address,
             put_vol_adjspd,
             10000000000 // 10k usdc
         );

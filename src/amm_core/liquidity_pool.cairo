@@ -259,7 +259,6 @@ mod LiquidityPool {
     // @param base_token_address: Address of the base token (ETH in ETH/USDC)
     // @param option_type: Type of the option 0 for Call, 1 for Put
     // @param lptoken_address: Address of the liquidity pool token
-    // @param pooled_token_addr: Address of the pooled token
     // @param volatility_adjustment_speed: Constant that determines how fast the volatility is changing
     // @param max_lpool_bal: Maximum balance of the bool for given pooled token
     fn add_lptoken(
@@ -267,7 +266,6 @@ mod LiquidityPool {
         base_token_address: ContractAddress,
         option_type: OptionType,
         lptoken_address: LPTAddress,
-        pooled_token_addr: LPTAddress,
         volatility_adjustment_speed: Fixed,
         max_lpool_bal: u256
     ) {
