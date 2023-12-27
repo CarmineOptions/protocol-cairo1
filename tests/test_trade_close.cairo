@@ -10,7 +10,7 @@ use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 use snforge_std::{
     declare, ContractClassTrait, start_prank, stop_prank, start_warp, stop_warp, ContractClass,
-    start_mock_call, stop_mock_call
+    start_mock_call, stop_mock_call, start_roll
 };
 use carmine_protocol::amm_core::helpers::{FixedHelpersTrait, toU256_balance};
 use carmine_protocol::amm_core::amm::AMM;
@@ -1246,4 +1246,167 @@ fn test_trade_close_short_with_pool_short_position() {
     assert(stats_1.opt_pos_sc == 2000000000000000000, 'sc1 pos wrong');
     assert(stats_1.opt_pos_lp == 0, 'lp1 pos wrong');
     assert(stats_1.opt_pos_sp == 2000000000000000000, 'sp1 pos wrong');
+}
+
+#[test]
+#[should_panic(expected: ('u256_sub Overflow',))]
+fn test_trade_close_not_enough_opt() {
+    let (ctx, dsps) = deploy_setup();
+    let five_tokens: u256 = 5000000000000000000; // with 18 decimals
+    let five_k_tokens: u256 = 5000000000; // with 6 decimals
+    let one_int = 1000000000000000000; // 1*10**18
+
+    start_warp(ctx.amm_address, 1000000000);
+    start_prank(ctx.amm_address, ctx.admin_address);
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_data',
+        PragmaPricesResponse {
+            price: 140000000000,
+            decimals: 8,
+            last_updated_timestamp: 1000000000 + 60 * 60 * 12,
+            num_sources_aggregated: 0,
+            expiration_timestamp: Option::None(())
+        }
+    );
+
+    // Open some trades
+    let _ = dsps
+        .amm
+        .trade_open(
+            0, // Call
+            ctx.strike_price,
+            ctx.expiry,
+            0, // Long
+            one_int,
+            ctx.usdc_address,
+            ctx.eth_address,
+            FixedTrait::from_unscaled_felt(100_000), // Disable this check
+            99999999999 // Disable this check
+        );
+
+    let _ = dsps
+        .amm
+        .trade_close(
+            0, // Call
+            ctx.strike_price,
+            ctx.expiry,
+            0, // Long
+            one_int * 2,
+            ctx.usdc_address,
+            ctx.eth_address,
+            FixedTrait::from_felt(1), // Disable this check
+            99999999999 // Disable this check
+        );
+}
+
+#[test]
+#[should_panic(expected: ('VTI - Trading is stopped',))]
+fn test_trade_close_2hr_before_expiry() {
+    let (ctx, dsps) = deploy_setup();
+    let five_tokens: u256 = 5000000000000000000; // with 18 decimals
+    let five_k_tokens: u256 = 5000000000; // with 6 decimals
+    let one_int = 1000000000000000000; // 1*10**18
+
+    start_warp(ctx.amm_address, 1000000000);
+    start_prank(ctx.amm_address, ctx.admin_address);
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_data',
+        PragmaPricesResponse {
+            price: 140000000000,
+            decimals: 8,
+            last_updated_timestamp: 1000000000 + 60 * 60 * 12,
+            num_sources_aggregated: 0,
+            expiration_timestamp: Option::None(())
+        }
+    );
+
+    // Open some trades
+    let _ = dsps
+        .amm
+        .trade_open(
+            0, // Call
+            ctx.strike_price,
+            ctx.expiry,
+            0, // Long
+            one_int,
+            ctx.usdc_address,
+            ctx.eth_address,
+            FixedTrait::from_unscaled_felt(100_000), // Disable this check
+            99999999999 // Disable this check
+        );
+
+    start_warp(ctx.amm_address, ctx.expiry - 3600);
+
+    // Close the trade
+    let _ = dsps
+        .amm
+        .trade_open(
+            0, // Call
+            ctx.strike_price,
+            ctx.expiry,
+            0, // Long
+            one_int,
+            ctx.usdc_address,
+            ctx.eth_address,
+            FixedTrait::from_felt(1), // Disable this check
+            99999999999 // Disable this check
+        );
+}
+
+#[test]
+#[should_panic(expected: ('VTI - opt already expired',))]
+fn test_trade_close_after_expiry() {
+    let (ctx, dsps) = deploy_setup();
+    let five_tokens: u256 = 5000000000000000000; // with 18 decimals
+    let five_k_tokens: u256 = 5000000000; // with 6 decimals
+    let one_int = 1000000000000000000; // 1*10**18
+
+    start_warp(ctx.amm_address, 1000000000);
+    start_prank(ctx.amm_address, ctx.admin_address);
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_data',
+        PragmaPricesResponse {
+            price: 140000000000,
+            decimals: 8,
+            last_updated_timestamp: 1000000000 + 60 * 60 * 12,
+            num_sources_aggregated: 0,
+            expiration_timestamp: Option::None(())
+        }
+    );
+
+    // Open some trades
+    let _ = dsps
+        .amm
+        .trade_open(
+            0, // Call
+            ctx.strike_price,
+            ctx.expiry,
+            0, // Long
+            one_int,
+            ctx.usdc_address,
+            ctx.eth_address,
+            FixedTrait::from_unscaled_felt(100_000), // Disable this check
+            99999999999 // Disable this check
+        );
+
+    start_warp(ctx.amm_address, ctx.expiry + 1);
+
+    // Close the trade
+    let _ = dsps
+        .amm
+        .trade_open(
+            0, // Call
+            ctx.strike_price,
+            ctx.expiry,
+            0, // Long
+            one_int,
+            ctx.usdc_address,
+            ctx.eth_address,
+            FixedTrait::from_felt(1), // Disable this check
+            99999999999 // Disable this check
+        );
+
 }
