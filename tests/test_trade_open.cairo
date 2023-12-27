@@ -829,9 +829,10 @@ fn test_trade_open_not_enough_unlocked() {
     start_roll(ctx.call_lpt_address, 2);
     dsps
         .amm
-        .withdraw_liquidity(ctx.eth_address, ctx.usdc_address, ctx.eth_address, 0, // Call
-        (one_int*4).into());
-
+        .withdraw_liquidity(
+            ctx.eth_address, ctx.usdc_address, ctx.eth_address, 0, // Call
+             (one_int * 4).into()
+        );
 
     // Open some trade
     let _ = dsps
@@ -841,7 +842,7 @@ fn test_trade_open_not_enough_unlocked() {
             ctx.strike_price,
             ctx.expiry,
             0, // Long
-            one_int*2,
+            one_int * 2,
             ctx.usdc_address,
             ctx.eth_address,
             FixedTrait::from_unscaled_felt(100_000), // Disable this check

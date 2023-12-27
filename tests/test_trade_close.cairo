@@ -1408,5 +1408,4 @@ fn test_trade_close_after_expiry() {
             FixedTrait::from_felt(1), // Disable this check
             99999999999 // Disable this check
         );
-
 }

@@ -988,7 +988,6 @@ fn test_trade_settle_short_terminal_price_above() {
     assert(stats_1.opt_pos_sc == 0, 'sc1 pos wrong');
     assert(stats_1.opt_pos_lp == 0, 'lp1 pos wrong');
     assert(stats_1.opt_pos_sp == 0, 'sp1 pos wrong');
-
 }
 
 #[test]
