@@ -1,4 +1,3 @@
-
 use carmine_protocol::testing::setup::deploy_setup;
 use traits::{Into, TryInto};
 use debug::PrintTrait;
