@@ -12,5 +12,5 @@ mod trading {
     mod test_trade_open;
     mod test_trade_settle;
     mod test_trading_halt;
+    mod test_validate_trade_input;
 }
-
