@@ -1,3 +1,4 @@
+mod aux_contract;
 mod erc20_interface;
 mod amm_interface;
 mod amm_core {
