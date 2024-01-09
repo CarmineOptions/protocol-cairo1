@@ -9,8 +9,6 @@ use starknet::ClassHash;
 
 #[starknet::interface]
 trait IAMM<TContractState> {
-    fn migrate_admin_to_owner(ref self: TContractState);
-
     fn trade_open(
         ref self: TContractState,
         option_type: OptionType,
@@ -54,27 +52,18 @@ trait IAMM<TContractState> {
     ) -> bool;
     fn set_trading_halt(ref self: TContractState, new_status: bool);
     fn get_trading_halt(self: @TContractState) -> bool;
+    fn set_trading_halt_permission(
+        ref self: TContractState, address: ContractAddress, permission: bool
+    );
+    fn get_trading_halt_permission(self: @TContractState, address: ContractAddress) -> bool;
     fn add_lptoken(
         ref self: TContractState,
         quote_token_address: ContractAddress,
         base_token_address: ContractAddress,
         option_type: OptionType,
         lptoken_address: ContractAddress,
-        pooled_token_addr: ContractAddress,
         volatility_adjustment_speed: Fixed,
         max_lpool_bal: u256,
-    );
-    fn add_option(
-        ref self: TContractState,
-        option_side: OptionSide,
-        maturity: u64,
-        strike_price: Fixed,
-        quote_token_address: ContractAddress,
-        base_token_address: ContractAddress,
-        option_type: OptionType,
-        lptoken_address: ContractAddress,
-        option_token_address_: ContractAddress,
-        initial_volatility: Fixed,
     );
     fn add_option_both_sides(
         ref self: TContractState,

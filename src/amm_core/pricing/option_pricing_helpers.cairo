@@ -48,9 +48,7 @@ fn convert_amount_to_option_currency_from_base_uint256(
     assert_option_type_exists(option_type.into(), 'CATOCFBU - unknown option type');
 
     if option_type == OPTION_PUT {
-        let base_token_decimals: u128 = get_decimal(base_token_address)
-            .expect('CATOCFBU - Cant get decimals')
-            .into();
+        let base_token_decimals: u128 = get_decimal(base_token_address).into();
         let dec: u256 = pow(10, base_token_decimals).into();
 
         let adj_amount = amount * strike_price;

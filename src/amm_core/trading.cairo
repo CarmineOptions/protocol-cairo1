@@ -8,7 +8,6 @@ mod Trading {
     use cubit::f128::types::fixed::Fixed;
     use cubit::f128::types::fixed::FixedTrait;
 
-    use carmine_protocol::types::basic::Math64x61_;
     use carmine_protocol::types::basic::OptionType;
     use carmine_protocol::types::basic::OptionSide;
     use carmine_protocol::types::basic::LPTAddress;
@@ -290,7 +289,7 @@ mod Trading {
         tx_deadline: Timestamp,
     ) {
         let halt_status = get_trading_halt();
-        assert(halt_status, 'Trading halted');
+        assert(!halt_status, 'Trading halted');
 
         assert(option_size > 0_u128, 'VTI - opt size <= 0');
         assert_option_type_exists(option_type.into(), 'VTI - invalid option type');
@@ -309,7 +308,7 @@ mod Trading {
             assert(current_block_time < maturity, 'VTI - opt already expired');
             assert(
                 current_block_time < (maturity - STOP_TRADING_BEFORE_MATURITY_SECONDS),
-                'VTI - Trading is no mo'
+                'VTI - Trading is stopped'
             );
         } else {
             let is_not_ripe = current_block_time <= maturity;

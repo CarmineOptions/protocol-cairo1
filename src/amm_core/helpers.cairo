@@ -4,6 +4,7 @@ use starknet::ContractAddress;
 use traits::Into;
 use traits::TryInto;
 use option::OptionTrait;
+use result::ResultTrait;
 
 use core::cmp::max;
 use core::cmp::min;
@@ -18,7 +19,6 @@ use cubit::f128::types::fixed::FixedInto;
 use carmine_protocol::amm_core::oracles::agg::OracleAgg::get_terminal_price;
 use carmine_protocol::amm_core::oracles::agg::OracleAgg::get_current_price;
 
-use carmine_protocol::types::basic::Math64x61_;
 use carmine_protocol::types::basic::OptionSide;
 use carmine_protocol::types::basic::OptionType;
 use carmine_protocol::types::basic::Int;
@@ -63,24 +63,6 @@ impl FixedHelpersImpl of FixedHelpersTrait {
     fn assert_nn(self: Fixed, errmsg: felt252) {
         assert(self >= FixedTrait::ZERO(), errmsg)
     }
-
-    // @notice Converts Fixed number to Math64x61 number (used in Cairo 0)
-    // @param self: Fixed Instance
-    // @returns Math64x61 (num * 2**61)
-    fn to_legacyMath(self: Fixed) -> Math64x61_ {
-        // Fixed is 8 times the old math
-        let new: felt252 = (self / FixedTrait::from_unscaled_felt(8)).into();
-        new
-    }
-
-    // @notice Converts Math64x61 number to Fixed number
-    // @param num: Math64x61 number
-    // @returns Fixed number
-    fn from_legacyMath(num: Math64x61_) -> Fixed {
-        // 2**61 is 8 times smaller than 2**64
-        // so we can just multiply old legacy math number by 8 to get cubit 
-        FixedTrait::from_felt(num * 8)
-    }
 }
 
 // @notice Asserts that given option side is valid (either 0 or 1)
@@ -116,6 +98,9 @@ fn pow(a: u128, b: u128) -> u128 {
     let mut n = b;
 
     if n == 0 {
+        // 0**0 is undefined
+        assert(x > 0, 'Undefined pow action');
+
         return 1;
     }
 
@@ -149,11 +134,11 @@ fn pow(a: u128, b: u128) -> u128 {
 // @param currency_address: Address of the currency - used to get decimals
 // @return Input converted to Uint256
 fn toU256_balance(x: Fixed, currency_address: ContractAddress) -> u256 {
-    // converts for example 1.2 ETH (as Math64_61 float) to int(1.2*10**18)
+    // converts for example 1.2 ETH (as Cubit float) to int(1.2*10**18)
 
     // We will guide you through with an example
-    // x = 1.2 * 2**61 (example input... 2**61 since it is Math64x61)
-    // We want to divide the number by 2**61 and multiply by 10**18 to get number in the "wei style
+    // x = 1.2 * 2**64 (example input... 2**64 since it is Cubit)
+    // We want to divide the number by 2**64 and multiply by 10**18 to get number in the "wei style
     // But the order is important, first multiply and then divide, otherwise the .2 would be lost.
     // (1.2 * 2**64) * 10**18 / 2**64
     // We can split the 10*18 to (2**18 * 5**18)
@@ -161,9 +146,7 @@ fn toU256_balance(x: Fixed, currency_address: ContractAddress) -> u256 {
 
     x.assert_nn('toU256 - x is zero'); //  Now we can just use the mag in Fixed
 
-    let decimals: u128 = get_decimal(currency_address)
-        .expect('toU256 - Unable to get decimals')
-        .into();
+    let decimals: u128 = get_decimal(currency_address).into();
 
     _toU256_balance(x, decimals)
 }
@@ -174,8 +157,8 @@ fn _toU256_balance(x: Fixed, decimals: u128) -> u256 {
     let x_5 = x.mag * five_to_dec;
 
     // // we can rearange a little again
-    // // (1.2 * 2**61 * 5**18) / (2**61 / 2**18)
-    // // (1.2 * 2**61 * 5**18) / 2**(61 - 18)
+    // // (1.2 * 2**64 * 5**18) / (2**64 / 2**18)
+    // // (1.2 * 2**64 * 5**18) / 2**(64 - 18)
     let _64_minus_dec = 64 - decimals;
 
     let decreased_part = pow(2, _64_minus_dec);
@@ -192,17 +175,17 @@ fn _toU256_balance(x: Fixed, decimals: u128) -> u256 {
 // @dev Only for balances/token amounts, takes care of getting decimals etc
 // @param x: Value to be converted
 // @param currency_address: Address of the currency - used to get decimals
-// @return Input converted to Math64_61
+// @return Input converted to Cubit
 fn fromU256_balance(x: u256, currency_address: ContractAddress) -> Fixed {
     // We will guide you through with an example
     // x = 1.2*10**18 (example input... 10**18 since it is ETH)
-    // We want to divide the number by 10**18 and multiply by 2**64 to get Math64x61 number
+    // We want to divide the number by 10**18 and multiply by 2**64 to get Cubit number
     // But the order is important, first multiply and then divide, otherwise the .2 would be lost.
-    // (1.2 * 10**18) * 2**61 / 10**18
+    // (1.2 * 10**18) * 2**64 / 10**18
     // We can split the 10*18 to (2**18 * 5**18)
     // (1.2 * 10**18) * 2**64 / (5**18 * 2**18)
 
-    let decimals: u128 = get_decimal(currency_address).expect('fromU256 - decimals zero').into();
+    let decimals: u128 = get_decimal(currency_address).into();
 
     _fromU256_balance(x, decimals)
 }
@@ -286,13 +269,13 @@ fn get_underlying_from_option_data(
 // @dev 18 for ETH, 6 for USDC
 // @param token_address: Address of the token for which decimals are being retrieved
 // @return dec: Decimal count
-fn get_decimal(token_address: ContractAddress) -> Option<u8> {
-    if token_address == TOKEN_ETH_ADDRESS.try_into()? {
-        return Option::Some(18);
+fn get_decimal(token_address: ContractAddress) -> u8 {
+    if token_address == TOKEN_ETH_ADDRESS.try_into().unwrap() {
+        return 18;
     }
 
-    if token_address == TOKEN_USDC_ADDRESS.try_into()? {
-        return Option::Some(6);
+    if token_address == TOKEN_USDC_ADDRESS.try_into().unwrap() {
+        return 6;
     }
 
     assert(!token_address.is_zero(), 'Token address is zero');
@@ -300,12 +283,7 @@ fn get_decimal(token_address: ContractAddress) -> Option<u8> {
     let decimals = IERC20Dispatcher { contract_address: token_address }.decimals();
     assert(decimals != 0, 'Token has decimals = 0');
 
-    if decimals == 0 {
-        return Option::None(());
-    } else {
-        let decimals_felt: felt252 = decimals.into();
-        return Option::Some(decimals_felt.try_into()?);
-    }
+    decimals
 }
 
 // Tests --------------------------------------------------------------------------------------------------------------
@@ -354,7 +332,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected: ('Unknown option side',))]
     fn test_assert_option_side_exists_failing() {
         assert_option_side_exists(2, 'Unknown option side')
     }
@@ -367,7 +345,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected: ('Unknown option type',))]
     fn test_assert_option_type_exists_failing() {
         assert_option_type_exists(2, 'Unknown option type')
     }
@@ -429,7 +407,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected: ('u128_mul Overflow',))]
     fn test__pow_failing() {
         pow(69, 69); // Should overflow
     }

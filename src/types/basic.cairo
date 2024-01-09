@@ -9,9 +9,6 @@ type Timestamp = u64; // In seconds, Block timestamps are also u64
 
 type Int = u128;
 
-type Math64x61_ = felt252; // legacy, for AMM trait definition
-type LegacyVolatility = Math64x61_;
-type LegacyStrike = Math64x61_;
 type Maturity = felt252;
 
 type Volatility = Fixed;

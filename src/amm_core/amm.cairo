@@ -1,17 +1,18 @@
 #[starknet::contract]
 mod AMM {
+    use starknet::get_block_info;
     use starknet::ContractAddress;
+    use starknet::get_caller_address;
 
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
     use carmine_protocol::types::basic::{
-        Math64x61_, LegacyVolatility, LegacyStrike, Volatility, Strike, LPTAddress, OptionSide,
-        Timestamp, OptionType, Maturity, Int
+        Volatility, Strike, LPTAddress, OptionSide, Timestamp, OptionType, Maturity, Int
     };
 
     use carmine_protocol::oz::security::reentrancyguard::ReentrancyGuardComponent;
     use carmine_protocol::oz::access::ownable::OwnableComponent;
     use carmine_protocol::types::pool::Pool;
-    use carmine_protocol::types::option_::{LegacyOption, Option_};
+    use carmine_protocol::types::option_::Option_;
     use carmine_protocol::amm_interface::IAMM;
 
 
@@ -35,34 +36,21 @@ mod AMM {
         re_guard: ReentrancyGuardComponent::Storage,
         #[substorage(v0)]
         ownable: OwnableComponent::Storage,
-        // Old admin storage
-        Proxy_admin: felt252,
-        // Storage vars with new types
-        pool_volatility_adjustment_speed: LegacyMap<LPTAddress, Math64x61_>,
         new_pool_volatility_adjustment_speed: LegacyMap<LPTAddress, Fixed>,
-        pool_volatility_separate: LegacyMap::<
-            (LPTAddress, Maturity, LegacyStrike), LegacyVolatility
-        >,
         option_volatility: LegacyMap::<(ContractAddress, u64, u128), Volatility>,
-        option_position_: LegacyMap<(LPTAddress, OptionSide, Maturity, LegacyStrike), felt252>,
         new_option_position: LegacyMap<(LPTAddress, OptionSide, Timestamp, u128), Int>,
-        option_token_address: LegacyMap::<
-            (LPTAddress, OptionSide, Maturity, LegacyStrike), ContractAddress
-        >,
         new_option_token_address: LegacyMap::<
             (LPTAddress, OptionSide, Timestamp, u128), ContractAddress
         >,
-        available_options: LegacyMap::<(LPTAddress, felt252), LegacyOption>,
         new_available_options: LegacyMap::<(LPTAddress, u32), Option_>,
         new_available_options_usable_index: LegacyMap::<LPTAddress, u32>,
-        // Storage vars that are basically the same
-
         underlying_token_address: LegacyMap<LPTAddress, ContractAddress>,
         max_lpool_balance: LegacyMap::<LPTAddress, u256>,
         pool_locked_capital_: LegacyMap<LPTAddress, u256>,
         lpool_balance_: LegacyMap<LPTAddress, u256>,
         max_option_size_percent_of_voladjspd: felt252,
-        trading_halted: bool, // Make this bool if they can be interchanged
+        trading_halted: bool,
+        trading_halt_permission: LegacyMap::<ContractAddress, bool>,
         available_lptoken_adresses: LegacyMap<felt252, LPTAddress>,
         // (quote_token_addr, base_token_address, option_type) -> LpToken address
         lptoken_addr_for_given_pooled_token: LegacyMap::<
@@ -166,25 +154,25 @@ mod AMM {
         self.ownable.initializer(owner);
     }
 
+    fn can_set_trading_halt_status(trading_halt_status: bool) -> bool {
+        let caller = get_caller_address();
+        let mut state: ContractState = unsafe_new_contract_state();
+
+        if caller == state.ownable.owner() {
+            true // Governance can do whathever it wants
+        } else {
+            // Trading halt is true if trading is to be halted, false otherwise
+            // We want permitted addresses to be able to set it to true - to halt trading
+            // but not resume trading again (set trading halt to false)
+
+            // So for this function to return true, the 
+            // caller must be permitted and status has to be true
+            state.trading_halt_permission.read(caller) && trading_halt_status
+        }
+    }
+
     #[external(v0)]
     impl Amm of IAMM<ContractState> {
-        // This is a helper function that migrates old Proxy admin (from C0 OZ contracts) 
-        // Since C1 OZ contracts don't have Proxy admin contracts, we need to migrate to owner   
-        fn migrate_admin_to_owner(ref self: ContractState) {
-            // Read old storage 
-            let admin = self.Proxy_admin.read();
-            assert(admin != 0, 'Admin is zero');
-
-            // Convert admin to address
-            let owner: ContractAddress = admin.try_into().unwrap();
-
-            // Set owner
-            self.ownable.initializer(owner);
-
-            // Write zero to old storage, so that this function will always fail if called again
-            self.Proxy_admin.write(0);
-        }
-
         fn trade_open(
             ref self: ContractState,
             option_type: OptionType,
@@ -280,12 +268,24 @@ mod AMM {
         }
 
         fn set_trading_halt(ref self: ContractState, new_status: bool) {
-            self.ownable.assert_only_owner();
+            assert(can_set_trading_halt_status(new_status), 'Cant set trading halt status');
+
             State::set_trading_halt(new_status)
         }
 
         fn get_trading_halt(self: @ContractState) -> bool {
             State::get_trading_halt()
+        }
+
+        fn set_trading_halt_permission(
+            ref self: ContractState, address: ContractAddress, permission: bool
+        ) {
+            self.ownable.assert_only_owner();
+            State::set_trading_halt_permission(address, permission);
+        }
+
+        fn get_trading_halt_permission(self: @ContractState, address: ContractAddress) -> bool {
+            State::get_trading_halt_permission(address)
         }
 
         fn add_lptoken(
@@ -294,7 +294,6 @@ mod AMM {
             base_token_address: ContractAddress,
             option_type: OptionType,
             lptoken_address: ContractAddress,
-            pooled_token_addr: ContractAddress,
             volatility_adjustment_speed: Fixed,
             max_lpool_bal: u256,
         ) {
@@ -306,41 +305,12 @@ mod AMM {
                 base_token_address,
                 option_type,
                 lptoken_address,
-                pooled_token_addr,
                 volatility_adjustment_speed,
                 max_lpool_bal,
             );
             self.re_guard.end();
         }
 
-        fn add_option(
-            ref self: ContractState,
-            option_side: OptionSide,
-            maturity: u64,
-            strike_price: Fixed,
-            quote_token_address: ContractAddress,
-            base_token_address: ContractAddress,
-            option_type: OptionType,
-            lptoken_address: ContractAddress,
-            option_token_address_: ContractAddress,
-            initial_volatility: Fixed,
-        ) {
-            self.ownable.assert_only_owner();
-
-            self.re_guard.start();
-            Options::add_option(
-                option_side,
-                maturity,
-                strike_price,
-                quote_token_address,
-                base_token_address,
-                option_type,
-                lptoken_address,
-                option_token_address_,
-                initial_volatility,
-            );
-            self.re_guard.end();
-        }
         fn add_option_both_sides(
             ref self: ContractState,
             maturity: u64,

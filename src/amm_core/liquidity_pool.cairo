@@ -96,27 +96,42 @@ mod LiquidityPool {
     // @return res: Value of the non_expired position within specified liquidity pool
     fn get_value_of_pool_non_expired_position(lptoken_address: LPTAddress) -> Fixed {
         let mut i: u32 = 0;
+
+        // This variable accumulates the position while iterating
+        // over the options
         let mut pool_pos: Fixed = FixedTrait::from_felt(0);
         let now = get_block_timestamp();
 
         loop {
+            // Get option stored under given index
             let option = get_available_options(lptoken_address, i);
+            // Increase index for next iteration
             i += 1;
 
+            // Option.sum() = 0 means we've reached the end of stored
+            // options so we can break
             if option.sum() == 0 {
                 break;
             }
 
-            let option_position = option.pools_position();
-            if option_position == 0 {
-                continue;
-            }
-
+            // This function only calculates value of non-expired position, 
+            // so if maturity has alread passed then just continue
+            // (index is already increased few lines above)
             if option.maturity < now {
                 // Option is expired
                 continue;
             }
 
+            // Get pool's position for given option
+            let option_position = option.pools_position();
+
+            // If there is no position then we don't have to
+            // calculate anything
+            if option_position == 0 {
+                continue;
+            }
+
+            // Add value of the given position
             pool_pos += option.value_of_position(option_position);
         };
 
@@ -126,44 +141,43 @@ mod LiquidityPool {
     // @notice Retrieves the value of the expired position within the pool
     // @dev Returns a total value of pools non expired position.
     // @dev Walks backwards (iteration starts from last index) all options in storage var "available_options" 
-    // @dev     that expired in last 8 weeks
     // @param lptoken_address: Address of the liquidity pool token
     // @return res: Value of the expired position within specified liquidity pool
     fn get_value_of_pool_expired_position(lptoken_address: LPTAddress) -> Fixed {
-        let LOOKBACK = 24 * 3600 * 7 * 8;
-        // ^ Only look back 8 weeks, all options should be long expired by then
-        let now = get_block_timestamp();
-        let last_ix = get_available_options_usable_index(lptoken_address);
+        let mut i: u32 = 0;
 
-        if last_ix == 0 {
-            return FixedTrait::ZERO();
-        }
-
-        let mut ix = last_ix - 1;
+        // This variable accumulates the position while iterating
+        // over the options
         let mut pool_pos: Fixed = FixedTrait::from_felt(0);
+        let now = get_block_timestamp();
 
         loop {
-            let option = get_available_options(lptoken_address, ix);
-            assert(option.sum() != 0, 'GVoEO - opt sum zero');
+            // Get option stored under given index
+            let option = get_available_options(lptoken_address, i);
+            i += 1;
 
-            if (option.maturity >= now) {
-                break; // Option is not yet expired
-            };
-
-            if (now - option.maturity) > LOOKBACK {
-                break; // We're over lookback window
-            };
-
-            if ix == 0 {
+            // Option.sum() = 0 means we've reached the end of stored
+            // options so we can break
+            if option.sum() == 0 {
                 break;
             }
-            ix -= 1;
 
+            // This function only calculates value of expired position, 
+            // so if maturity is in the future just continue
+            if (option.maturity >= now) {
+                // Option is not expired yet
+                continue;
+            };
+
+            // Get pool's position in given option
             let option_position = option.pools_position();
-            if option_position == 0 {
-                continue; // Don't care if there is no position - or the option is already expired
-            }
 
+            // There is nothing to calculate if there is no position
+            if option_position == 0 {
+                continue;
+            };
+
+            // Add value of the given position
             pool_pos += option.value_of_position(option_position);
         };
 
@@ -245,7 +259,6 @@ mod LiquidityPool {
     // @param base_token_address: Address of the base token (ETH in ETH/USDC)
     // @param option_type: Type of the option 0 for Call, 1 for Put
     // @param lptoken_address: Address of the liquidity pool token
-    // @param pooled_token_addr: Address of the pooled token
     // @param volatility_adjustment_speed: Constant that determines how fast the volatility is changing
     // @param max_lpool_bal: Maximum balance of the bool for given pooled token
     fn add_lptoken(
@@ -253,7 +266,6 @@ mod LiquidityPool {
         base_token_address: ContractAddress,
         option_type: OptionType,
         lptoken_address: LPTAddress,
-        pooled_token_addr: LPTAddress,
         volatility_adjustment_speed: Fixed,
         max_lpool_bal: u256
     ) {
@@ -315,9 +327,6 @@ mod LiquidityPool {
         let caller_addr = get_caller_address();
         let own_addr = get_contract_address();
 
-        assert(!caller_addr.is_zero(), 'Caller address is zero');
-        assert(!own_addr.is_zero(), 'Own address is zero');
-
         let lptoken_address = get_lptoken_address_for_given_option(
             quote_token_address, base_token_address, option_type
         );
@@ -346,12 +355,14 @@ mod LiquidityPool {
 
         let max_balance = get_max_lpool_balance(lptoken_address);
 
-        assert(current_balance <= max_balance, 'Lpool bal exceeds maximum');
+        assert(new_balance <= max_balance, 'Lpool bal exceeds maximum');
 
         IERC20Dispatcher { contract_address: lptoken_address }.mint(caller_addr, mint_amount);
 
-        IERC20Dispatcher { contract_address: pooled_token_address }
+        let transfer_res = IERC20Dispatcher { contract_address: pooled_token_address }
             .transferFrom(caller_addr, own_addr, amount);
+
+        assert(transfer_res, 'Deposit liq unable to transfer');
     }
 
     // @notice Withdraw liquidity from the LP
@@ -401,13 +412,14 @@ mod LiquidityPool {
         );
 
         let current_balance = get_lpool_balance(lptoken_address);
-        let unlocked_capital = get_unlocked_capital(lptoken_address);
         let new_balance = current_balance - underlying_amount;
 
         set_lpool_balance(lptoken_address, new_balance);
 
-        IERC20Dispatcher { contract_address: pooled_token_address }
+        let transfer_res = IERC20Dispatcher { contract_address: pooled_token_address }
             .transfer(caller_addr, underlying_amount);
+
+        assert(transfer_res, 'Withdraw liq unable to transfer');
 
         IERC20Dispatcher { contract_address: lptoken_address }.burn(caller_addr, lp_token_amount);
     }
@@ -543,16 +555,6 @@ mod LiquidityPool {
             maturity,
             strike_price
         );
-
-        let current_pool_position = get_option_position(
-            lptoken_address, option_side, maturity, strike_price
-        );
-
-        let new_pool_position = current_pool_position - option_size;
-
-        let opt_size_u256: u256 = option_size.into();
-
-        assert(opt_size_u256 <= current_pool_position.into(), 'Opt size > curr pool pos');
 
         set_option_position(lptoken_address, option_side, maturity, strike_price, 0);
     }

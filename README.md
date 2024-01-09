@@ -39,6 +39,24 @@ The AMM is currently built on Cairo version 2.3.0. However while OpenZeppelin wa
 - src/tokens/lptoken.cairo
 - src/tokens/option_token.cairo
 
+## Tests
+Unit tests are located in files containing relevant code, while integration tests are located in `tests` folder. Currently there are integration tests for: 
+- Depositing liquidity
+- Withdrawing liquidity
+- Opening trade
+- Closing trade
+- Settling trade
+- View functions
+- Sandwich guard
+
+Most of the tests also contain a couple of different scenarios.
+
+Folder `src/testing` contains various utilities for writing tests:
+ - `setup.cairo` - Contains function that will fully deploy the AMM (along with tokens representing ETH, USDC), set it up, add liquidity etc. The function is called `deploy_setup` and it returns a tuple of two structs, where the first one is `Ctx` (context) which contains information needed for tests - addresses (AMM, tokens, LP tokens, OP tokens, admin...) strike, expiry etc. The second struct, `Dispatchers`, provides dispatcher for every contract that is deployed in the tests (it's more convenient than having to create them in the test manually). 
+ - `test_utils.cairo` provides utilities for fetching all the information about current AMM state (plus some user balances etc.). To fetch the `Stats` struct, call the `new` method on it with `Ctx` and `Dispatchers` as args. `Stats` also implement `PrintTrait` for more convenient debugging. 
+
+You can look into `tests/test_dummy.cairo` to see an example of how to write a new test - how to deploy the setup, prank the AMM, mock the Pragma price, fetch the AMM state etc.
+
 ## Deployment - Zero to Hero 
 Deployment described using `starkli`, version `0.1.20 (e4d2307)`.
 
@@ -65,8 +83,8 @@ There will be a lot of invoking and deploying, so it might be useful to make som
 
 3. Export some additional vars
     - `export ETH_ADDR=0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7`
-    - `export USDC_ADDR=0x005a643907b9a4bc6a55e9069c4fd5fd1f5c79a22470690f75556c4736e34426`
-    - `export BTC_ADDR=0x012d537dc323c439dc65c976fad242d5610d27cfb5f31689a0a319b8be7f3d56`
+    - `export USDC_ADDR=0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8`
+    - `export BTC_ADDR=0x03fe2b97c1fd336e750087d68b9b867997fd64a2661ff3ca5a7c771641e8e7ac`
     - `export INITIAL_VOL=1844674407370955161600` 
     - `export CALL_TYPE=0`
     - `export PUT_TYPE=1`
@@ -96,8 +114,8 @@ There will be a lot of invoking and deploying, so it might be useful to make som
     - `export MILLIE_USDC=1000000000000`
     - `export MILLIE_ETH=1000000000000000000000000`
 
-    - `sinv $AMM_ADDR add_lptoken $USDC_ADDR $ETH_ADDR $CALL_TYPE $ETH_CALL_LPT $ETH_ADDR $VOLADJSPD_ETHC 0 $MILLIE_ETH 0`
-    - `sinv $AMM_ADDR add_lptoken $USDC_ADDR $ETH_ADDR $PUT_TYPE $ETH_PUT_LPT $USDC_ADDR $VOLADJSPD_ETHP 0 $MILLIE_USDC 0`
+    - `sinv $AMM_ADDR add_lptoken $USDC_ADDR $ETH_ADDR $CALL_TYPE $ETH_CALL_LPT $VOLADJSPD_ETHC 0 $MILLIE_ETH 0`
+    - `sinv $AMM_ADDR add_lptoken $USDC_ADDR $ETH_ADDR $PUT_TYPE $ETH_PUT_LPT $VOLADJSPD_ETHP 0 $MILLIE_USDC 0`
 
 7. Deploy OP Tokens
     - `export MATURITY=...` (UNIX timestamp)
@@ -156,9 +174,10 @@ There will be a lot of invoking and deploying, so it might be useful to make som
     - PUT
         - `starkli call $AMM_ADDR get_lpool_balance $ETH_PUT_LPT`
 
-13. Enable trading and set max option size
-    - `sinv $AMM_ADDR set_trading_halt 1`
+13. Set max option size and permission for trading halt (owner has that by default)
     - `sinv $AMM_ADDR set_max_option_size_percent_of_voladjspd 50`
+    - `export ALLOWED_TO_HALT_TRADING_ADDR=...`
+    - `sinv $AMM_ADDR set_trading_halt_permission $ALLOWED_TO_HALT_TRADING_ADDR 1`
 
 14. YOLO into some Options
     - CALL 

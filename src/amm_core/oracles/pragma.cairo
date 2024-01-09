@@ -24,9 +24,8 @@ mod Pragma {
     };
 
     // Mainnet
-    // Testnet TODO: Check before mainnet launch
     const PRAGMA_ORACLE_ADDRESS: felt252 =
-        0x6df335982dddce41008e4c03f2546fa27276567b5274c7d0c1262f3c2b5d167; // C1 version
+        0x2a85bd616f912537c50a49a4076db02c00b29b2cdc8a197ce92ed1837fa875b; // C1 version
 
 
     // @notice Returns Pragma key identifier for stablecoins

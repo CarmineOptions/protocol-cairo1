@@ -10,7 +10,7 @@ use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{
 use cubit::f128::types::fixed::{Fixed, FixedTrait};
 use snforge_std::{
     declare, ContractClassTrait, start_prank, stop_prank, start_warp, stop_warp, ContractClass,
-    start_mock_call, stop_mock_call
+    start_mock_call, stop_mock_call, start_roll
 };
 use carmine_protocol::amm_core::helpers::{FixedHelpersTrait, toU256_balance};
 use carmine_protocol::amm_core::amm::AMM;
@@ -37,7 +37,6 @@ fn test_deposit_liquidity() {
             expiration_timestamp: Option::None(())
         }
     );
-
     let stats_0 = StatsTrait::new(ctx, dsps);
 
     assert(stats_0.bal_lpt_c == five_tokens, 'Call lpt bal wrong');
@@ -73,18 +72,19 @@ fn test_deposit_liquidity() {
     let one_eth: u256 = 1000000000000000000;
     let one_k_usdc: u256 = 1000000000;
 
+    start_roll(ctx.call_lpt_address, 2);
     dsps
         .amm
         .deposit_liquidity(ctx.eth_address, ctx.usdc_address, ctx.eth_address, 0, // Call
          one_eth);
 
+    start_roll(ctx.put_lpt_address, 2);
     dsps
         .amm
         .deposit_liquidity(
             ctx.usdc_address, ctx.usdc_address, ctx.eth_address, 1, // Put
              one_k_usdc
         );
-
     let stats_1 = StatsTrait::new(ctx, dsps);
 
     assert(stats_1.bal_lpt_c == five_tokens + one_eth, 'Call1 lpt bal wrong');
@@ -224,11 +224,13 @@ fn test_deposit_liquidity() {
     assert(stats_2.pool_pos_val_p == FixedTrait::ZERO(), 'Put2 pos val wrong');
 
     // Deposit one more time
+    start_roll(ctx.call_lpt_address, 3);
     dsps
         .amm
         .deposit_liquidity(ctx.eth_address, ctx.usdc_address, ctx.eth_address, 0, // Call
          one_eth);
 
+    start_roll(ctx.put_lpt_address, 3);
     dsps
         .amm
         .deposit_liquidity(
@@ -315,8 +317,7 @@ fn _add_options_with_longer_expiry(ctx: Ctx, dsps: Dispatchers) -> felt252 {
 
     dsps
         .amm
-        .add_option(
-            0, // side
+        .add_option_both_sides(
             longer_expiry.try_into().unwrap(),
             ctx.strike_price,
             ctx.usdc_address,
@@ -324,27 +325,13 @@ fn _add_options_with_longer_expiry(ctx: Ctx, dsps: Dispatchers) -> felt252 {
             0, // type
             ctx.call_lpt_address,
             new_long_call_address,
-            FixedTrait::from_unscaled_felt(100)
-        );
-
-    dsps
-        .amm
-        .add_option(
-            1, // side
-            longer_expiry.try_into().unwrap(),
-            ctx.strike_price,
-            ctx.usdc_address,
-            ctx.eth_address,
-            0, // type
-            ctx.call_lpt_address,
             new_short_call_address,
             FixedTrait::from_unscaled_felt(100)
         );
 
     dsps
         .amm
-        .add_option(
-            0, // side
+        .add_option_both_sides(
             longer_expiry.try_into().unwrap(),
             ctx.strike_price,
             ctx.usdc_address,
@@ -352,22 +339,43 @@ fn _add_options_with_longer_expiry(ctx: Ctx, dsps: Dispatchers) -> felt252 {
             1, // type
             ctx.put_lpt_address,
             new_long_put_address,
-            FixedTrait::from_unscaled_felt(100)
-        );
-
-    dsps
-        .amm
-        .add_option(
-            1, // side
-            longer_expiry.try_into().unwrap(),
-            ctx.strike_price,
-            ctx.usdc_address,
-            ctx.eth_address,
-            1, // type
-            ctx.put_lpt_address,
             new_short_put_address,
             FixedTrait::from_unscaled_felt(100)
         );
 
     longer_expiry
+}
+
+#[test]
+#[should_panic(expected: ('Lpool bal exceeds maximum',))]
+fn test_deposit_liquidity_at_max_lpool_balance() {
+    let (ctx, dsps) = deploy_setup();
+
+    start_prank(ctx.amm_address, ctx.admin_address);
+    start_mock_call(
+        PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
+        'get_data',
+        PragmaPricesResponse {
+            price: 140000000000,
+            decimals: 8,
+            last_updated_timestamp: 1000000000 + 60 * 60 * 12,
+            num_sources_aggregated: 0,
+            expiration_timestamp: Option::None(())
+        }
+    );
+
+    let stats_0 = StatsTrait::new(ctx, dsps);
+
+    // Set lower max lpool bal - at current balance so it's at maximum
+    start_prank(ctx.amm_address, ctx.admin_address);
+    dsps.amm.set_max_lpool_balance(ctx.call_lpt_address, stats_0.lpool_balance_c - 1);
+
+    // Deposit one more eth - it should fail
+    let one_eth: u256 = 1000000000000000000;
+
+    start_roll(ctx.call_lpt_address, 2);
+    dsps
+        .amm
+        .deposit_liquidity(ctx.eth_address, ctx.usdc_address, ctx.eth_address, 0, // Call
+         one_eth);
 }
