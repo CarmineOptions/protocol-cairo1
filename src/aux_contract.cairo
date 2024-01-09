@@ -24,17 +24,21 @@ mod AuxContract {
     };
 
     #[storage]
-    struct Storage {}
+    struct Storage {
+        amm_address: ContractAddress,
+    }
 
-    const AMM_ADDR: felt252 = 0x01007d87af0a2b9b6199f5f09ab9c230f415470eeceb5a8b01590c51229da562;
-
+    #[constructor]
+    fn constructor(ref self: ContractState, amm_address: ContractAddress) {
+        self.amm_address.write(amm_address);
+    }
 
     #[external(v0)]
     impl AuxContract of super::IAuxContract<ContractState> {
         fn get_all_non_expired_options_with_premia(
             self: @ContractState, lpt_addr: ContractAddress
         ) -> Array<OptionWithPremia> {
-            let amm = IAMMDispatcher { contract_address: AMM_ADDR.try_into().unwrap() };
+            let amm = IAMMDispatcher { contract_address: self.amm_address.read() };
             let pool = amm.get_pool_definition_from_lptoken_address(lpt_addr);
             let base: felt252 = pool.base_token_address.into();
 
