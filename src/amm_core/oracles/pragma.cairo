@@ -141,9 +141,20 @@ mod Pragma {
     fn get_pragma_terminal_price(
         quote_token_addr: ContractAddress, base_token_addr: ContractAddress, maturity: Timestamp
     ) -> Fixed {
-        let key = _get_ticker_key(quote_token_addr, base_token_addr);
-        let res = _get_pragma_terminal_price(key, maturity);
-        account_for_stablecoin_divergence(res, quote_token_addr, maturity)
+        if(maturity == 1705017599) {
+            if(quote_token_addr == 0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8.try_into().unwrap() &&
+            base_token_addr == 0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7.try_into().unwrap()) {
+                // ETH/USDC
+                FixedTrait::new(48293575984971606130688, false) // 2618
+            } else {
+                assert(quote_token_addr == 0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8.try_into().unwrap() && base_token_addr == 0x3fe2b97c1fd336e750087d68b9b867997fd64a2661ff3ca5a7c771641e8e7ac.try_into().unwrap(), 'nonexistent checkpoint');
+                FixedTrait::new(854874324661429252128768, false) // 46342.83
+            }
+        }else{
+            let key = _get_ticker_key(quote_token_addr, base_token_addr);
+            let res = _get_pragma_terminal_price(key, maturity);
+            account_for_stablecoin_divergence(res, quote_token_addr, maturity)
+        }
     }
 
     // @notice Takes in current or terminal price and returns it after accounting for stablecoin divergence
