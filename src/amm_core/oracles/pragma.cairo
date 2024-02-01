@@ -20,7 +20,7 @@ mod Pragma {
 
 
     use carmine_protocol::amm_core::constants::{
-        TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, TOKEN_WBTC_ADDRESS
+        TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, TOKEN_WBTC_ADDRESS, TOKEN_STRK_ADDRESS
     };
 
     // Mainnet
@@ -97,10 +97,21 @@ mod Pragma {
     fn get_pragma_median_price(
         quote_token_addr: ContractAddress, base_token_addr: ContractAddress,
     ) -> Fixed {
-        let key = _get_ticker_key(quote_token_addr, base_token_addr);
-        // .expect('Pragma/GPMP - Cant get spot key');
-        let res = _get_pragma_median_price(key);
-        account_for_stablecoin_divergence(res, quote_token_addr, 0)
+        // STRK/ETH gets special treatment
+        if base_token_addr.into() == TOKEN_STRK_ADDRESS
+            && quote_token_addr.into() == TOKEN_ETH_ADDRESS {
+            let eth_in_usd = _get_pragma_median_price(PragmaUtils::PRAGMA_ETH_USD_KEY);
+            let strk_in_usd = _get_pragma_median_price(PragmaUtils::PRAGMA_STRK_USD_KEY);
+
+            let strk_in_eth = strk_in_usd / eth_in_usd;
+
+            strk_in_eth
+        } else {
+            let key = _get_ticker_key(quote_token_addr, base_token_addr);
+            // .expect('Pragma/GPMP - Cant get spot key');
+            let res = _get_pragma_median_price(key);
+            account_for_stablecoin_divergence(res, quote_token_addr, 0)
+        }
     }
 
 
@@ -253,6 +264,7 @@ mod PragmaUtils {
     const PRAGMA_ADA_USD_KEY: felt252 = 18370920243876676;
     const PRAGMA_XRP_USD_KEY: felt252 = 24860302295520068;
     const PRAGMA_MATIC_USD_KEY: felt252 = 1425106761739050242884;
+    const PRAGMA_STRK_USD_KEY: felt252 = 6004514686061859652;
 
     // Stablecoins
     const PRAGMA_USDT_USD_KEY: felt252 = 6148333044652921668;

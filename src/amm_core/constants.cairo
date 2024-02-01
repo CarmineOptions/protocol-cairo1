@@ -48,6 +48,9 @@ const TOKEN_WBTC_ADDRESS: felt252 =
     0x03fe2b97c1fd336e750087d68b9b867997fd64a2661ff3ca5a7c771641e8e7ac; // mainnet
 // const TOKEN_WBTC_ADDRESS: felt252 =
 //     0x012d537dc323c439dc65c976fad242d5610d27cfb5f31689a0a319b8be7f3d56; // testnet
+
+const TOKEN_STRK_ADDRESS: felt252 = 0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d; // testnet
+
 // Tests --------------------------------------------------------------------------------------------------------------
 
 #[cfg(test)]
