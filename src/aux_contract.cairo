@@ -28,7 +28,7 @@ mod AuxContract {
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
     use carmine_protocol::amm_core::constants::{
-        TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, TOKEN_WBTC_ADDRESS
+        TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, TOKEN_WBTC_ADDRESS, TOKEN_STRK_ADDRESS
     };
 
     #[generate_trait]
@@ -105,12 +105,19 @@ mod AuxContract {
             let amm = IAMMDispatcher { contract_address: amm_address };
             let pool = amm.get_pool_definition_from_lptoken_address(lpt_addr);
             let base: felt252 = pool.base_token_address.into();
+            let quote: felt252 = pool.quote_token_address.into();
 
-            let opt_size = if base == TOKEN_ETH_ADDRESS {
-                1000000000000000000 // 10**18 * 1
-            } else {
-                10000000 // 10**8 * 0.1
-            };
+            let mut opt_size = 1000000000000000000; // 1 ETH -> 10**18 * 1
+
+            if quote == TOKEN_STRK_ADDRESS {
+                // for ETH/STRK options
+                opt_size = 1000000000000000; // 0.001 ETH -> 10**18 * 0.001
+            }
+
+            if base == TOKEN_WBTC_ADDRESS {
+                // for BTC/USDC options
+                opt_size = 10000000; // 0.1 BTC -> 10**8 * 0.1
+            }
 
             let mut i: u32 = 0;
             let current_block_time = get_block_timestamp();
