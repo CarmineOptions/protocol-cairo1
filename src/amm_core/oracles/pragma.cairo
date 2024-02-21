@@ -83,10 +83,11 @@ mod Pragma {
         };
 
         assert(time_diff < 3600, 'Pragma/_GPMP - Price too old');
-
+        
         convert_from_int_to_Fixed(
             res.price, res.decimals.try_into().expect('Pragma/_GPMP - decimals err')
         )
+        
     }
 
     // @notice Returns current Pragma median price for given key
@@ -98,17 +99,18 @@ mod Pragma {
         quote_token_addr: ContractAddress, base_token_addr: ContractAddress,
     ) -> Fixed {
         // STRK/ETH gets special treatment
-        if base_token_addr.into() == TOKEN_STRK_ADDRESS
-            && quote_token_addr.into() == TOKEN_ETH_ADDRESS {
+        if base_token_addr.into() == TOKEN_ETH_ADDRESS
+            && quote_token_addr.into() == TOKEN_STRK_ADDRESS {
             let eth_in_usd = _get_pragma_median_price(PragmaUtils::PRAGMA_ETH_USD_KEY);
             let strk_in_usd = _get_pragma_median_price(PragmaUtils::PRAGMA_STRK_USD_KEY);
 
-            let strk_in_eth = strk_in_usd / eth_in_usd;
+            let eth_in_strk =  eth_in_usd / strk_in_usd;
 
-            strk_in_eth
+            return eth_in_strk;
+
         } else {
             let key = _get_ticker_key(quote_token_addr, base_token_addr);
-            // .expect('Pragma/GPMP - Cant get spot key');
+
             let res = _get_pragma_median_price(key);
             account_for_stablecoin_divergence(res, quote_token_addr, 0)
         }
@@ -152,9 +154,21 @@ mod Pragma {
     fn get_pragma_terminal_price(
         quote_token_addr: ContractAddress, base_token_addr: ContractAddress, maturity: Timestamp
     ) -> Fixed {
-        let key = _get_ticker_key(quote_token_addr, base_token_addr);
-        let res = _get_pragma_terminal_price(key, maturity);
-        account_for_stablecoin_divergence(res, quote_token_addr, maturity)
+
+        if base_token_addr.into() == TOKEN_ETH_ADDRESS
+            && quote_token_addr.into() == TOKEN_STRK_ADDRESS {
+            let eth_in_usd =  _get_pragma_terminal_price(PragmaUtils::PRAGMA_ETH_USD_KEY, maturity);
+            let strk_in_usd = _get_pragma_terminal_price(PragmaUtils::PRAGMA_STRK_USD_KEY, maturity);
+
+            let eth_in_strk =  eth_in_usd / strk_in_usd;
+
+            return eth_in_strk;
+        } else {
+        
+            let key = _get_ticker_key(quote_token_addr, base_token_addr);
+            let res = _get_pragma_terminal_price(key, maturity);
+            return account_for_stablecoin_divergence(res, quote_token_addr, maturity);
+        }
     }
 
     // @notice Takes in current or terminal price and returns it after accounting for stablecoin divergence
@@ -196,6 +210,7 @@ mod Pragma {
         set_pragma_checkpoint(PragmaUtils::PRAGMA_ETH_USD_KEY);
         set_pragma_checkpoint(PragmaUtils::PRAGMA_USDC_USD_KEY);
         set_pragma_checkpoint(PragmaUtils::PRAGMA_WBTC_USD_KEY);
+        set_pragma_checkpoint(PragmaUtils::PRAGMA_STRK_USD_KEY);
     }
 }
 
