@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.2.0] - 2024-03-11
+
+### Added
+
+- Support for STRK/USDC pools.
+- Bump `starknet` version to `v2.3.1`
+
 ## [1.1.0] - 2024-03-11
 
 ### Added
@@ -25,6 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Initial release.
 
 [Unreleased]: https://github.com/CarmineOptions/protocol-cairo1/compare/v1.1.0...HEAD
+[1.2.0]: https://github.com/CarmineOptions/protocol-cairo1/compare/v1.1.1...v1.2.0
 [1.1.0]: https://github.com/CarmineOptions/protocol-cairo1/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/CarmineOptions/protocol-cairo1/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/CarmineOptions/protocol-cairo1/releases/tag/v1.0.0
