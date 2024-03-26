@@ -60,6 +60,12 @@ mod Pragma {
             } else {
                 0
             }
+        } else if base_token_addr.into() == TOKEN_STRK_ADDRESS {
+            if quote_token_addr.into() == TOKEN_USDC_ADDRESS {
+                PragmaUtils::PRAGMA_STRK_USD_KEY
+            } else {
+                0
+            }
         } else {
             0
         }

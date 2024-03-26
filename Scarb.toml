@@ -2,14 +2,14 @@
 name = "carmine_protocol"
 version = "0.1.0"
 description = "Code for Carmine Option AMM"
-cairo-version = "2.3.0"
+cairo-version = "2.3.1"
 homepage = "https://github.com/CarmineOptions/protocol-cairo1"
 
 [dependencies]
 # openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", commit = "841a073" }
 cubit = { git = "https://github.com/influenceth/cubit.git", commit = "b4590530d5aeae9aabd36740cc2a3d9e6adc5fde" }
 snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry.git", tag = "v0.10.1"}
-starknet = "=2.3.0"
+starknet = "=2.3.1"
 
 [[target.starknet-contract]]
 sierra = true
