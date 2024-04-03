@@ -40,6 +40,7 @@ mod View {
 
     use carmine_protocol::amm_core::helpers::fromU256_balance;
 
+    use carmine_protocol::amm_core::constants::FEE_PROPORTION_PERCENT;
 
     //
     // @title View Functions
@@ -223,6 +224,10 @@ mod View {
             correct_option.premia_before_fees(pos_size_int),
             correct_option.premia_with_fees(pos_size_int)
         )
+    }
+
+    fn get_fees_percentage() -> u128 {
+        FEE_PROPORTION_PERCENT
     }
 }
 

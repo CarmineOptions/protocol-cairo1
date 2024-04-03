@@ -639,5 +639,9 @@ mod AMM {
         ) -> (Fixed, Fixed) {
             View::get_total_premia(option, position_size, is_closing)
         }
+
+        fn get_fees_percentage(self: @ContractState) -> u128 {
+            View::get_fees_percentage()
+        }
     }
 }
