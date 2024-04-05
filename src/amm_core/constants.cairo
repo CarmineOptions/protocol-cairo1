@@ -38,19 +38,20 @@ const VOLATILITY_LOWER_BOUND: felt252 = 1;
 const VOLATILITY_UPPER_BOUND: felt252 = 42535295865117307932921825928971026432; // 2**64 * 2**61
 
 const TOKEN_ETH_ADDRESS: felt252 =
-    0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7; // mainnet and testnet
-const TOKEN_USDC_ADDRESS: felt252 =
-    0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8; // mainnet
+    0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7; // mainnet and sepolia
 // const TOKEN_USDC_ADDRESS: felt252 =
-//     0x0643907b9a4bc6a55e9069c4fd5fd1f5c79a22470690f75556c4736e34426; // testnet
+//     0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8; // mainnet
 
-const TOKEN_WBTC_ADDRESS: felt252 =
-    0x03fe2b97c1fd336e750087d68b9b867997fd64a2661ff3ca5a7c771641e8e7ac; // mainnet
+const TOKEN_USDC_ADDRESS: felt252 =
+    0x07b5be4ebf7c50f67d54d328c45ee21b06de8e39240c7943b25ab811c07c43e4; // sepolia
+
 // const TOKEN_WBTC_ADDRESS: felt252 =
-//     0x012d537dc323c439dc65c976fad242d5610d27cfb5f31689a0a319b8be7f3d56; // testnet
+//     0x03fe2b97c1fd336e750087d68b9b867997fd64a2661ff3ca5a7c771641e8e7ac; // mainnet
+const TOKEN_WBTC_ADDRESS: felt252 =
+    0x00c6164da852d230360333d6ade3551ee3e48124c815704f51fa7f12d8287dcc; // sepolia
 
 const TOKEN_STRK_ADDRESS: felt252 =
-    0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d; // mainnet
+    0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d; // mainnet and sepolia
 
 // Tests --------------------------------------------------------------------------------------------------------------
 
