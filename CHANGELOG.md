@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.3.0] - 2024-04-19
+
+### Added
+
+- `get_fees_percentage` view function
+
 ## [1.2.0] - 2024-03-11
 
 ### Added
@@ -31,7 +37,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Initial release.
 
-[Unreleased]: https://github.com/CarmineOptions/protocol-cairo1/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/CarmineOptions/protocol-cairo1/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/CarmineOptions/protocol-cairo1/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/CarmineOptions/protocol-cairo1/compare/v1.1.1...v1.2.0
 [1.1.0]: https://github.com/CarmineOptions/protocol-cairo1/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/CarmineOptions/protocol-cairo1/compare/v1.0.0...v1.0.1
