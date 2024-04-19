@@ -101,7 +101,7 @@ trait IAMM<TContractState> {
     ) -> Array<OptionWithUsersPosition>;
     fn get_all_lptoken_addresses(self: @TContractState,) -> Array<ContractAddress>;
     fn get_value_of_pool_position(self: @TContractState, lptoken_address: ContractAddress) -> Fixed;
-
+    fn get_fees_percentage(self: @TContractState) -> u128;
     fn get_value_of_pool_expired_position(
         self: @TContractState, lptoken_address: ContractAddress
     ) -> Fixed;
