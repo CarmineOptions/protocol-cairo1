@@ -256,7 +256,7 @@ mod State {
 
         let locked = state.pool_locked_capital_.read(lptoken_address);
         assert(balance >= locked, 'Cant set lpool < locked');
-        
+
         state.lpool_balance_.write(lptoken_address, balance)
     }
 
@@ -337,7 +337,7 @@ mod State {
 
         let lpool_bal = state.lpool_balance_.read(lptoken_address);
         assert(lpool_bal >= balance, 'Cant set locked > lpool');
-        
+
         state.pool_locked_capital_.write(lptoken_address, balance)
     }
 
