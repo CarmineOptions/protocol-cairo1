@@ -253,6 +253,10 @@ mod State {
     // @param balance: New lpool balance in u256
     fn set_lpool_balance(lptoken_address: LPTAddress, balance: u256) {
         let mut state = AMM::unsafe_new_contract_state();
+
+        let locked = state.pool_locked_capital_.read(lptoken_address);
+        assert(balance >= locked, 'Cant set lpool < locked');
+        
         state.lpool_balance_.write(lptoken_address, balance)
     }
 
@@ -330,6 +334,10 @@ mod State {
     // @param  balance: New amount of locked pooled tokens in u256
     fn set_pool_locked_capital(lptoken_address: LPTAddress, balance: u256) {
         let mut state = AMM::unsafe_new_contract_state();
+
+        let lpool_bal = state.lpool_balance_.read(lptoken_address);
+        assert(lpool_bal >= balance, 'Cant set locked > lpool');
+        
         state.pool_locked_capital_.write(lptoken_address, balance)
     }
 
