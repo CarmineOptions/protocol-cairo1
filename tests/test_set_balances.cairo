@@ -1,4 +1,3 @@
-
 use carmine_protocol::testing::setup::deploy_setup;
 use traits::{Into, TryInto};
 use debug::PrintTrait;
@@ -28,8 +27,8 @@ fn test_set_balance() {
 
     let five_tokens: u256 = 5000000000000000000; // with 18 decimals
     let five_k_tokens: u256 = 5000000000; // with 6 decimals
-    
-    let almost_five_k_tokens: u256 = 4950000000 ; // 4 950 USDC
+
+    let almost_five_k_tokens: u256 = 4950000000; // 4 950 USDC
 
     start_warp(ctx.amm_address, 1000000000);
     start_prank(ctx.amm_address, ctx.admin_address);
@@ -45,34 +44,32 @@ fn test_set_balance() {
         }
     );
 
-    
     ///////////////////////////////////////////////////
     // Open a long trade to lock in capital
     ///////////////////////////////////////////////////
-    
+
     let new_expiry = _add_options_with_longer_expiry(ctx, dsps);
-    
+
     // Opening 3.3 options -> all of unlocked (before premia)
     let five_int = 3300000000000000000; // 1*10**18
     let long_put_premia = dsps
         .amm
         .trade_open(
-            1, 
+            1,
             ctx.strike_price,
             new_expiry.try_into().unwrap(),
-            0, 
+            0,
             five_int,
             ctx.usdc_address,
             ctx.eth_address,
             FixedTrait::from_unscaled_felt(99999999999), // Disable this check
             99999999999 // Disable this check
         );
-    
 
     ///////////////////////////////////////////////////
     // Open a short trade 
     ///////////////////////////////////////////////////
-    
+
     start_mock_call(
         PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
         'get_data',
@@ -84,7 +81,7 @@ fn test_set_balance() {
             expiration_timestamp: Option::None(())
         }
     );
-    
+
     let one_int = 1000000000000000000; // 1*10**18
     let short_put_premia = dsps
         .amm
@@ -99,7 +96,6 @@ fn test_set_balance() {
             FixedTrait::from_felt(1), // Disable this check
             99999999999 // Disable this check
         );
-    
 }
 
 // We need another options that will be traded and pool will lock some caital in them
