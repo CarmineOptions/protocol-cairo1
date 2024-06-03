@@ -14,3 +14,6 @@ mod trading {
     mod test_trading_halt;
     mod test_validate_trade_input;
 }
+
+mod test_set_balances;
+
