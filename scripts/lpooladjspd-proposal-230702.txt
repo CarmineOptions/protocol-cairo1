@@ -1,0 +1,129 @@
+STRK/USDC call
+Call Pool Simulation:
+Initial volatility: 100
+Adjustment speed: 400000
+call currency in pool: 600000
+
+Trading simulation:
+Traded 60000.00: New volatility = 115.00
+Traded 120000.00: New volatility = 130.00
+Traded 180000.00: New volatility = 145.00
+Traded 240000.00: New volatility = 160.00
+Traded 300000.00: New volatility = 175.00
+Traded 360000.00: New volatility = 190.00
+Traded 420000.00: New volatility = 205.00
+Traded 480000.00: New volatility = 220.00
+Traded 540000.00: New volatility = 235.00
+Traded 600000.00: New volatility = 250.00
+
+Final volatility after trading all 600000 call: 250.00
+
+==================================================
+
+STRK/USDC put
+Put Pool Simulation:
+Initial volatility: 100
+Adjustment speed: 66666.67
+put currency in pool: 100000
+
+Trading simulation:
+Traded 10000.00: New volatility = 115.00
+Traded 20000.00: New volatility = 130.00
+Traded 30000.00: New volatility = 145.00
+Traded 40000.00: New volatility = 160.00
+Traded 50000.00: New volatility = 175.00
+Traded 60000.00: New volatility = 190.00
+Traded 70000.00: New volatility = 205.00
+Traded 80000.00: New volatility = 220.00
+Traded 90000.00: New volatility = 235.00
+Traded 100000.00: New volatility = 250.00
+
+Final volatility after trading all 100000 put: 250.00
+
+==================================================
+
+ETH/USDC call
+Call Pool Simulation:
+Initial volatility: 60
+Adjustment speed: 20
+call currency in pool: 23
+
+Trading simulation:
+Traded 2.30: New volatility = 71.50
+Traded 4.60: New volatility = 83.00
+Traded 6.90: New volatility = 94.50
+Traded 9.20: New volatility = 106.00
+Traded 11.50: New volatility = 117.50
+Traded 13.80: New volatility = 129.00
+Traded 16.10: New volatility = 140.50
+Traded 18.40: New volatility = 152.00
+Traded 20.70: New volatility = 163.50
+Traded 23.00: New volatility = 175.00
+
+Final volatility after trading all 23 call: 175.00
+
+==================================================
+
+ETH/USDC put
+Put Pool Simulation:
+Initial volatility: 60
+Adjustment speed: 50000
+put currency in pool: 78000
+
+Trading simulation:
+Traded 7800.00: New volatility = 75.60
+Traded 15600.00: New volatility = 91.20
+Traded 23400.00: New volatility = 106.80
+Traded 31200.00: New volatility = 122.40
+Traded 39000.00: New volatility = 138.00
+Traded 46800.00: New volatility = 153.60
+Traded 54600.00: New volatility = 169.20
+Traded 62400.00: New volatility = 184.80
+Traded 70200.00: New volatility = 200.40
+Traded 78000.00: New volatility = 216.00
+
+Final volatility after trading all 78000 put: 216.00
+
+==================================================
+
+STRK/ETH call pool
+Call Pool Simulation:
+Initial volatility: 100
+Adjustment speed: 10
+call currency in pool: 10
+
+Trading simulation:
+Traded 1.00: New volatility = 110.00
+Traded 2.00: New volatility = 120.00
+Traded 3.00: New volatility = 130.00
+Traded 4.00: New volatility = 140.00
+Traded 5.00: New volatility = 150.00
+Traded 6.00: New volatility = 160.00
+Traded 7.00: New volatility = 170.00
+Traded 8.00: New volatility = 180.00
+Traded 9.00: New volatility = 190.00
+Traded 10.00: New volatility = 200.00
+
+Final volatility after trading all 10 call: 200.00
+
+==================================================
+
+STRK/ETH put pool
+Put Pool Simulation:
+Initial volatility: 100
+Adjustment speed: 180000
+put currency in pool: 243000
+
+Trading simulation:
+Traded 24300.00: New volatility = 113.50
+Traded 48600.00: New volatility = 127.00
+Traded 72900.00: New volatility = 140.50
+Traded 97200.00: New volatility = 154.00
+Traded 121500.00: New volatility = 167.50
+Traded 145800.00: New volatility = 181.00
+Traded 170100.00: New volatility = 194.50
+Traded 194400.00: New volatility = 208.00
+Traded 218700.00: New volatility = 221.50
+Traded 243000.00: New volatility = 235.00
+
+Final volatility after trading all 243000 put: 235.00
