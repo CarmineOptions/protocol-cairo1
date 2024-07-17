@@ -2,7 +2,7 @@ use array::ArrayTrait;
 use array::SpanTrait;
 
 fn get_std_normal_cdf_table() -> Array<u128> {
-    let mut arr = ArrayTrait::new();
+    let mut arr = ArrayTrait::<u128>::new();
     arr.append(9223372036854775808);
     arr.append(9238090399336028160);
     arr.append(9252808702943967232);
@@ -4003,5 +4003,6 @@ fn get_std_normal_cdf_table() -> Array<u128> {
     arr.append(18446744073709539328);
     arr.append(18446744073709539328);
     arr.append(18446744073709539328);
-    arr.append(18446744073709539328)
+    arr.append(18446744073709539328);
+    arr
 }

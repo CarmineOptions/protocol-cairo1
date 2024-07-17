@@ -52,6 +52,7 @@ mod OptionPricing {
     //      and that is used for updating prices.
     // @param x: number in Math64x61 form
     // @return Returns std normal cdf value in Math64x61 form
+
     fn std_normal_cdf_dep(x: Fixed) -> Fixed {
         let TWO = FixedTrait::from_unscaled_felt(2);
         let THREE = FixedTrait::from_unscaled_felt(3);
@@ -88,7 +89,7 @@ mod OptionPricing {
             return (FixedTrait::ONE() - dist_symmetric_value);
         };
         let scaled_x = x * FixedTrait::new(4000, false);
-        let index_fixed = scaled_x / FixedTrait::new(147573952589676412928, false); // 2^6
+        let index_fixed = scaled_x / FixedTrait::new(147573952589676412928, false); // 2^67
         let index: usize = index_fixed.try_into().unwrap();
 
         // Ensure index is within bounds

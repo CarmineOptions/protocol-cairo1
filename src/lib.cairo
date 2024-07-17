@@ -17,6 +17,7 @@ mod amm_core {
         mod fees;
         mod option_pricing;
         mod option_pricing_helpers;
+        mod lookup_table_cdf;
     }
     mod peripheries {
         mod view;
