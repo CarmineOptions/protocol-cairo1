@@ -303,7 +303,6 @@ mod AMM {
             volatility_adjustment_speed: Fixed,
             max_lpool_bal: u256,
         ) {
-            self.ownable.assert_only_owner();
 
             self.re_guard.start();
             LiquidityPool::add_lptoken(
@@ -329,7 +328,6 @@ mod AMM {
             option_token_address_short: ContractAddress,
             initial_volatility: Fixed,
         ) {
-            self.ownable.assert_only_owner();
 
             self.re_guard.start();
             Options::add_option_both_sides(

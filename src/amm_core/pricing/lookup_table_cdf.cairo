@@ -2,7 +2,8 @@ use array::ArrayTrait;
 use array::SpanTrait;
 
 
-const CDF_LOOKUP_TABLE: Array<u128> = array![
+fn get_std_normal_cdf_table() -> Array<u128> {
+    array![
     9223372036854775808_u128,
     9252808702943967232_u128,
     9282244898050897920_u128,
@@ -2004,4 +2005,5 @@ const CDF_LOOKUP_TABLE: Array<u128> = array![
     18446744073709539328_u128,
     18446744073709539328_u128,
     18446744073709539328_u128
-].span()
+]
+}
