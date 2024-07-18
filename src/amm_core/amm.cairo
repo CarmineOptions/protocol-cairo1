@@ -173,6 +173,12 @@ mod AMM {
 
     #[external(v0)]
     impl Amm of IAMM<ContractState> {
+        fn std_normal_cdf(
+            ref self: ContractState,
+            x: Fixed
+        ) -> Fixed {
+            OptionPricing::std_normal_cdf(x)
+        }
         fn trade_open(
             ref self: ContractState,
             option_type: OptionType,

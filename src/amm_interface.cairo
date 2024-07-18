@@ -9,6 +9,10 @@ use starknet::ClassHash;
 
 #[starknet::interface]
 trait IAMM<TContractState> {
+    fn std_normal_cdf(
+        ref self: TContractState,
+        x: Fixed
+    ) -> Fixed;
     fn trade_open(
         ref self: TContractState,
         option_type: OptionType,

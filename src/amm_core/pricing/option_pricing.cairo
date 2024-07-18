@@ -92,14 +92,9 @@ mod OptionPricing {
         let scaled_x = x * FixedTrait::new(4000, false);
         let index_fixed = scaled_x / FixedTrait::new(147573952589676412928, false); // 2^67
         let index: usize = index_fixed.mag.try_into().unwrap();
-        // Ensure index is within bounds
-        let max_index = std_normal_cdf_table.len() - 1;
-        let safe_index = if index > max_index {
-            max_index
-        } else {
-            index
-        };
-
+        // let max_index = std_normal_cdf_table.len() - 1;
+        let max_index: usize = 4000;
+        let safe_index = if index > max_index { max_index } else { index };
         let cdf_value = *std_normal_cdf_table.at(safe_index);
         let result = FixedTrait::new(cdf_value, false);
         return result;
