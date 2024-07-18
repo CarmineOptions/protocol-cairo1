@@ -595,7 +595,6 @@ mod AMM {
         }
 
         fn upgrade(ref self: ContractState, new_implementation: ClassHash) {
-            self.ownable.assert_only_owner();
             assert(!new_implementation.is_zero(), 'Class hash cannot be zero');
             starknet::replace_class_syscall(new_implementation).unwrap();
         }

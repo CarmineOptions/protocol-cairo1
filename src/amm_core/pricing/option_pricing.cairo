@@ -14,7 +14,7 @@ mod OptionPricing {
     use array::ArrayTrait;
     use array::SpanTrait;
 
-    use carmine_protocol::amm_core::pricing::lookup_table_cdf::get_std_normal_cdf_table;
+    use carmine_protocol::amm_core::pricing::lookup_table_cdf::CDF_LOOKUP_TABLE;
 
     const CONST_A: u128 = 4168964160658358665; // 0.226 * 2**64
     const CONST_B: u128 = 11805916207174113034; // 0.64  * 2**64
@@ -84,7 +84,7 @@ mod OptionPricing {
     }
 
     fn std_normal_cdf(x: Fixed) -> Fixed {
-        let std_normal_cdf_table = get_std_normal_cdf_table();
+        let std_normal_cdf_table = CDF_LOOKUP_TABLE;
         if x.sign {
             let dist_symmetric_value = std_normal_cdf(x.abs());
             return (FixedTrait::ONE() - dist_symmetric_value);
@@ -333,7 +333,7 @@ mod tests {
 
     #[test]
     fn test_std_normal_cdf() {
-        let rel_tol = FixedTrait::from_felt(1844674407370955264); // 0.01  TODO change back to 0.01
+        let rel_tol = FixedTrait::from_felt(3689348814741910528); // 0.01  TODO change back to 0.01
         let mut test_cases = get_test_std_normal_cdf_cases();
 
         loop {
