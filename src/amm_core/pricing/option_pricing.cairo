@@ -14,7 +14,7 @@ mod OptionPricing {
     use array::ArrayTrait;
     use array::SpanTrait;
 
-    use carmine_protocol::amm_core::pricing::lookup_table_cdf::get_std_normal_cdf_table;
+    use carmine_protocol::amm_core::pricing::lookup_table_cdf::lookup_cdf;
 
     const CONST_A: u128 = 4168964160658358665; // 0.226 * 2**64
     const CONST_B: u128 = 11805916207174113034; // 0.64  * 2**64
@@ -84,19 +84,25 @@ mod OptionPricing {
     }
 
     fn std_normal_cdf(x: Fixed) -> Fixed {
-        let std_normal_cdf_table = get_std_normal_cdf_table();
+        x.print();
         if x.sign {
             let dist_symmetric_value = std_normal_cdf(x.abs());
             return (FixedTrait::ONE() - dist_symmetric_value);
         };
-        let scaled_x = x * FixedTrait::new(2000, false);
-        let index_fixed = scaled_x / FixedTrait::new(147573952589676412928, false); // 2^67
-        let index: usize = index_fixed.mag.try_into().unwrap();
-        // let max_index = std_normal_cdf_table.len() - 1;
-        let max_index: usize = 2000;
+        let index_fixed = x / FixedTrait::new(36028797018963968, false); // 2^55
+        index_fixed.print();
+        index_fixed.mag.print();
+
+        // let index: usize = index_fixed.mag.try_into().unwrap();
+        let index: usize = (index_fixed.mag / 18446744073709551616_u128).try_into().unwrap();
+        index.print();
+
+        let max_index: usize = 4096;
         let safe_index = if index > max_index { max_index } else { index };
-        let cdf_value = *std_normal_cdf_table.at(safe_index);
+        let cdf_value = lookup_cdf(safe_index.into());
         let result = FixedTrait::new(cdf_value, false);
+        result.print();
+        result.print();
         return result;
     }
 
@@ -353,6 +359,13 @@ mod tests {
 
     fn get_test_std_normal_cdf_cases() -> Array<(Fixed, Fixed)> {
         let mut arr = ArrayTrait::<(Fixed, Fixed)>::new();
+        arr
+            .append(
+                (
+                    FixedTrait::from_felt(36028797018963968),
+                    FixedTrait::from_felt(14326541)
+                )
+            );
         arr
             .append(
                 (
