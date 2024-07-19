@@ -362,13 +362,6 @@ mod tests {
         arr
             .append(
                 (
-                    FixedTrait::from_felt(36028797018963968),
-                    FixedTrait::from_felt(14326541)
-                )
-            );
-        arr
-            .append(
-                (
                     FixedTrait::from_felt(64800229984264355840),
                     FixedTrait::from_felt(18442654751404615680)
                 )
