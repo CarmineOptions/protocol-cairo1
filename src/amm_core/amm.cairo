@@ -646,5 +646,16 @@ mod AMM {
         fn get_fees_percentage(self: @ContractState) -> u128 {
             View::get_fees_percentage()
         }
+
+        // #[cfg(test)]
+        fn set_latest_oracle_price(
+            ref self: ContractState,
+            base_token_address: ContractAddress,
+            quote_token_address: ContractAddress,
+            price: Fixed,
+            block: u64
+        ) {
+            self.latest_oracle_price.write((base_token_address, quote_token_address), (price, block));
+        }
     }
 }

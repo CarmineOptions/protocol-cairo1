@@ -69,12 +69,12 @@ fn test_set_balance() {
     ///////////////////////////////////////////////////
     // Open a short trade 
     ///////////////////////////////////////////////////
-    // write_latest_oracle_price(
-    //    ctx.eth_address,
-    //    ctx.usdc_address,
-    //    FixedTrait::ZERO(),
-    //    0_u64
-    // );
+    dsps.amm.set_latest_oracle_price(
+        ctx.eth_address,
+        ctx.usdc_address,
+        FixedTrait::ZERO(),
+        0_u64
+    );
 
     start_mock_call(
         PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),
