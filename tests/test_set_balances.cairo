@@ -18,7 +18,6 @@ use carmine_protocol::amm_interface::{IAMMDispatcher, IAMMDispatcherTrait};
 use carmine_protocol::testing::setup::{Ctx, Dispatchers};
 
 use carmine_protocol::tokens::my_token::{MyToken, IMyTokenDispatcher, IMyTokenDispatcherTrait};
-use carmine_protocol::amm_core::state::State::write_latest_oracle_price;
 
 #[test]
 #[should_panic(expected: ('Cant set lpool < locked',))]

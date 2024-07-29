@@ -9,8 +9,9 @@ mod OracleAgg {
         get_pragma_median_price, get_pragma_terminal_price
     };
 
-    use carmine_protocol::amm_core::state::State::read_latest_oracle_price;
-    use carmine_protocol::amm_core::state::State::write_latest_oracle_price;
+    use carmine_protocol::amm_core::state::State::{
+        read_latest_oracle_price, write_latest_oracle_price
+    };
 
     // @notice Returns current spot price for given ticker (quote and base token)
     // @param quote_token_addr: Address of quote token in given ticker
@@ -33,7 +34,6 @@ mod OracleAgg {
             price_pragma
         }
     }
-
 
     // @notice Returns terminal spot price for given ticker (quote and base token)
     // @param quote_token_addr: Address of quote token in given ticker
@@ -58,8 +58,12 @@ mod tests {
     use carmine_protocol::amm_core::state::State;
     use carmine_protocol::amm_core::oracles::pragma::Pragma::PRAGMA_ORACLE_ADDRESS;
     use carmine_protocol::amm_core::oracles::pragma::PragmaUtils::{PragmaPricesResponse};
-    use carmine_protocol::amm_core::state::State::{write_latest_oracle_price, read_latest_oracle_price};
-    use snforge_std::{start_prank, stop_prank, start_mock_call, stop_mock_call, start_warp, stop_warp};
+    use carmine_protocol::amm_core::state::State::{
+        write_latest_oracle_price, read_latest_oracle_price
+    };
+    use snforge_std::{
+        start_prank, stop_prank, start_mock_call, stop_mock_call, start_warp, stop_warp
+    };
 
     #[test]
     fn test_get_current_price() {
@@ -70,10 +74,7 @@ mod tests {
 
         // Test case 1: When last_price_block_num == curr_block
         write_latest_oracle_price(
-            base_token_addr,
-            quote_token_addr,
-            FixedTrait::from_unscaled_felt(1000),
-            2000
+            base_token_addr, quote_token_addr, FixedTrait::from_unscaled_felt(1000), 2000
         );
 
         let result1 = OracleAgg::get_current_price(base_token_addr, quote_token_addr);
@@ -81,10 +82,7 @@ mod tests {
 
         // Test case 2: When last_price_block_num != curr_block
         write_latest_oracle_price(
-            base_token_addr,
-            quote_token_addr,
-            FixedTrait::from_unscaled_felt(1000),
-            1999
+            base_token_addr, quote_token_addr, FixedTrait::from_unscaled_felt(1000), 1999
         );
 
         // Mock Pragma oracle call
@@ -105,10 +103,7 @@ mod tests {
 
         // Test case 3: When last_price_block_num != curr_block, price in state is updated
         write_latest_oracle_price(
-            base_token_addr,
-            quote_token_addr,
-            FixedTrait::from_unscaled_felt(1000),
-            1999
+            base_token_addr, quote_token_addr, FixedTrait::from_unscaled_felt(1000), 1999
         );
 
         // Mock Pragma oracle call
@@ -125,7 +120,12 @@ mod tests {
         );
 
         let current_price = OracleAgg::get_current_price(base_token_addr, quote_token_addr);
-        let (new_price_in_state, last_block_in_state) = read_latest_oracle_price(base_token_addr, quote_token_addr);
-        assert(new_price_in_state == FixedTrait::from_unscaled_felt(1500), 'Price in state was not updated.');
+        let (new_price_in_state, last_block_in_state) = read_latest_oracle_price(
+            base_token_addr, quote_token_addr
+        );
+        assert(
+            new_price_in_state == FixedTrait::from_unscaled_felt(1500),
+            'Price in state was not updated.'
+        );
     }
 }

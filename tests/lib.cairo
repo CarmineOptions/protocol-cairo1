@@ -6,6 +6,7 @@ mod liquidity_pools {
     mod test_deposit_liquidity;
     mod test_withdraw_liquidity;
     mod test_expire_pool;
+    mod test_get_value_of_pool_position;
 }
 mod trading {
     mod test_trade_close;

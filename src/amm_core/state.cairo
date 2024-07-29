@@ -52,8 +52,8 @@ mod State {
 
     use carmine_protocol::amm_core::amm::AMM::latest_oracle_price;
     use carmine_protocol::amm_core::amm::AMM::latest_oracle_priceContractMemberStateTrait;
-    
-    
+
+
     use carmine_protocol::amm_core::amm::AMM;
 
     use carmine_protocol::types::basic::LPTAddress;
@@ -529,29 +529,27 @@ mod State {
         let pool = state.pool_definition_from_lptoken_address.write(lptoken_address, pool);
     }
 
-    fn read_latest_oracle_price(base_token_address: ContractAddress, quote_token_address: ContractAddress) -> (Fixed, u64) {
+    fn read_latest_oracle_price(
+        base_token_address: ContractAddress, quote_token_address: ContractAddress
+    ) -> (Fixed, u64) {
         let state = AMM::unsafe_new_contract_state();
         state.latest_oracle_price.read((base_token_address, quote_token_address))
     }
 
     fn write_latest_oracle_price(
-        base_token_address: ContractAddress, 
+        base_token_address: ContractAddress,
         quote_token_address: ContractAddress,
         price: Fixed,
         current_block: u64
     ) {
-
         let mut state = AMM::unsafe_new_contract_state();
 
-        state.latest_oracle_price.write(
-            (base_token_address, quote_token_address),
-            (price, current_block)
-        )
+        state
+            .latest_oracle_price
+            .write((base_token_address, quote_token_address), (price, current_block))
     }
 
 
-    
-    
     // @notice Returns Option struct with addition info based on several option parameters
     // @param lptoken_address: Address of liquidity pool that corresponds to the option
     // @param option_side: Option's side
