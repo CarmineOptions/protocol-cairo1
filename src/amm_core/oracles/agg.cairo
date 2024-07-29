@@ -18,7 +18,7 @@ mod OracleAgg {
     // @param base_token_addr: Address of base token in given ticker
     // @return current_price: Current spot price
     fn get_current_price(
-        base_token_addr: ContractAddress, quote_token_addr: ContractAddress,
+        quote_token_addr: ContractAddress, base_token_addr: ContractAddress,
     ) -> Fixed {
         let curr_block = get_block_info().unbox().block_number;
         let (last_price, last_price_block_num) = read_latest_oracle_price(
@@ -80,7 +80,7 @@ mod tests {
             base_token_addr, quote_token_addr, FixedTrait::from_unscaled_felt(1000), 2000
         );
 
-        let result1 = OracleAgg::get_current_price(base_token_addr, quote_token_addr);
+        let result1 = OracleAgg::get_current_price(quote_token_addr, base_token_addr);
         assert(result1 == FixedTrait::from_unscaled_felt(1000), 'Wrong price when block matches');
 
         // Test case 2: When last_price_block_num != curr_block
@@ -101,7 +101,7 @@ mod tests {
             }
         );
 
-        let result2 = OracleAgg::get_current_price(base_token_addr, quote_token_addr);
+        let result2 = OracleAgg::get_current_price(quote_token_addr, base_token_addr);
         assert(result2 == FixedTrait::from_unscaled_felt(1500), 'Wrong price from Pragma');
 
         // Test case 3: When last_price_block_num != curr_block, price in state is updated
@@ -122,7 +122,7 @@ mod tests {
             }
         );
 
-        let current_price = OracleAgg::get_current_price(base_token_addr, quote_token_addr);
+        let current_price = OracleAgg::get_current_price(quote_token_addr, base_token_addr);
         let (new_price_in_state, last_block_in_state) = read_latest_oracle_price(
             base_token_addr, quote_token_addr
         );
