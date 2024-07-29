@@ -14,6 +14,9 @@ mod OracleAgg {
     };
 
     // @notice Returns current spot price for given ticker (quote and base token)
+    // @dev This function first checks if a price has been cached in the current block.
+    //      If so, it returns the cached price to avoid unnecessary oracle calls within
+    //      the same block. This optimization reduces external calls and gas costs.
     // @param quote_token_addr: Address of quote token in given ticker
     // @param base_token_addr: Address of base token in given ticker
     // @return current_price: Current spot price
@@ -36,9 +39,6 @@ mod OracleAgg {
     }
 
     // @notice Returns terminal spot price for given ticker (quote and base token)
-    // @dev This function first checks if a price has been cached in the current block.
-    //      If so, it returns the cached price to avoid unnecessary oracle calls within
-    //      the same block. This optimization reduces external calls and gas costs.
     // @param quote_token_addr: Address of quote token in given ticker
     // @param base_token_addr: Address of base token in given ticker
     // @return terminal_price: Terminal spot price
