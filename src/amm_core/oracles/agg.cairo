@@ -28,7 +28,7 @@ mod OracleAgg {
         if last_price_block_num == curr_block {
             last_price
         } else {
-            let price_pragma = get_pragma_median_price(base_token_addr, quote_token_addr);
+            let price_pragma = get_pragma_median_price(quote_token_addr, base_token_addr);
             write_latest_oracle_price(base_token_addr, quote_token_addr, price_pragma, curr_block);
 
             price_pragma
