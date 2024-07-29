@@ -529,6 +529,10 @@ mod State {
         let pool = state.pool_definition_from_lptoken_address.write(lptoken_address, pool);
     }
 
+    // @notice Reads the latest oracle price for a given token pair
+    // @param base_token_address: Address of the base token
+    // @param quote_token_address: Address of the quote token
+    // @returns (price, block): Tuple containing the latest price as Fixed and the block number when it was updated
     fn read_latest_oracle_price(
         base_token_address: ContractAddress, quote_token_address: ContractAddress
     ) -> (Fixed, u64) {
@@ -536,6 +540,11 @@ mod State {
         state.latest_oracle_price.read((base_token_address, quote_token_address))
     }
 
+    // @notice Writes the latest oracle price for a given token pair
+    // @param base_token_address: Address of the base token
+    // @param quote_token_address: Address of the quote token
+    // @param price: The latest price as Fixed
+    // @param current_block: The current block number
     fn write_latest_oracle_price(
         base_token_address: ContractAddress,
         quote_token_address: ContractAddress,
