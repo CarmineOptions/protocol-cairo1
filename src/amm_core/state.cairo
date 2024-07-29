@@ -8,8 +8,6 @@ mod State {
     use cubit::f128::types::fixed::FixedTrait;
     use starknet::get_block_info;
 
-    
-
     use carmine_protocol::amm_core::helpers::assert_option_side_exists;
     use carmine_protocol::amm_core::helpers::assert_option_type_exists;
     use carmine_protocol::amm_core::helpers::FixedHelpersTrait;

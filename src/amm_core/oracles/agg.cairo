@@ -21,20 +21,14 @@ mod OracleAgg {
     ) -> Fixed {
         let curr_block = get_block_info().unbox().block_number;
         let (last_price, last_price_block_num) = read_latest_oracle_price(
-            base_token_addr,
-            quote_token_addr
+            base_token_addr, quote_token_addr
         );
 
         if last_price_block_num == curr_block {
             last_price
         } else {
             let price_pragma = get_pragma_median_price(base_token_addr, quote_token_addr);
-            write_latest_oracle_price(
-                base_token_addr, 
-                quote_token_addr, 
-                price_pragma,
-                curr_block
-            );
+            write_latest_oracle_price(base_token_addr, quote_token_addr, price_pragma, curr_block);
 
             price_pragma
         }

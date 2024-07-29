@@ -216,13 +216,4 @@ trait IAMM<TContractState> {
     fn set_pragma_checkpoint(ref self: TContractState, key: felt252);
     fn set_pragma_required_checkpoints(ref self: TContractState);
     fn upgrade(ref self: TContractState, new_implementation: ClassHash);
-
-    // #[cfg(test)]
-    fn set_latest_oracle_price(
-        ref self: TContractState,
-        base_token_address: ContractAddress,
-        quote_token_address: ContractAddress,
-        price: Fixed,
-        block: u64
-    );
 }
