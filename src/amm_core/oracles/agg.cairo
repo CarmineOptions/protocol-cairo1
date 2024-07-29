@@ -18,7 +18,7 @@ mod OracleAgg {
     // @param base_token_addr: Address of base token in given ticker
     // @return current_price: Current spot price
     fn get_current_price(
-        quote_token_addr: ContractAddress, base_token_addr: ContractAddress,
+        quote_token_addr: ContractAddress, base_token_addr: ContractAddress
     ) -> Fixed {
         let curr_block = get_block_info().unbox().block_number;
         let (last_price, last_price_block_num) = read_latest_oracle_price(
