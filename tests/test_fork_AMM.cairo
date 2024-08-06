@@ -49,12 +49,12 @@ fn test_amm_deposit_withdraw_liquidity() {
     stop_prank(amm_contract_addr);
 
     // Test parameters
-    let quote_token_address: ContractAddress = // USDC address
-    0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8
+    let quote_token_address: ContractAddress =
+        0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8
         .try_into()
         .unwrap();
-    let base_token_address: ContractAddress = // ETH address
-    0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7
+    let base_token_address: ContractAddress =
+        0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7
         .try_into()
         .unwrap();
 
@@ -147,12 +147,12 @@ fn test_amm_open_close_trade() {
     stop_prank(amm_contract_addr);
 
     // Test parameters
-    let quote_token_address: ContractAddress = // USDC address
-    0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8
+    let quote_token_address: ContractAddress =
+        0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8
         .try_into()
         .unwrap();
-    let base_token_address: ContractAddress = // ETH address
-    0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7
+    let base_token_address: ContractAddress =
+        0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7
         .try_into()
         .unwrap();
 
@@ -275,12 +275,12 @@ fn test_amm_open_trade_and_settle() {
     stop_prank(amm_contract_addr);
 
     // Test parameters (same as before)
-    let quote_token_address: ContractAddress = // USDC address
-    0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8
+    let quote_token_address: ContractAddress =
+        0x53c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8
         .try_into()
         .unwrap();
-    let base_token_address: ContractAddress = // ETH address
-    0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7
+    let base_token_address: ContractAddress =
+        0x49d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7
         .try_into()
         .unwrap();
 
