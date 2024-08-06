@@ -1,6 +1,7 @@
 mod test_dummy;
 mod test_sandwich_guard;
 mod test_view;
+mod test_fork_AMM;
 
 mod liquidity_pools {
     mod test_deposit_liquidity;
