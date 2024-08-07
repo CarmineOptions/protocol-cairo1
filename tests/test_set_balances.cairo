@@ -19,7 +19,6 @@ use carmine_protocol::testing::setup::{Ctx, Dispatchers};
 
 use carmine_protocol::tokens::my_token::{MyToken, IMyTokenDispatcher, IMyTokenDispatcherTrait};
 
-
 #[test]
 #[should_panic(expected: ('Cant set lpool < locked',))]
 fn test_set_balance() {
@@ -69,6 +68,7 @@ fn test_set_balance() {
     ///////////////////////////////////////////////////
     // Open a short trade 
     ///////////////////////////////////////////////////
+    start_roll(ctx.amm_address, 2001);
 
     start_mock_call(
         PRAGMA_ORACLE_ADDRESS.try_into().unwrap(),

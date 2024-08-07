@@ -6,6 +6,7 @@ mod State {
     use core::option::OptionTrait;
     use cubit::f128::types::fixed::Fixed;
     use cubit::f128::types::fixed::FixedTrait;
+    use starknet::get_block_info;
 
     use carmine_protocol::amm_core::helpers::assert_option_side_exists;
     use carmine_protocol::amm_core::helpers::assert_option_type_exists;
@@ -48,6 +49,10 @@ mod State {
     use carmine_protocol::amm_core::amm::AMM::pool_definition_from_lptoken_address;
     use carmine_protocol::amm_core::amm::AMM::lpool_balance_;
     use carmine_protocol::amm_core::amm::AMM::pool_locked_capital_;
+
+    use carmine_protocol::amm_core::amm::AMM::latest_oracle_price;
+    use carmine_protocol::amm_core::amm::AMM::latest_oracle_priceContractMemberStateTrait;
+
 
     use carmine_protocol::amm_core::amm::AMM;
 
@@ -523,6 +528,36 @@ mod State {
         let mut state = AMM::unsafe_new_contract_state();
         let pool = state.pool_definition_from_lptoken_address.write(lptoken_address, pool);
     }
+
+    // @notice Reads the latest oracle price for a given token pair
+    // @param base_token_address: Address of the base token
+    // @param quote_token_address: Address of the quote token
+    // @returns (price, block): Tuple containing the latest price as Fixed and the block number when it was updated
+    fn read_latest_oracle_price(
+        base_token_address: ContractAddress, quote_token_address: ContractAddress
+    ) -> (Fixed, u64) {
+        let state = AMM::unsafe_new_contract_state();
+        state.latest_oracle_price.read((base_token_address, quote_token_address))
+    }
+
+    // @notice Writes the latest oracle price for a given token pair
+    // @param base_token_address: Address of the base token
+    // @param quote_token_address: Address of the quote token
+    // @param price: The latest price as Fixed
+    // @param current_block: The current block number
+    fn write_latest_oracle_price(
+        base_token_address: ContractAddress,
+        quote_token_address: ContractAddress,
+        price: Fixed,
+        current_block: u64
+    ) {
+        let mut state = AMM::unsafe_new_contract_state();
+
+        state
+            .latest_oracle_price
+            .write((base_token_address, quote_token_address), (price, current_block))
+    }
+
 
     // @notice Returns Option struct with addition info based on several option parameters
     // @param lptoken_address: Address of liquidity pool that corresponds to the option
