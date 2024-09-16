@@ -11,6 +11,7 @@ mod amm_core {
     mod oracles {
         mod agg;
         mod pragma;
+        mod chainlink;
         mod oracle_helpers;
     }
     mod pricing {
