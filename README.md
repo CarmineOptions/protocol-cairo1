@@ -1,9 +1,9 @@
 # protocol-cairo1
-This repo contains Carmine Options AMM written in C1, version `2.3.0`.
+This repo contains Carmine Options AMM written in C1, version `2.3.1`.
 
 ## Building/Testing the project
 The contracts are build using Scarb `2.3.0.` Install with:
-`curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | sh -s -- -v 2.3.0`
+`curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | sh -s -- -v 2.3.1`
 
 Then build by running `scarb build` command.
 
