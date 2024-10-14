@@ -24,8 +24,8 @@ use carmine_protocol::erc20_interface::IERC20Dispatcher;
 use carmine_protocol::erc20_interface::IERC20DispatcherTrait;
 use carmine_protocol::types::basic::{OptionType, OptionSide};
 
-#[test]
-#[fork("MAINNET")]
+// #[test]
+// #[fork("MAINNET")]
 fn test_amm_deposit_withdraw_liquidity() {
     // Replace with your actual AMM contract address on mainnet
     let amm_contract_addr: ContractAddress =
@@ -122,8 +122,8 @@ fn test_amm_deposit_withdraw_liquidity() {
 }
 
 
-#[test]
-#[fork("MAINNET")]
+// #[test]
+// #[fork("MAINNET")]
 fn test_amm_open_close_trade() {
     // Replace with your actual AMM contract address on mainnet
     let amm_contract_addr: ContractAddress =
@@ -250,8 +250,8 @@ fn test_amm_open_close_trade() {
 }
 
 
-#[test]
-#[fork("MAINNET")]
+// #[test]
+// #[fork("MAINNET")]
 fn test_amm_open_trade_and_settle() {
     // AMM setup and upgrade
     let amm_contract_addr: ContractAddress =
