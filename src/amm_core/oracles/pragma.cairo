@@ -222,6 +222,7 @@ mod Pragma {
         set_pragma_checkpoint(PragmaUtils::PRAGMA_USDC_USD_KEY);
         set_pragma_checkpoint(PragmaUtils::PRAGMA_WBTC_USD_KEY);
         set_pragma_checkpoint(PragmaUtils::PRAGMA_STRK_USD_KEY);
+        set_pragma_checkpoint(PragmaUtils::PRAGMA_EKUBO_USD_KEY);
     }
 }
 
