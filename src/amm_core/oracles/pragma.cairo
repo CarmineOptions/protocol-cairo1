@@ -20,7 +20,8 @@ mod Pragma {
 
 
     use carmine_protocol::amm_core::constants::{
-        TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, TOKEN_WBTC_ADDRESS, TOKEN_STRK_ADDRESS
+        TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, TOKEN_WBTC_ADDRESS, TOKEN_STRK_ADDRESS,
+        TOKEN_EKUBO_ADDRESS
     };
 
     // Mainnet
@@ -63,6 +64,12 @@ mod Pragma {
         } else if base_token_addr.into() == TOKEN_STRK_ADDRESS {
             if quote_token_addr.into() == TOKEN_USDC_ADDRESS {
                 PragmaUtils::PRAGMA_STRK_USD_KEY
+            } else {
+                0
+            }
+        } else if base_token_addr.into() == TOKEN_EKUBO_ADDRESS {
+            if quote_token_addr.into() == TOKEN_USDC_ADDRESS {
+                PragmaUtils::PRAGMA_EKUBO_USD_KEY
             } else {
                 0
             }
@@ -284,6 +291,7 @@ mod PragmaUtils {
     const PRAGMA_XRP_USD_KEY: felt252 = 24860302295520068;
     const PRAGMA_MATIC_USD_KEY: felt252 = 1425106761739050242884;
     const PRAGMA_STRK_USD_KEY: felt252 = 6004514686061859652;
+    const PRAGMA_EKUBO_USD_KEY: felt252 = 1278253658919688033092;
 
     // Stablecoins
     const PRAGMA_USDT_USD_KEY: felt252 = 6148333044652921668;
