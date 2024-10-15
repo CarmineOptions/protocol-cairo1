@@ -53,9 +53,8 @@ fn USDC_WHALE() -> ContractAddress {
     0x00000005dd3d2f4429af886cd1a3b08289dbcea99a294197e9eb43b0e0325b4b.try_into().unwrap()
 }
 
-
 #[test]
-#[fork("MAINNET")]
+#[fork("MAINNET", block_number: 803195)]
 fn test_add_ekubo_options() {
     let amm_contract_addr: ContractAddress =
         0x047472e6755afc57ada9550b6a3ac93129cc4b5f98f51c73e0644d129fd208d9
