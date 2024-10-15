@@ -40,9 +40,10 @@ use carmine_protocol::oz::access::interface::IOwnableDispatcherTrait;
 /// TODO:
 /// [x] Add lpools
 /// [x] Add options
-/// [ ] Add liquidity to both pools
-/// [ ] Trade options
-/// [ ] Settle options
+/// [x] Add liquidity to both pools
+/// [x] Trade options
+/// [x] Close options
+/// [x] Settle options
 
 fn EKUBO_WHALE() -> ContractAddress {
     0x02a3ed03046e1042e193651e3da6d3c973e3d45c624442be936a374380a78bb5.try_into().unwrap()
@@ -66,9 +67,14 @@ fn test_add_ekubo_options() {
     // Add ekubo lpools
     let (ekubo_call_lpt, ekubo_put_lpt) = add_ekubo_lpools(amm_contract_addr, owner);
 
-    let now = get_block_timestamp();
-    let expiry = now + 7 * 86_400; // + week
+    // Let's pretend that now is one week ago so that we 
+    // dont have to deal with pragma price being too old
+    // when setting checkpoints for expirying options
+    let expiry = get_block_timestamp();
+    let now = expiry - 7 * 86_400; // + week
+    
     let strike_price = 46116860184273879040; // 2.5 * 2**64
+    start_warp(amm_contract_addr, now);
     deploy_and_add_ekubo_options(
         amm_contract_addr, ekubo_call_lpt, ekubo_put_lpt, expiry, strike_price
     );
@@ -136,8 +142,6 @@ fn test_add_ekubo_options() {
             expiry
         );
     stop_prank(amm_contract_addr);
-    'LCALLL'.print();
-    long_call_premia.print();
 
     start_prank(quote_token, USDC_WHALE());
     usdc_token.approve(amm_contract_addr, TEN_K_EKUBO);
@@ -150,7 +154,7 @@ fn test_add_ekubo_options() {
             strike_fixed,
             expiry,
             TRADE_SIDE_LONG,
-            (TEN_K_USDC / 10).try_into().unwrap(),
+            (TEN_K_EKUBO / 100).try_into().unwrap(),
             quote_token,
             base_token,
             FixedTrait::new_unscaled(1_000_000, false),
@@ -158,8 +162,142 @@ fn test_add_ekubo_options() {
         );
     stop_prank(amm_contract_addr);
 
-    'LPUUTT'.print();
-    long_put_premia.print();
+    start_warp(amm_contract_addr, now + 86_400);
+    // Close options
+
+    start_prank(amm_contract_addr, EKUBO_WHALE());
+    let _ = amm
+        .trade_close(
+            OPTION_CALL,
+            strike_fixed,
+            expiry,
+            TRADE_SIDE_LONG,
+            (TEN_K_EKUBO / 100).try_into().unwrap(),
+            quote_token,
+            base_token,
+            FixedTrait::new(1, false),
+            expiry
+        );
+    stop_prank(amm_contract_addr);
+
+    start_prank(amm_contract_addr, USDC_WHALE());
+    let _ = amm
+        .trade_close(
+            OPTION_PUT,
+            strike_fixed,
+            expiry,
+            TRADE_SIDE_LONG,
+            (TEN_K_EKUBO / 100).try_into().unwrap(),
+            quote_token,
+            base_token,
+            FixedTrait::new(1, false),
+            expiry
+        );
+    stop_prank(amm_contract_addr);
+
+    // Open again so we have some
+    start_prank(amm_contract_addr, EKUBO_WHALE());
+    let _ = amm
+        .trade_open(
+            OPTION_CALL,
+            strike_fixed,
+            expiry,
+            TRADE_SIDE_LONG,
+            (TEN_K_EKUBO / 100).try_into().unwrap(),
+            quote_token,
+            base_token,
+            FixedTrait::new_unscaled(1_000_000, false),
+            expiry
+        );
+    stop_prank(amm_contract_addr);
+
+    start_prank(quote_token, USDC_WHALE());
+    usdc_token.approve(amm_contract_addr, TEN_K_EKUBO);
+    stop_prank(quote_token);
+
+    start_prank(amm_contract_addr, USDC_WHALE());
+    let _ = amm
+        .trade_open(
+            OPTION_PUT,
+            strike_fixed,
+            expiry,
+            TRADE_SIDE_LONG,
+            (TEN_K_EKUBO / 100).try_into().unwrap(),
+            quote_token,
+            base_token,
+            FixedTrait::new_unscaled(1_000_000, false),
+            expiry
+        );
+    stop_prank(amm_contract_addr);
+
+    // jump to expiry and set checkpoints
+    start_warp(amm_contract_addr, expiry - 1);
+    amm.set_pragma_required_checkpoints();
+
+    // Expire options
+    start_warp(amm_contract_addr, expiry + 1);
+
+    // Calls
+    amm.expire_option_token_for_pool(
+        ekubo_call_lpt,
+        TRADE_SIDE_LONG,
+        strike_fixed,
+        expiry
+    );
+    amm.expire_option_token_for_pool(
+        ekubo_call_lpt,
+        TRADE_SIDE_SHORT,
+        strike_fixed,
+        expiry
+    );
+
+    
+    // Puts
+    amm.expire_option_token_for_pool(
+        ekubo_put_lpt,
+        TRADE_SIDE_LONG,
+        strike_fixed,
+        expiry
+    );
+    amm.expire_option_token_for_pool(
+        ekubo_put_lpt,
+        TRADE_SIDE_SHORT,
+        strike_fixed,
+        expiry
+    );
+
+    assert(amm.get_option_position( ekubo_put_lpt, TRADE_SIDE_SHORT, expiry, strike_fixed,) == 0, 'Should be no put short');
+    assert(amm.get_option_position( ekubo_put_lpt, TRADE_SIDE_LONG, expiry, strike_fixed,) == 0, 'Should be no put long');
+
+    assert(amm.get_option_position( ekubo_call_lpt, TRADE_SIDE_SHORT, expiry, strike_fixed,) == 0, 'Should be no call short');
+    assert(amm.get_option_position( ekubo_call_lpt, TRADE_SIDE_LONG, expiry, strike_fixed,) == 0, 'Should be no call long');
+
+
+    // Settle
+    start_prank(amm_contract_addr, EKUBO_WHALE());
+    amm.trade_settle(
+        OPTION_CALL,
+        strike_fixed,
+        expiry,
+        TRADE_SIDE_LONG,
+        (TEN_K_EKUBO / 100).try_into().unwrap(),
+        quote_token,
+        base_token
+    );
+    stop_prank(amm_contract_addr);
+
+    start_prank(amm_contract_addr, USDC_WHALE());
+    amm.trade_settle(
+        OPTION_PUT,
+        strike_fixed,
+        expiry,
+        TRADE_SIDE_LONG,
+        (TEN_K_EKUBO / 100).try_into().unwrap(),
+        quote_token,
+        base_token
+    );
+    stop_prank(amm_contract_addr);
+    
 }
 
 
@@ -286,7 +424,7 @@ fn add_ekubo_lpools(
 
     let base_token: ContractAddress = TOKEN_EKUBO_ADDRESS.try_into().unwrap();
     let quote_token: ContractAddress = TOKEN_USDC_ADDRESS.try_into().unwrap();
-    let ekubo_max_bal =
+    let max_bal =
         115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
     let lptokens_before = amm.get_all_lptoken_addresses();
@@ -300,7 +438,7 @@ fn add_ekubo_lpools(
             OPTION_CALL,
             ekubo_call_lpt,
             FixedTrait::new(184467440737095516160000, false), // 10k
-            ekubo_max_bal
+            max_bal
         );
 
     // Adding Put
@@ -311,7 +449,7 @@ fn add_ekubo_lpools(
             OPTION_PUT,
             ekubo_put_lpt,
             FixedTrait::new(922337203685477580800000, false), // 50k
-            ekubo_max_bal
+            max_bal
         );
 
     stop_prank(amm_contract_addr);
