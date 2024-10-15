@@ -72,7 +72,7 @@ fn test_add_ekubo_options() {
     // when setting checkpoints for expirying options
     let expiry = get_block_timestamp();
     let now = expiry - 7 * 86_400; // + week
-    
+
     let strike_price = 46116860184273879040; // 2.5 * 2**64
     start_warp(amm_contract_addr, now);
     deploy_and_add_ekubo_options(
@@ -238,66 +238,57 @@ fn test_add_ekubo_options() {
     start_warp(amm_contract_addr, expiry + 1);
 
     // Calls
-    amm.expire_option_token_for_pool(
-        ekubo_call_lpt,
-        TRADE_SIDE_LONG,
-        strike_fixed,
-        expiry
-    );
-    amm.expire_option_token_for_pool(
-        ekubo_call_lpt,
-        TRADE_SIDE_SHORT,
-        strike_fixed,
-        expiry
-    );
+    amm.expire_option_token_for_pool(ekubo_call_lpt, TRADE_SIDE_LONG, strike_fixed, expiry);
+    amm.expire_option_token_for_pool(ekubo_call_lpt, TRADE_SIDE_SHORT, strike_fixed, expiry);
 
-    
     // Puts
-    amm.expire_option_token_for_pool(
-        ekubo_put_lpt,
-        TRADE_SIDE_LONG,
-        strike_fixed,
-        expiry
+    amm.expire_option_token_for_pool(ekubo_put_lpt, TRADE_SIDE_LONG, strike_fixed, expiry);
+    amm.expire_option_token_for_pool(ekubo_put_lpt, TRADE_SIDE_SHORT, strike_fixed, expiry);
+
+    assert(
+        amm.get_option_position(ekubo_put_lpt, TRADE_SIDE_SHORT, expiry, strike_fixed,) == 0,
+        'Should be no put short'
     );
-    amm.expire_option_token_for_pool(
-        ekubo_put_lpt,
-        TRADE_SIDE_SHORT,
-        strike_fixed,
-        expiry
+    assert(
+        amm.get_option_position(ekubo_put_lpt, TRADE_SIDE_LONG, expiry, strike_fixed,) == 0,
+        'Should be no put long'
     );
 
-    assert(amm.get_option_position( ekubo_put_lpt, TRADE_SIDE_SHORT, expiry, strike_fixed,) == 0, 'Should be no put short');
-    assert(amm.get_option_position( ekubo_put_lpt, TRADE_SIDE_LONG, expiry, strike_fixed,) == 0, 'Should be no put long');
-
-    assert(amm.get_option_position( ekubo_call_lpt, TRADE_SIDE_SHORT, expiry, strike_fixed,) == 0, 'Should be no call short');
-    assert(amm.get_option_position( ekubo_call_lpt, TRADE_SIDE_LONG, expiry, strike_fixed,) == 0, 'Should be no call long');
-
+    assert(
+        amm.get_option_position(ekubo_call_lpt, TRADE_SIDE_SHORT, expiry, strike_fixed,) == 0,
+        'Should be no call short'
+    );
+    assert(
+        amm.get_option_position(ekubo_call_lpt, TRADE_SIDE_LONG, expiry, strike_fixed,) == 0,
+        'Should be no call long'
+    );
 
     // Settle
     start_prank(amm_contract_addr, EKUBO_WHALE());
-    amm.trade_settle(
-        OPTION_CALL,
-        strike_fixed,
-        expiry,
-        TRADE_SIDE_LONG,
-        (TEN_K_EKUBO / 100).try_into().unwrap(),
-        quote_token,
-        base_token
-    );
+    amm
+        .trade_settle(
+            OPTION_CALL,
+            strike_fixed,
+            expiry,
+            TRADE_SIDE_LONG,
+            (TEN_K_EKUBO / 100).try_into().unwrap(),
+            quote_token,
+            base_token
+        );
     stop_prank(amm_contract_addr);
 
     start_prank(amm_contract_addr, USDC_WHALE());
-    amm.trade_settle(
-        OPTION_PUT,
-        strike_fixed,
-        expiry,
-        TRADE_SIDE_LONG,
-        (TEN_K_EKUBO / 100).try_into().unwrap(),
-        quote_token,
-        base_token
-    );
+    amm
+        .trade_settle(
+            OPTION_PUT,
+            strike_fixed,
+            expiry,
+            TRADE_SIDE_LONG,
+            (TEN_K_EKUBO / 100).try_into().unwrap(),
+            quote_token,
+            base_token
+        );
     stop_prank(amm_contract_addr);
-    
 }
 
 
@@ -424,8 +415,7 @@ fn add_ekubo_lpools(
 
     let base_token: ContractAddress = TOKEN_EKUBO_ADDRESS.try_into().unwrap();
     let quote_token: ContractAddress = TOKEN_USDC_ADDRESS.try_into().unwrap();
-    let max_bal =
-        115792089237316195423570985008687907853269984665640564039457584007913129639935;
+    let max_bal = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
     let lptokens_before = amm.get_all_lptoken_addresses();
 
