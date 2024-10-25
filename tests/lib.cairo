@@ -18,4 +18,7 @@ mod trading {
 }
 
 mod test_set_balances;
+mod forks {
+    mod add_ekubo;
+}
 
