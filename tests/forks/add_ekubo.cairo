@@ -402,8 +402,12 @@ fn add_ekubo_lpools(
     let amm = IAMMDispatcher { contract_address: amm_contract_addr };
     // Upgrade amm
     start_prank(amm_contract_addr, owner);
-    let new_amm_hash = declare('AMM');
-    amm.upgrade(new_amm_hash.class_hash);
+    // let new_amm_hash = declare('AMM');
+    // amm.upgrade(new_amm_hash.class_hash);
+
+    let new_amm_hash: ClassHash = 0x0217863fdd0f365bff051411a5a1c792bb24e21c80f6bb4d297cef5ceb6d22f5.try_into().unwrap();
+    amm.upgrade(new_amm_hash);
+
     stop_prank(amm_contract_addr);
 
     let (ekubo_call_lpt, ekubo_put_lpt) = deploy_ekubo_lptokens(amm_contract_addr);
