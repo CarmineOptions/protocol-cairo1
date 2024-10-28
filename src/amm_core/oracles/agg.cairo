@@ -1,16 +1,20 @@
 mod OracleAgg {
     use starknet::ContractAddress;
     use starknet::get_block_info;
+    use starknet::get_block_timestamp;
 
-    use cubit::f128::types::fixed::{Fixed};
+    use cubit::f128::types::fixed::{Fixed, FixedTrait};
 
     use carmine_protocol::types::basic::{Timestamp};
     use carmine_protocol::amm_core::oracles::pragma::Pragma::{
         get_pragma_median_price, get_pragma_terminal_price
     };
 
+    use carmine_protocol::amm_core::oracles::chainlink::Chainlink;
+
     use carmine_protocol::amm_core::state::State::{
-        read_latest_oracle_price, write_latest_oracle_price
+        read_latest_oracle_price, write_latest_oracle_price, read_historical_oracle_price_cache,
+        write_historical_oracle_price_cache,
     };
 
     // @notice Returns current spot price for given ticker (quote and base token)
@@ -31,10 +35,20 @@ mod OracleAgg {
         if last_price_block_num == curr_block {
             last_price
         } else {
-            let price_pragma = get_pragma_median_price(quote_token_addr, base_token_addr);
-            write_latest_oracle_price(base_token_addr, quote_token_addr, price_pragma, curr_block);
+            let price =
+                match Chainlink::get_chainlink_current_price(quote_token_addr, base_token_addr) {
+                // If there is a chainlink price, use that one
+                // Chainlink price fetch will fail only if the addresses are expected to have some price,
+                // but no prices were fetched
+                Option::Some(chainlink_price) => chainlink_price,
+                // If there is no chainlink price, try to use pragma (which will fail if the addresses are unknown)
+                // Pragma is used only for tokens that do not have chainlink source
+                Option::None(()) => get_pragma_median_price(quote_token_addr, base_token_addr)
+            };
 
-            price_pragma
+            write_latest_oracle_price(base_token_addr, quote_token_addr, price, curr_block);
+
+            price
         }
     }
 
@@ -45,8 +59,23 @@ mod OracleAgg {
     fn get_terminal_price(
         quote_token_addr: ContractAddress, base_token_addr: ContractAddress, maturity: Timestamp
     ) -> Fixed {
-        let price_pragma = get_pragma_terminal_price(quote_token_addr, base_token_addr, maturity);
-        price_pragma
+        let historical_price = read_historical_oracle_price_cache(
+            base_token_addr, quote_token_addr, maturity
+        );
+
+        if historical_price != FixedTrait::ZERO() {
+            return historical_price;
+        } else {
+            let price_pragma = get_pragma_terminal_price(
+                quote_token_addr, base_token_addr, maturity
+            );
+
+            write_historical_oracle_price_cache(
+                base_token_addr, quote_token_addr, maturity, price_pragma
+            );
+
+            price_pragma
+        }
     }
 }
 

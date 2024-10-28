@@ -16,16 +16,16 @@ mod Chainlink {
 
     fn get_chainlink_current_price(
         quote_token_addr: ContractAddress, base_token_addr: ContractAddress,
-    ) -> Fixed {
+    ) -> Option<Fixed> {
         let base_chainlink_proxy_address = ChainlinkUtils::get_chainlink_proxy_address(
             base_token_addr
-        );
+        )?;
         let quote_chainlink_proxy_address = ChainlinkUtils::get_chainlink_proxy_address(
             quote_token_addr
-        );
+        )?;
 
-        let base_price = ChainlinkUtils::get_current_price_for_proxy(base_chainlink_proxy_address);
-        let quote_price = ChainlinkUtils::get_current_price_for_proxy(
+        let base_price = ChainlinkUtils::get_current_price_from_proxy(base_chainlink_proxy_address);
+        let quote_price = ChainlinkUtils::get_current_price_from_proxy(
             quote_chainlink_proxy_address
         );
 
@@ -39,13 +39,14 @@ mod Chainlink {
             quote_price, ChainlinkUtils::CHAINLINK_DECIMALS
         );
 
-        base_price_fixed / quote_price_fixed
+        Option::Some(base_price_fixed / quote_price_fixed)
     }
 }
 
 
 mod ChainlinkUtils {
     use starknet::ContractAddress;
+    use starknet::get_block_timestamp;
     use core::panic_with_felt252;
 
     use carmine_protocol::amm_core::constants::TOKEN_USDC_ADDRESS;
@@ -85,34 +86,32 @@ mod ChainlinkUtils {
             0x72495dbb867dd3c6373820694008f8a8bff7b41f7f7112245d687858b243470;
     }
 
-    mod Testnet {
-        const CHAINLINK_BTC_USD_ADDRESS: felt252 = 0;
-        const CHAINLINK_ETH_USD_ADDRESS: felt252 = 0;
-        const CHAINLINK_STRK_USD_ADDRESS: felt252 = 0;
-        const CHAINLINK_USDC_USD_ADDRESS: felt252 = 0;
-    }
-
-    fn get_current_price_for_proxy(proxy: ContractAddress) -> u128 {
+    fn get_current_price_from_proxy(proxy: ContractAddress) -> u128 {
         let contract = IAggregatorProxyDispatcher { contract_address: proxy };
-        contract.latest_round_data().answer
+        let res = contract.latest_round_data();
+
+        let now = get_block_timestamp();
+        assert(res.updated_at > now - 2 * 3600, 'Oracle data stale');
+
+        res.answer
     }
 
-    fn get_chainlink_proxy_address(token_address: ContractAddress) -> ContractAddress {
+    fn get_chainlink_proxy_address(token_address: ContractAddress) -> Option<ContractAddress> {
         let address_felt: felt252 = token_address.into();
 
         if address_felt == TOKEN_ETH_ADDRESS {
-            return Mainnet::CHAINLINK_ETH_USD_ADDRESS.try_into().unwrap();
+            return Option::Some(Mainnet::CHAINLINK_ETH_USD_ADDRESS.try_into().unwrap());
         }
         if address_felt == TOKEN_WBTC_ADDRESS {
-            return Mainnet::CHAINLINK_WBTC_USD_ADDRESS.try_into().unwrap();
+            return Option::Some(Mainnet::CHAINLINK_WBTC_USD_ADDRESS.try_into().unwrap());
         }
         if address_felt == TOKEN_STRK_ADDRESS {
-            return Mainnet::CHAINLINK_STRK_USD_ADDRESS.try_into().unwrap();
+            return Option::Some(Mainnet::CHAINLINK_STRK_USD_ADDRESS.try_into().unwrap());
         }
         if address_felt == TOKEN_USDC_ADDRESS {
-            return Mainnet::CHAINLINK_USDC_USD_ADDRESS.try_into().unwrap();
+            return Option::Some(Mainnet::CHAINLINK_USDC_USD_ADDRESS.try_into().unwrap());
         }
 
-        panic_with_felt252('unknown address for price')
+        Option::None(())
     }
 }
