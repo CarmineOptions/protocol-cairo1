@@ -53,6 +53,8 @@ mod State {
     use carmine_protocol::amm_core::amm::AMM::latest_oracle_price;
     use carmine_protocol::amm_core::amm::AMM::latest_oracle_priceContractMemberStateTrait;
 
+    use carmine_protocol::amm_core::amm::AMM::historical_oracle_price_cache;
+    use carmine_protocol::amm_core::amm::AMM::historical_oracle_price_cacheContractMemberStateTrait;
 
     use carmine_protocol::amm_core::amm::AMM;
 
@@ -558,6 +560,38 @@ mod State {
             .write((base_token_address, quote_token_address), (price, current_block))
     }
 
+    // @notice Reads the historical oracle price for given token pair and maturity
+    // @param base_token_address: Address of the base token
+    // @param quote_token_address: Address of the quote token
+    // @param maturity: Maturity for which to fetch historical price
+    // @returns price: Historical price at maturity
+    fn read_historical_oracle_price_cache(
+        base_token_address: ContractAddress,
+        quote_token_address: ContractAddress,
+        maturity: Timestamp
+    ) -> Fixed {
+        let state = AMM::unsafe_new_contract_state();
+        state
+            .historical_oracle_price_cache
+            .read((base_token_address, quote_token_address, maturity))
+    }
+
+    // @notice Writes the historical oracle price for given token pair and maturity
+    // @param base_token_address: Address of the base token
+    // @param quote_token_address: Address of the quote token
+    // @param maturity: Maturity for which to fetch historical price
+    // @param price: Price at maturity which'll be stored
+    fn write_historical_oracle_price_cache(
+        base_token_address: ContractAddress,
+        quote_token_address: ContractAddress,
+        maturity: Timestamp,
+        price: Fixed
+    ) {
+        let mut state = AMM::unsafe_new_contract_state();
+        state
+            .historical_oracle_price_cache
+            .write((base_token_address, quote_token_address, maturity), price)
+    }
 
     // @notice Returns Option struct with addition info based on several option parameters
     // @param lptoken_address: Address of liquidity pool that corresponds to the option
