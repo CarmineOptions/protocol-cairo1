@@ -27,4 +27,4 @@ block_id.tag = "Latest"
 [[tool.snforge.fork]]
 name = "MAINNET_MISSING_TERMINAL_PRICE"
 url = "https://starknet-mainnet.public.blastapi.io/rpc/v0_7"
-block_id.number = "1363168"
+block_id.number = "1364161"
