@@ -25,7 +25,7 @@ use carmine_protocol::amm_core::constants::{
 #[test]
 #[fork("MAINNET_MISSING_TERMINAL_PRICE")]
 fn test_missing_ekubo_terminal_price() {
-    // New AMM Hash: 0x0202e349e2cd0cdde2f38c542bc4607cfbda38799745193cac196614356f10e7
+    // New AMM Hash: 0x07fb1aa680d9c02e1017d5ed048612630c30d11991d43b3e4e7a22531621cd5c
 
     // Missing maturities: 1744329599, 1744934399, 1745539199, 1743119999
     let mat1: u64 = 1744329599;
@@ -60,7 +60,7 @@ fn test_missing_ekubo_terminal_price() {
     let ekubo_correct_price = amm.get_terminal_price(quote_token, base_token, _mat5);
 
     start_prank(amm_contract_addr, owner);
-    let new_amm_hash = 0x0202e349e2cd0cdde2f38c542bc4607cfbda38799745193cac196614356f10e7;
+    let new_amm_hash = 0x07fb1aa680d9c02e1017d5ed048612630c30d11991d43b3e4e7a22531621cd5c;
     amm.upgrade(new_amm_hash.try_into().unwrap());
 
     let pragma = IOracleABIDispatcher {

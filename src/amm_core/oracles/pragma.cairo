@@ -219,6 +219,12 @@ mod Pragma {
                 let price = 660550232;
                 return Option::Some(convert_from_int_to_Fixed(price, 8));
             }
+            if (maturity == 1746143999) {
+                // Block 1364987 -> 2025-05-01T23:59:44+00:00
+                // Pragma price -> 437617938 -> 4.37
+                let price = 437617938;
+                return Option::Some(convert_from_int_to_Fixed(price, 8));
+            }
         }
 
         Option::None(())
