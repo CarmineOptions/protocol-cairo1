@@ -22,3 +22,9 @@ test = 'snforge test'
 name = "MAINNET"
 url = "https://starknet-mainnet.public.blastapi.io/rpc/v0_7"
 block_id.tag = "Latest"
+
+
+[[tool.snforge.fork]]
+name = "MAINNET_MISSING_TERMINAL_PRICE"
+url = "https://starknet-mainnet.public.blastapi.io/rpc/v0_7"
+block_id.number = "1366040"

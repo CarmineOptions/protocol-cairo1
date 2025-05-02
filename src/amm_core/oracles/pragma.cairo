@@ -165,6 +165,14 @@ mod Pragma {
     fn get_pragma_terminal_price(
         quote_token_addr: ContractAddress, base_token_addr: ContractAddress, maturity: Timestamp
     ) -> Fixed {
+        match _get_missing_terminal_price(quote_token_addr, base_token_addr, maturity) {
+            Option::Some(missing_price) => {
+                // No `if let Option...` in this version
+                return missing_price;
+            },
+            Option::None(()) => {}
+        }
+
         if base_token_addr.into() == TOKEN_ETH_ADDRESS
             && quote_token_addr.into() == TOKEN_STRK_ADDRESS {
             let eth_in_usd = _get_pragma_terminal_price(PragmaUtils::PRAGMA_ETH_USD_KEY, maturity);
@@ -180,6 +188,46 @@ mod Pragma {
             let res = _get_pragma_terminal_price(key, maturity);
             return account_for_stablecoin_divergence(res, quote_token_addr, maturity);
         }
+    }
+
+    fn _get_missing_terminal_price(
+        quote_token_addr: ContractAddress, base_token_addr: ContractAddress, maturity: Timestamp
+    ) -> Option<Fixed> {
+        if (base_token_addr.into() == TOKEN_EKUBO_ADDRESS)
+            && (quote_token_addr.into() == TOKEN_USDC_ADDRESS) {
+            if (maturity == 1744329599) {
+                // Block 1305721 -> 2025-04-10T23:59:43+00:00
+                // Pragma price -> 383116769 -> 3.83
+                let price = 383116769;
+                return Option::Some(convert_from_int_to_Fixed(price, 8));
+            }
+            if (maturity == 1744934399) {
+                // Block 1325477 -> 2025-04-17T23:59:56+00:00
+                // Pragma price -> 364000000 -> 3.64
+                let price = 364000000;
+                return Option::Some(convert_from_int_to_Fixed(price, 8));
+            }
+            if (maturity == 1745539199) {
+                // Block 1345160 -> 2025-04-24T23:59:49+00:00
+                // Pragma price -> 457500000 -> 4.57
+                let price = 457500000;
+                return Option::Some(convert_from_int_to_Fixed(price, 8));
+            }
+            if (maturity == 1743119999) {
+                // Block 1266210 -> 2025-03-27T23:59:55+00:00
+                // Pragma price -> 660550232 -> 6.6
+                let price = 660550232;
+                return Option::Some(convert_from_int_to_Fixed(price, 8));
+            }
+            if (maturity == 1746143999) {
+                // Block 1364987 -> 2025-05-01T23:59:44+00:00
+                // Pragma price -> 437617938 -> 4.37
+                let price = 437617938;
+                return Option::Some(convert_from_int_to_Fixed(price, 8));
+            }
+        }
+
+        Option::None(())
     }
 
     // @notice Takes in current or terminal price and returns it after accounting for stablecoin divergence

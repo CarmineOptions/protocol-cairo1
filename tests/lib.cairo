@@ -20,5 +20,6 @@ mod trading {
 mod test_set_balances;
 mod forks {
     mod add_ekubo;
+    mod missing_ekubo_terminal_price;
 }
 
