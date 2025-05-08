@@ -58,6 +58,7 @@ mod AMM {
         >,
         pool_definition_from_lptoken_address: LegacyMap<LPTAddress, Pool>,
         latest_oracle_price: LegacyMap::<(ContractAddress, ContractAddress), (Fixed, u64)>,
+        historical_oracle_price_cache: LegacyMap::<(ContractAddress, ContractAddress, u64), Fixed>,
     }
 
     fn emit_event<S, impl IntoImpl: traits::Into<S, Event>, impl DropImpl: traits::Drop<S>>(
