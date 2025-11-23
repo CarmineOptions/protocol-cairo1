@@ -84,3 +84,12 @@ struct UserPoolInfo {
     size_of_users_tokens: u256,
     pool_info: PoolInfo
 }
+
+#[derive(Drop, Serde)]
+struct PoolState {
+    locked: u256,
+    unlocked: u256,
+    balance: u256,
+    position: Fixed,
+    value: u256,
+}
