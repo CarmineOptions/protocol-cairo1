@@ -32,7 +32,7 @@ mod AuxContract {
     use carmine_protocol::types::pool::{PoolInfo, Pool};
     use carmine_protocol::erc20_interface::{IERC20Dispatcher, IERC20DispatcherTrait};
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
-
+    use carmine_protocol::amm_core::state::State;
     use carmine_protocol::amm_core::constants::{
         TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, TOKEN_WBTC_ADDRESS
     };
@@ -176,7 +176,10 @@ mod AuxContract {
                     // This means we've reached the end, so break
                     break;
                 }
-                let opt_address = opt.opt_address();
+                let opt_address = amm
+                    .get_option_token_address(
+                        lpt_addr, opt.option_side, opt.maturity, opt.strike_price
+                    );
                 arr
                     .append(
                         OptionWithAddress {
