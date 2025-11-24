@@ -1,6 +1,7 @@
 use starknet::ContractAddress;
 use carmine_protocol::types::option_::OptionWithPremia;
 use carmine_protocol::types::pool::{UserPoolInfo, PoolState};
+use carmine_protocol::types::option_::OptionWithAddress;
 
 #[starknet::interface]
 trait IAuxContract<TContractState> {
@@ -11,6 +12,9 @@ trait IAuxContract<TContractState> {
         self: @TContractState, user: ContractAddress, lpt_addr: ContractAddress
     ) -> UserPoolInfo;
     fn get_pool_state(self: @TContractState, lpt_addr: ContractAddress) -> PoolState;
+    fn get_pool_options_with_address(
+        self: @TContractState, lpt_addr: ContractAddress
+    ) -> Array<OptionWithAddress>;
 }
 
 #[starknet::contract]
@@ -23,7 +27,7 @@ mod AuxContract {
     use carmine_protocol::types::option_::Option_Trait;
     use carmine_protocol::amm_interface::IAMM;
     use carmine_protocol::amm_interface::{IAMMDispatcher, IAMMDispatcherTrait};
-
+    use carmine_protocol::types::option_::OptionWithAddress;
     use carmine_protocol::types::pool::{UserPoolInfo, PoolState};
     use carmine_protocol::types::pool::{PoolInfo, Pool};
     use carmine_protocol::erc20_interface::{IERC20Dispatcher, IERC20DispatcherTrait};
@@ -92,7 +96,7 @@ mod AuxContract {
     #[storage]
     struct Storage {}
 
-    const AMM_ADDR: felt252 = 0x01007d87af0a2b9b6199f5f09ab9c230f415470eeceb5a8b01590c51229da562;
+    const AMM_ADDR: felt252 = 0x047472e6755afc57ada9550b6a3ac93129cc4b5f98f51c73e0644d129fd208d9;
 
 
     #[external(v0)]
@@ -155,6 +159,37 @@ mod AuxContract {
                 ); // 10**18 - get value of size 1
 
             PoolState { locked, unlocked, balance, position, value, }
+        }
+
+        fn get_pool_options_with_address(
+            self: @ContractState, lpt_addr: ContractAddress
+        ) -> Array<OptionWithAddress> {
+            let amm = IAMMDispatcher { contract_address: AMM_ADDR.try_into().unwrap() };
+
+            let mut i: u32 = 0;
+            let mut arr = ArrayTrait::<OptionWithAddress>::new();
+
+            loop {
+                let opt = amm.get_available_options(lpt_addr, i);
+                i += 1;
+                if opt.sum() == 0 {
+                    // This means we've reached the end, so break
+                    break;
+                }
+                let opt_address = opt.opt_address();
+                arr
+                    .append(
+                        OptionWithAddress {
+                            option_side: opt.option_side,
+                            maturity: opt.maturity,
+                            strike_price: opt.strike_price,
+                            option_type: opt.option_type,
+                            address: opt_address,
+                        }
+                    );
+            };
+
+            arr
         }
     }
 }
