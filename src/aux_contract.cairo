@@ -1,7 +1,8 @@
 use starknet::ContractAddress;
 use carmine_protocol::types::option_::OptionWithPremia;
 use carmine_protocol::types::pool::{UserPoolInfo, PoolState};
-use carmine_protocol::types::option_::OptionWithAddress;
+use carmine_protocol::types::option_::{OptionWithAddress, OptionWithUsersPosition};
+use carmine_protocol::types::price::Price;
 
 #[starknet::interface]
 trait IAuxContract<TContractState> {
@@ -12,13 +13,22 @@ trait IAuxContract<TContractState> {
         self: @TContractState, user: ContractAddress, lpt_addr: ContractAddress
     ) -> UserPoolInfo;
     fn get_pool_state(self: @TContractState, lpt_addr: ContractAddress) -> PoolState;
+    fn get_all_pools_states(self: @TContractState) -> Array<PoolState>;
     fn get_pool_options_with_address(
         self: @TContractState, lpt_addr: ContractAddress
     ) -> Array<OptionWithAddress>;
+    fn get_price(self: @TContractState, token_address: ContractAddress) -> Price;
+    fn get_all_token_prices(self: @TContractState) -> Array<Price>;
+    fn get_option_with_position_of_user(
+        self: @TContractState, user_address: ContractAddress, lp_address: ContractAddress
+    ) -> Array<OptionWithUsersPosition>;
 }
 
 #[starknet::contract]
 mod AuxContract {
+    use core::zeroable::Zeroable;
+    use core::traits::Into;
+    use core::array::ArrayTrait;
     use starknet::ContractAddress;
     use starknet::get_block_timestamp;
     use starknet::contract_address_const;
@@ -27,16 +37,20 @@ mod AuxContract {
     use carmine_protocol::types::option_::Option_Trait;
     use carmine_protocol::amm_interface::IAMM;
     use carmine_protocol::amm_interface::{IAMMDispatcher, IAMMDispatcherTrait};
-    use carmine_protocol::types::option_::OptionWithAddress;
+    use carmine_protocol::types::option_::{OptionWithAddress, OptionWithUsersPosition};
     use carmine_protocol::types::pool::{UserPoolInfo, PoolState};
     use carmine_protocol::types::pool::{PoolInfo, Pool};
     use carmine_protocol::erc20_interface::{IERC20Dispatcher, IERC20DispatcherTrait};
     use cubit::f128::types::fixed::{Fixed, FixedTrait};
     use carmine_protocol::amm_core::state::State;
     use carmine_protocol::amm_core::constants::{
-        TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, TOKEN_WBTC_ADDRESS
+        TOKEN_USDC_ADDRESS, TOKEN_ETH_ADDRESS, TOKEN_WBTC_ADDRESS, TOKEN_STRK_ADDRESS,
+        TOKEN_EKUBO_ADDRESS
     };
-
+    use carmine_protocol::types::price::Price;
+    use carmine_protocol::amm_core::helpers::pow;
+    use carmine_protocol::tokens::option_token::IOptionTokenDispatcher;
+    use carmine_protocol::tokens::option_token::IOptionTokenDispatcherTrait;
 
     #[generate_trait]
     impl PoolImpl of PoolTrait {
@@ -149,16 +163,39 @@ mod AuxContract {
 
         fn get_pool_state(self: @ContractState, lpt_addr: ContractAddress) -> PoolState {
             let amm = IAMMDispatcher { contract_address: AMM_ADDR.try_into().unwrap() };
+
+            let underlying_token_address = amm.get_underlying_token_address(lpt_addr);
+            assert(underlying_token_address.is_non_zero(), 'Invalid token address');
+            let decimals = IERC20Dispatcher { contract_address: underlying_token_address }
+                .decimals();
+            let base = pow(10, decimals.into());
+
             let locked = amm.get_pool_locked_capital(lpt_addr);
             let unlocked = amm.get_unlocked_capital(lpt_addr);
             let balance = amm.get_lpool_balance(lpt_addr);
             let position = amm.get_value_of_pool_position(lpt_addr);
-            let value = amm
-                .get_lptokens_for_underlying(
-                    lpt_addr, 1000000000000000000
-                ); // 10**18 - get value of size 1
+            let value = amm.get_lptokens_for_underlying(lpt_addr, base.into());
 
-            PoolState { locked, unlocked, balance, position, value, }
+            PoolState { locked, unlocked, balance, position, value, lp_address: lpt_addr }
+        }
+
+        fn get_all_pools_states(self: @ContractState) -> Array<PoolState> {
+            let amm = IAMMDispatcher { contract_address: AMM_ADDR.try_into().unwrap() };
+            let mut i: felt252 = 0;
+            let mut arr = ArrayTrait::<PoolState>::new();
+
+            loop {
+                let lpt_addr = amm.get_available_lptoken_addresses(i);
+
+                if lpt_addr.is_zero() {
+                    break;
+                }
+
+                i += 1;
+                arr.append(self.get_pool_state(lpt_addr));
+            };
+
+            arr
         }
 
         fn get_pool_options_with_address(
@@ -186,10 +223,74 @@ mod AuxContract {
                             option_side: opt.option_side,
                             maturity: opt.maturity,
                             strike_price: opt.strike_price,
-                            option_type: opt.option_type,
                             address: opt_address,
                         }
                     );
+            };
+
+            arr
+        }
+
+        fn get_price(self: @ContractState, token_address: ContractAddress) -> Price {
+            let amm = IAMMDispatcher { contract_address: AMM_ADDR.try_into().unwrap() };
+            let price = amm
+                .get_current_price(TOKEN_USDC_ADDRESS.try_into().unwrap(), token_address);
+            Price { token_address, price: price.mag }
+        }
+
+        fn get_all_token_prices(self: @ContractState) -> Array<Price> {
+            let mut arr = ArrayTrait::<Price>::new();
+
+            arr.append(self.get_price(TOKEN_ETH_ADDRESS.try_into().unwrap()));
+            arr.append(self.get_price(TOKEN_WBTC_ADDRESS.try_into().unwrap()));
+            arr.append(self.get_price(TOKEN_STRK_ADDRESS.try_into().unwrap()));
+            arr.append(self.get_price(TOKEN_EKUBO_ADDRESS.try_into().unwrap()));
+
+            // USDC price in USDC is 1
+            arr
+                .append(
+                    Price {
+                        token_address: TOKEN_USDC_ADDRESS.try_into().unwrap(),
+                        price: FixedTrait::ONE().mag
+                    }
+                );
+
+            arr
+        }
+
+        // @notice Getter for list of all options with position of a given user(if they have any)
+        // @param user_address: user's address
+        // @return array: Array of OptionWithUsersPosition
+        fn get_option_with_position_of_user(
+            self: @ContractState, user_address: ContractAddress, lp_address: ContractAddress
+        ) -> Array<OptionWithUsersPosition> {
+            let amm = IAMMDispatcher { contract_address: AMM_ADDR.try_into().unwrap() };
+            let mut opt_idx: u32 = 0;
+            let mut arr = ArrayTrait::<OptionWithUsersPosition>::new();
+
+            loop {
+                let option = amm.get_available_options(lp_address, opt_idx);
+
+                if option.sum() == 0 {
+                    break;
+                }
+
+                let pos_size = IOptionTokenDispatcher { contract_address: option.opt_address() }
+                    .balance_of(user_address);
+
+                if pos_size == 0 {
+                    opt_idx += 1;
+                    break;
+                }
+
+                let premia_with_fees = option.value_of_user_position(pos_size.try_into().unwrap());
+
+                let new_opt = OptionWithUsersPosition {
+                    option: option, position_size: pos_size, value_of_position: premia_with_fees
+                };
+
+                arr.append(new_opt);
+                opt_idx += 1;
             };
 
             arr

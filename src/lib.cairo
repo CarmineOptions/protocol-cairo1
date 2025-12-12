@@ -28,6 +28,7 @@ mod types {
     mod basic;
     mod option_;
     mod pool;
+    mod price;
 }
 mod tokens {
     mod my_token;

@@ -92,4 +92,5 @@ struct PoolState {
     balance: u256,
     position: Fixed,
     value: u256,
+    lp_address: ContractAddress,
 }

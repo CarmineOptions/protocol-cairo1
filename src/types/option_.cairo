@@ -300,6 +300,5 @@ struct OptionWithAddress {
     option_side: OptionSide,
     maturity: Timestamp,
     strike_price: Fixed,
-    option_type: OptionType,
     address: ContractAddress
 }
